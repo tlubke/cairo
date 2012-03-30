@@ -1347,7 +1347,11 @@ client_shm (const char *shm_path)
 
     base = mmap (NULL, DATA_SIZE,
 		 PROT_READ | PROT_WRITE,
+#ifdef MAP_NORESERVE
 		 MAP_SHARED | MAP_NORESERVE,
+#else
+		 MAP_SHARED,
+#endif
 		 fd, 0);
     close (fd);
 
