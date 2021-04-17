@@ -182,21 +182,6 @@ cairo_feature_sources = {
   'cairo-win32-dwrite-font': [
     'win32/cairo-dwrite-font.cpp',
   ],
-  'cairo-gl': [
-    'cairo-gl-composite.c',
-    'cairo-gl-device.c',
-    'cairo-gl-dispatch.c',
-    'cairo-gl-glyphs.c',
-    'cairo-gl-gradient.c',
-    'cairo-gl-info.c',
-    'cairo-gl-msaa-compositor.c',
-    'cairo-gl-operand.c',
-    'cairo-gl-shaders.c',
-    'cairo-gl-source.c',
-    'cairo-gl-spans-compositor.c',
-    'cairo-gl-surface.c',
-    'cairo-gl-traps-compositor.c',
-  ],
   'cairo-script': [
     'cairo-script-surface.c',
   ],
@@ -209,15 +194,6 @@ cairo_feature_sources = {
   ],
   'cairo-svg': [
     'cairo-svg-surface.c',
-  ],
-  'cairo-egl': [
-    'cairo-egl-context.c',
-  ],
-  'cairo-glx': [
-    'cairo-glx-context.c',
-  ],
-  'cairo-wgl': [
-    'cairo-wgl-context.c',
   ],
   'cairo-xml': [
     'cairo-xml-surface.c',

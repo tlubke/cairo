@@ -551,135 +551,6 @@ if host_machine.system() == 'windows'
   endif
 endif
 
-# GL / GLESV2 / GLESV3 are mutually exclusive
-gl_backend = get_option('gl-backend')
-need_egl_functions = false
-need_wgl_functions = false
-need_glx_functions = false
-
-if gl_backend in ['auto', 'gl']
-  gl_dep = dependency('gl', required: false)
-  if not gl_dep.found()
-    gl_dep = cc.find_library('GL', required: gl_backend == 'gl')
-  endif
-  if gl_dep.found() and \
-     cc.has_header('GL/gl.h', required: gl_backend == 'gl', dependencies: gl_dep) and \
-     cc.has_header('GL/glext.h', required: gl_backend == 'gl', dependencies: gl_dep)
-    deps += [gl_dep]
-
-    need_egl_functions = true
-    need_wgl_functions = true
-    need_glx_functions = true
-
-    feature_conf.set('CAIRO_HAS_GL_SURFACE', 1)
-    built_features += [{
-      'name': 'cairo-gl',
-      'description': 'OpenGL surface backend',
-      'deps': [gl_dep],
-    }]
-  endif
-endif
-
-if feature_conf.get('CAIRO_HAS_GL_SURFACE', 0) == 0 and ['auto', 'glesv2'].contains(gl_backend)
-  glesv2_dep = dependency('glesv2', required: false)
-  if not glesv2_dep.found()
-    glesv2_dep = cc.find_library('GLESv2', required: gl_backend == 'glesv2')
-  endif
-  if glesv2_dep.found() and \
-     cc.has_header('GLES2/gl2.h', required: gl_backend == 'glesv2', dependencies: glesv2_dep) and \
-     cc.has_header('GLES2/gl2ext.h', required: gl_backend == 'glesv2', dependencies: glesv2_dep)
-    deps += [glesv2_dep]
-    need_egl_functions = true
-
-    feature_conf.set('CAIRO_HAS_GLESV2_SURFACE', 1)
-    built_features += [{
-      'name': 'cairo-glesv2',
-      'source-key': 'cairo-gl',
-      'description': 'OpenGLESv2 surface backend',
-      'deps': [glesv2_dep],
-    }]
-  endif
-endif
-
-if feature_conf.get('CAIRO_HAS_GL_SURFACE', 0) == 0 and feature_conf.get('CAIRO_HAS_GLESV2_SURFACE', 0) == 0 and ['auto', 'glesv3'].contains(gl_backend)
-  # glesv3 is provided via libGLESv2.so (there is no libGLESv3, nor glesv3.pc)
-  glesv3_dep = dependency('glesv2', required: false)
-  if not glesv3_dep.found()
-    glesv3_dep = cc.find_library('GLESv2', required: gl_backend == 'glesv3')
-  endif
-
-  if glesv3_dep.found() and \
-     cc.has_header('GLES3/gl3.h', required: gl_backend == 'glesv3', dependencies: glesv3_dep) and \
-     cc.has_header('GLES3/gl3ext.h', required: gl_backend == 'glesv3', dependencies: glesv3_dep)
-    deps += [glesv3_dep]
-    need_egl_functions = true
-
-    feature_conf.set('CAIRO_HAS_GLESV3_SURFACE', 1)
-    built_features += [{
-      'name': 'cairo-glesv3',
-      'source-key': 'cairo-gl',
-      'description': 'OpenGLESv3 surface backend',
-      'deps': [glesv3_dep],
-    }]
-  endif
-endif
-
-if need_egl_functions
-  # FIXME: automagic
-  egl_extra_deps = []
-  egl_dep = dependency('egl', required: false)
-  if not egl_dep.found()
-    if cc.has_header('EGL/egl.h')
-      csi_dep = cc.find_library('csi', required: false)
-      if csi_dep.found() and cc.has_function('csi_stream_attachresource', dependencies: [csi_dep])
-        egl_extra_deps += csi_dep
-      endif
-
-      foreach libname : ['EGL', 'egl13', 'egl12', 'egl11']
-        dep = cc.find_library(libname, required: false)
-        if dep.found() and cc.has_function('eglGetError', dependencies: [dep])
-          egl_dep = dep
-          break
-        endif
-      endforeach
-    endif
-  endif
-
-  if egl_dep.found()
-    deps += egl_dep
-    feature_conf.set('CAIRO_HAS_EGL_FUNCTIONS', 1)
-    built_features += [{
-      'name': 'cairo-egl',
-      'description': 'EGL functions',
-      'deps': [egl_dep] + egl_extra_deps,
-    }]
-  endif
-endif
-
-if need_glx_functions
-  # FIXME: automagic
-  if cc.has_header('GL/glx.h')
-    feature_conf.set('CAIRO_HAS_GLX_FUNCTIONS', 1)
-    built_features += [{
-      'name': 'cairo-glx',
-      'description': 'GLX functions',
-      'deps': [cc.find_library('GL')],
-    }]
-  endif
-endif
-
-# Untested
-if need_wgl_functions
-  # FIXME: automagic
-  if cc.has_header('windows.h')
-    feature_conf.set('CAIRO_HAS_WGL_FUNCTIONS', 1)
-    built_features += [{
-      'name': 'cairo-wgl',
-      'description': 'WGL functions',
-    }]
-  endif
-endif
-
 gobject_dep = dependency('gobject-2.0',
   required: get_option('glib'),
   fallback: ['glib', 'libgobject_dep']
@@ -979,9 +850,6 @@ summary({
         'PostScript':  feature_conf.get('CAIRO_HAS_PS_SURFACE', 0) == 1,
         'PDF':  feature_conf.get('CAIRO_HAS_PDF_SURFACE', 0) == 1,
         'SVG':  feature_conf.get('CAIRO_HAS_SVG_SURFACE', 0) == 1,
-        'OpenGL': feature_conf.get('CAIRO_HAS_GL_SURFACE', 0) == 1,
-        'OpenGL ES 2.0': feature_conf.get('CAIRO_HAS_GLESV2_SURFACE', 0) == 1,
-        'OpenGL ES 3.0': feature_conf.get('CAIRO_HAS_GLESV3_SURFACE', 0) == 1,
         }, section: 'Surface Backends', bool_yn: true)
 
 summary({
@@ -995,9 +863,6 @@ summary({
 
 summary({
         'PNG functions': feature_conf.get('CAIRO_HAS_PNG_FUNCTIONS', 0) == 1,
-        'GLX functions': feature_conf.get('CAIRO_HAS_GLX_FUNCTIONS', 0) == 1,
-        'WGL functions': feature_conf.get('CAIRO_HAS_WGL_FUNCTIONS', 0) == 1,
-        'EGL functions': feature_conf.get('CAIRO_HAS_EGL_FUNCTIONS', 0) == 1,
         'X11-xcb': feature_conf.get('CAIRO_HAS_XLIB_XCB_FUNCTIONS', 0) == 1,
         'XCB-shm': feature_conf.get('CAIRO_HAS_XCB_SHM_FUNCTIONS', 0) == 1,
         }, section: 'Functions', bool_yn: true)

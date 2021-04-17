@@ -4,11 +4,6 @@ option('fontconfig', type : 'feature', value : 'auto')
 option('freetype', type : 'feature', value : 'auto')
 
 # Cairo surface backends
-option('gl-backend', type : 'combo', value : 'disabled',
-       # FIXME: https://github.com/mesonbuild/meson/issues/4566
-       choices : ['auto', 'gl', 'glesv2', 'glesv3', 'disabled'])
-option('glesv2', type : 'feature', value : 'disabled')
-option('glesv3', type : 'feature', value : 'disabled')
 option('png', type : 'feature', value : 'auto') # png and svg surfaces
 option('quartz', type : 'feature', value : 'auto')
 option('tee', type : 'feature', value : 'disabled')
@@ -33,8 +28,3 @@ option('symbol-lookup', type: 'feature', value : 'auto',
 # Documentation
 option('gtk_doc', type : 'boolean', value : false,
        description: 'Build the Cairo API reference (depends on gtk-doc)')
-
-# FIXME: implement these to avoid automagic
-#option('egl', type : 'feature', value : 'auto')
-#option('glx', type : 'feature', value : 'auto')
-#option('wgl', type : 'feature', value : 'auto')

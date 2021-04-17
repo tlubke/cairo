@@ -16,9 +16,6 @@ variables:
 
   DEFAULT_MESON_ARGS: >
     --default-library=both
-    -Dgl-backend=auto
-    -Dglesv2=auto
-    -Dglesv3=auto
 
 stages:
   - prep
@@ -78,12 +75,6 @@ fedora image:
       pixman-devel
       systemd-devel
       systemd-udev
-      mesa-libEGL
-      mesa-libGL
-      mesa-libGL-devel
-      mesa-libgbm
-      mesa-libgbm-devel
-      mesa-libglapi
       expat-devel
       autoconf
       automake
@@ -229,7 +220,6 @@ fedora meson build:
   variables:
     MESON_ARGS: >
       ${DEFAULT_MESON_ARGS}
-      -Dgl-backend=gl
   script:
     - export CFLAGS="-Werror -Wno-error=deprecated-declarations"
     - meson builddir ${MESON_ARGS}
