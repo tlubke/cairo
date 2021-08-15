@@ -172,6 +172,7 @@ rounded-rectangle-fill
 rounded-rectangle-stroke
 scale-offset-image
 scale-offset-similar
+self-copy-overlap
 stroke-ctm-caps
 stroke-clipped
 stroke-image
