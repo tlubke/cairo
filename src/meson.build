@@ -278,7 +278,8 @@ libcairo = library('cairo', cairo_sources,
   include_directories: incbase,
 )
 
-cairo_headers += [configure_file(output: 'cairo-features.h', configuration: feature_conf)]
+cairo_features_file = configure_file(output: 'cairo-features.h', configuration: feature_conf)
+cairo_headers += [cairo_features_file]
 
 libcairo_dep = declare_dependency(link_with: libcairo,
   dependencies: deps,
@@ -298,9 +299,6 @@ install_headers(cairo_headers, subdir: 'cairo')
 shell = find_program('sh', required: false)
 if shell.found()
   test_scripts = [
-    # This script calls back into make to generate cairo.def
-    # TODO: Make this work, somehow
-    #'check-def.sh',
     'check-doc-syntax.sh',
     'check-headers.sh',
     'check-preprocessor-syntax.sh',
@@ -315,6 +313,21 @@ if shell.found()
 
   env = environment()
   env.set('CAIRO_HAS_HIDDEN_SYMBOLS', '1')
+
+  cairo_def = custom_target('make-cairo-def',
+                            input : cairo_headers,
+                            output : 'cairo.def',
+                            command : [ shell,
+                                        meson.current_source_dir()/'make-cairo-def.sh',
+                                        '@OUTPUT@',
+                                        cairo_features_file,
+                                        '@INPUT@'
+                                      ])
+
+  test('check-def', shell,
+       args: ['meson-check-def.sh', cairo_def, libcairo ],
+       env: env,
+       workdir: meson.current_source_dir())
 
   test('check-plt.sh', shell,
     args: ['check-plt.sh', libcairo ],

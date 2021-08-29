@@ -235,7 +235,6 @@ fedora meson build:
     - ninja -C builddir
 
     # Run test scripts
-    #- (cd builddir/src && srcdir=../../src bash "$srcdir/check-def.sh")   This script calls "make cairo.def" and thus does not work with meson
     - mkdir builddir/src/.libs
     - touch builddir/src/.libs/libfoo.so
     # Run all the tests, except for the big test executable which
