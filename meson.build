@@ -175,6 +175,10 @@ test_deps = []
 internal_deps = []
 extra_link_args = []
 
+extra_link_args += cc.get_supported_link_arguments([
+  '-Wl,-Bsymbolic-functions',
+])
+
 if host_machine.endian() == 'big'
   conf.set('WORDS_BIGENDIAN', 1)
 endif
