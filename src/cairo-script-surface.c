@@ -2113,6 +2113,16 @@ _device_flush (void *abstract_device)
 }
 
 static void
+_device_finish (void *abstract_device)
+{
+    cairo_script_context_t *ctx = abstract_device;
+
+    cairo_status_t status = _cairo_output_stream_close (ctx->stream);
+    status = _cairo_device_set_error (&ctx->base, status);
+    (void) status;
+}
+
+static void
 _device_destroy (void *abstract_device)
 {
     cairo_script_context_t *ctx = abstract_device;
@@ -3731,7 +3741,7 @@ static const cairo_device_backend_t _cairo_script_device_backend = {
     NULL, NULL, /* lock, unlock */
 
     _device_flush,  /* flush */
-    NULL,  /* finish */
+    _device_finish,  /* finish */
     _device_destroy
 };
 

@@ -24,8 +24,9 @@ test_sources = \
 	bug-spline.c					\
 	big-trap.c					\
 	bilevel-image.c					\
-	bug-40410.c					\
+	bug-277.c					\
 	bug-361.c					\
+	bug-40410.c					\
 	bug-431.c					\
 	bug-448.c					\
 	bug-51910.c					\
