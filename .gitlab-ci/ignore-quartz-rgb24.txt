@@ -31,7 +31,6 @@ image-surface-source
 linear-gradient-one-stop
 mask-ctm
 mask-surface-ctm
-negative-stride-image
 nil-surface
 operator-www
 overlapping-boxes
