@@ -93,6 +93,8 @@ _cairo_surface_is_quartz (const cairo_surface_t *surface);
 
 cairo_private cairo_bool_t
 _cairo_surface_is_quartz_image (const cairo_surface_t *surface);
+cairo_private cairo_bool_t
+_cairo_quartz_image_surface_is_zero (const cairo_quartz_image_surface_t *surface);
 
 cairo_private CGContextRef
 _cairo_quartz_image_surface_get_cg_context (cairo_surface_t *surface);

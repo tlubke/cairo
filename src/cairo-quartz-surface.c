@@ -56,6 +56,7 @@
 #endif
 
 #include <limits.h>
+#include <assert.h>
 
 #undef QUARTZ_DEBUG
 
@@ -72,16 +73,22 @@
 #endif
 
 static inline cairo_bool_t
-IS_EMPTY(void *abstract_surface) {
-    if (_cairo_surface_is_quartz ((cairo_surface_t*)abstract_surface)) {
-	cairo_quartz_surface_t *surface = (cairo_quartz_surface_t*)abstract_surface;
-	return surface->extents.width == 0 || surface->extents.height == 0;
-    }
-    if (_cairo_surface_is_quartz_image ((cairo_surface_t*)abstract_surface)) {
-	cairo_quartz_image_surface_t *surface = (cairo_quartz_image_surface_t*)abstract_surface;
-	return surface->width == 0 || surface->height == 0;
-    }
-    return TRUE;
+_is_quartz_surface (cairo_surface_t *surface) {
+    return _cairo_surface_is_quartz (surface) || _cairo_surface_is_quartz_image (surface);
+}
+
+static inline cairo_bool_t
+_cairo_quartz_surface_is_zero (cairo_quartz_surface_t* surface) {
+    return surface->extents.width == 0 || surface->extents.height == 0;
+}
+
+static inline cairo_bool_t
+_cairo_quartz_is_zero_surface (cairo_surface_t* surface) {
+    assert (_is_quartz_surface (surface));
+    if (_cairo_surface_is_quartz (surface))
+	return (_cairo_quartz_surface_is_zero ((cairo_quartz_surface_t*) surface));
+    else
+	return (_cairo_quartz_image_surface_is_zero ((cairo_quartz_image_surface_t*) surface));
 }
 
 /**
@@ -609,9 +616,9 @@ _cairo_surface_to_cgimage (cairo_surface_t       *source,
     void *image_extra;
     cairo_bool_t acquired = FALSE;
 
-    if (_cairo_surface_is_quartz (source) || _cairo_surface_is_quartz_image (source)) {
+    if (_is_quartz_surface (source)) {
 	CGContextRef cgContext = cairo_quartz_surface_get_cg_context(source);
-	if (IS_EMPTY (source)) {
+	if (_cairo_quartz_is_zero_surface (source)) {
 	    *image_out = NULL;
 	    return CAIRO_INT_STATUS_NOTHING_TO_DO;
 	}
@@ -1249,7 +1256,7 @@ _cairo_quartz_surface_map_to_image (void *abstract_surface,
     unsigned char *imageData;
     cairo_format_t format;
 
-    if (IS_EMPTY (surface))
+    if (_cairo_quartz_is_zero_surface (&surface->base))
 	return (cairo_image_surface_t *) cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 0, 0);
 
     if (! _cairo_quartz_is_cgcontext_bitmap_context (surface->cgContext))
@@ -1321,7 +1328,7 @@ _cairo_quartz_surface_finish (void *abstract_surface)
 
     ND ((stderr, "_cairo_quartz_surface_finish[%p] cgc: %p\n", surface, surface->cgContext));
 
-    if (IS_EMPTY (surface))
+    if (_cairo_quartz_is_zero_surface (&surface->base))
 	return CAIRO_STATUS_SUCCESS;
 
     /* Restore our saved gstate that we use to reset clipping */
@@ -1968,7 +1975,7 @@ _cairo_quartz_surface_clipper_intersect_clip_path (cairo_surface_clipper_t *clip
 
     ND ((stderr, "%p _cairo_quartz_surface_intersect_clip_path path: %p\n", surface, path));
 
-    if (IS_EMPTY (surface))
+    if (_cairo_quartz_is_zero_surface (&surface->base))
 	return CAIRO_STATUS_SUCCESS;
 
     if (path == NULL) {
@@ -2066,7 +2073,7 @@ _cairo_quartz_surface_create_internal (CGContextRef cgContext,
     surface->extents.height = height;
     surface->virtual_extents = surface->extents;
 
-    if (IS_EMPTY (surface)) {
+    if (_cairo_quartz_is_zero_surface (&surface->base)) {
 	surface->cgContext = NULL;
 	surface->cgContextBaseCTM = CGAffineTransformIdentity;
 	surface->base.is_clear = TRUE;
@@ -2283,7 +2290,7 @@ _cairo_quartz_snapshot_create (cairo_surface_t *surface)
 {
     cairo_quartz_snapshot_t *snapshot = NULL;
     CGContextRef cgContext;
-    if (!surface || IS_EMPTY (surface)) //IS_EMPTY returns true if the surface type is wrong.
+    if (!surface || ! _is_quartz_surface (surface) || _cairo_quartz_is_zero_surface (surface))
 	return NULL;
 
     if (_cairo_surface_is_quartz (surface) &&
@@ -2320,8 +2327,7 @@ CGImageRef
 _cairo_quartz_surface_snapshot_get_image (cairo_surface_t *surface)
 {
     cairo_surface_t *snapshot;
-    assert (_cairo_surface_is_quartz (surface) ||
-	    _cairo_surface_is_quartz_image (surface));
+    assert (_is_quartz_surface (surface));
     snapshot =
 	_cairo_surface_has_snapshot (surface, &cairo_quartz_snapshot_backend);
 

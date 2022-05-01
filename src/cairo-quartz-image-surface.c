@@ -359,7 +359,7 @@ _cairo_quartz_image_surface_get_cg_context (cairo_surface_t *surface)
 	return NULL;
 }
 
-/**
+/*
  * _cairo_surface_is_quartz_image:
  * @surface: a #cairo_surface_t
  *
@@ -368,8 +368,11 @@ _cairo_quartz_image_surface_get_cg_context (cairo_surface_t *surface)
  * Return value: True if the surface is an quartz surface
  **/
 cairo_bool_t
-_cairo_surface_is_quartz_image (const cairo_surface_t *surface)
-{
+_cairo_surface_is_quartz_image (const cairo_surface_t *surface) {
     return surface->backend == &cairo_quartz_image_surface_backend;
 }
 
+cairo_bool_t
+_cairo_quartz_image_surface_is_zero (const cairo_quartz_image_surface_t *surface) {
+    return surface->width == 0 || surface->height == 0;
+}
