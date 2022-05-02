@@ -2622,19 +2622,152 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 }
 
 static cairo_int_status_t
+_cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
+				     cairo_scaled_glyph_t	*scaled_glyph,
+				     cairo_scaled_glyph_info_t	 info,
+				     FT_Face face,
+				     cairo_bool_t vertical_layout,
+				     int load_flags)
+{
+    cairo_status_t status = CAIRO_STATUS_SUCCESS;
+    cairo_ft_unscaled_font_t *unscaled = scaled_font->unscaled;
+    FT_Glyph_Metrics *metrics;
+    double x_factor, y_factor;
+    FT_GlyphSlot glyph;
+    cairo_bool_t scaled_glyph_loaded = FALSE;
+    cairo_text_extents_t fs_metrics;
+
+    cairo_bool_t hint_metrics = scaled_font->base.options.hint_metrics != CAIRO_HINT_METRICS_OFF;
+
+    /* The font metrics for color glyphs should be the same as the
+     * outline glyphs. But just in case there aren't, request the
+     * color or outline metrics based on the font option and if
+     * the font has color.
+     */
+    int color_flag = 0;
+#ifdef FT_LOAD_COLOR
+    if (unscaled->have_color && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
+	color_flag = FT_LOAD_COLOR;
+#endif
+    status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
+						scaled_glyph,
+						face,
+						load_flags | color_flag,
+						!hint_metrics,
+						vertical_layout);
+    if (unlikely (status))
+	return status;
+
+    glyph = face->glyph;
+    scaled_glyph_loaded = hint_metrics;
+
+    /*
+     * Compute font-space metrics
+     */
+    metrics = &glyph->metrics;
+
+    if (unscaled->x_scale == 0)
+	x_factor = 0;
+    else
+	x_factor = 1 / unscaled->x_scale;
+
+    if (unscaled->y_scale == 0)
+	y_factor = 0;
+    else
+	y_factor = 1 / unscaled->y_scale;
+
+    /*
+     * Note: Y coordinates of the horizontal bearing need to be negated.
+     *
+     * Scale metrics back to glyph space from the scaled glyph space returned
+     * by FreeType
+     *
+     * If we want hinted metrics but aren't asking for hinted glyphs from
+     * FreeType, then we need to do the metric hinting ourselves.
+     */
+
+    if (hint_metrics && (load_flags & FT_LOAD_NO_HINTING))
+    {
+	FT_Pos x1, x2;
+	FT_Pos y1, y2;
+	FT_Pos advance;
+
+	if (!vertical_layout) {
+	    x1 = (metrics->horiBearingX) & -64;
+	    x2 = (metrics->horiBearingX + metrics->width + 63) & -64;
+	    y1 = (-metrics->horiBearingY) & -64;
+	    y2 = (-metrics->horiBearingY + metrics->height + 63) & -64;
+
+	    advance = ((metrics->horiAdvance + 32) & -64);
+
+	    fs_metrics.x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
+	    fs_metrics.y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
+
+	    fs_metrics.width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
+	    fs_metrics.height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
+
+	    fs_metrics.x_advance = DOUBLE_FROM_26_6 (advance) * x_factor;
+	    fs_metrics.y_advance = 0;
+	} else {
+	    x1 = (metrics->vertBearingX) & -64;
+	    x2 = (metrics->vertBearingX + metrics->width + 63) & -64;
+	    y1 = (metrics->vertBearingY) & -64;
+	    y2 = (metrics->vertBearingY + metrics->height + 63) & -64;
+
+	    advance = ((metrics->vertAdvance + 32) & -64);
+
+	    fs_metrics.x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
+	    fs_metrics.y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
+
+	    fs_metrics.width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
+	    fs_metrics.height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
+
+	    fs_metrics.x_advance = 0;
+	    fs_metrics.y_advance = DOUBLE_FROM_26_6 (advance) * y_factor;
+	}
+    } else {
+	fs_metrics.width  = DOUBLE_FROM_26_6 (metrics->width) * x_factor;
+	fs_metrics.height = DOUBLE_FROM_26_6 (metrics->height) * y_factor;
+
+	if (!vertical_layout) {
+	    fs_metrics.x_bearing = DOUBLE_FROM_26_6 (metrics->horiBearingX) * x_factor;
+	    fs_metrics.y_bearing = DOUBLE_FROM_26_6 (-metrics->horiBearingY) * y_factor;
+
+	    if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+		fs_metrics.x_advance = DOUBLE_FROM_26_6 (metrics->horiAdvance) * x_factor;
+	    else
+		fs_metrics.x_advance = DOUBLE_FROM_16_16 (glyph->linearHoriAdvance) * x_factor;
+	    fs_metrics.y_advance = 0 * y_factor;
+	} else {
+	    fs_metrics.x_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingX) * x_factor;
+	    fs_metrics.y_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingY) * y_factor;
+
+	    fs_metrics.x_advance = 0 * x_factor;
+	    if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+		fs_metrics.y_advance = DOUBLE_FROM_26_6 (metrics->vertAdvance) * y_factor;
+	    else
+		fs_metrics.y_advance = DOUBLE_FROM_16_16 (glyph->linearVertAdvance) * y_factor;
+	}
+    }
+
+    _cairo_scaled_glyph_set_metrics (scaled_glyph,
+				     &scaled_font->base,
+				     &fs_metrics);
+
+    return status;
+}
+
+static cairo_int_status_t
 _cairo_ft_scaled_glyph_init (void			*abstract_font,
 			     cairo_scaled_glyph_t	*scaled_glyph,
 			     cairo_scaled_glyph_info_t	 info,
 			     const cairo_color_t        *foreground_color)
 {
-    cairo_text_extents_t    fs_metrics;
     cairo_ft_scaled_font_t *scaled_font = abstract_font;
     cairo_ft_unscaled_font_t *unscaled = scaled_font->unscaled;
     FT_GlyphSlot glyph;
     FT_Face face;
     int load_flags = scaled_font->ft_options.load_flags;
-    FT_Glyph_Metrics *metrics;
-    double x_factor, y_factor;
     cairo_bool_t vertical_layout = FALSE;
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
     cairo_bool_t scaled_glyph_loaded = FALSE;
@@ -2662,123 +2795,14 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
     }
 
     if (info & CAIRO_SCALED_GLYPH_INFO_METRICS) {
-
-	cairo_bool_t hint_metrics = scaled_font->base.options.hint_metrics != CAIRO_HINT_METRICS_OFF;
-
-	/* The font metrics for color glyphs should be the same as the
-	 * outline glyphs. But just in case there aren't, request the
-	 * color or outline metrics based on the font option and if
-	 * the font has color.
-	 */
-	int color_flag = 0;
-#ifdef FT_LOAD_COLOR
-	if (unscaled->have_color && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
-	    color_flag = FT_LOAD_COLOR;
-#endif
-	status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
-						    scaled_glyph,
-						    face,
-						    load_flags | color_flag,
-						    !hint_metrics,
-						    vertical_layout);
+	status = _cairo_ft_scaled_glyph_init_metrics (scaled_font,
+						      scaled_glyph,
+						      info,
+						      face,
+						      vertical_layout,
+						      load_flags);
 	if (unlikely (status))
 	    goto FAIL;
-
-	glyph = face->glyph;
-	scaled_glyph_loaded = hint_metrics;
-
-	/*
-	 * Compute font-space metrics
-	 */
-	metrics = &glyph->metrics;
-
-	if (unscaled->x_scale == 0)
-	    x_factor = 0;
-	else
-	    x_factor = 1 / unscaled->x_scale;
-
-	if (unscaled->y_scale == 0)
-	    y_factor = 0;
-	else
-	    y_factor = 1 / unscaled->y_scale;
-
-	/*
-	 * Note: Y coordinates of the horizontal bearing need to be negated.
-	 *
-	 * Scale metrics back to glyph space from the scaled glyph space returned
-	 * by FreeType
-	 *
-	 * If we want hinted metrics but aren't asking for hinted glyphs from
-	 * FreeType, then we need to do the metric hinting ourselves.
-	 */
-
-	if (hint_metrics && (load_flags & FT_LOAD_NO_HINTING))
-	{
-	    FT_Pos x1, x2;
-	    FT_Pos y1, y2;
-	    FT_Pos advance;
-
-	    if (!vertical_layout) {
-		x1 = (metrics->horiBearingX) & -64;
-		x2 = (metrics->horiBearingX + metrics->width + 63) & -64;
-		y1 = (-metrics->horiBearingY) & -64;
-		y2 = (-metrics->horiBearingY + metrics->height + 63) & -64;
-
-		advance = ((metrics->horiAdvance + 32) & -64);
-
-		fs_metrics.x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
-		fs_metrics.y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
-
-		fs_metrics.width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
-		fs_metrics.height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
-
-		fs_metrics.x_advance = DOUBLE_FROM_26_6 (advance) * x_factor;
-		fs_metrics.y_advance = 0;
-	    } else {
-		x1 = (metrics->vertBearingX) & -64;
-		x2 = (metrics->vertBearingX + metrics->width + 63) & -64;
-		y1 = (metrics->vertBearingY) & -64;
-		y2 = (metrics->vertBearingY + metrics->height + 63) & -64;
-
-		advance = ((metrics->vertAdvance + 32) & -64);
-
-		fs_metrics.x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
-		fs_metrics.y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
-
-		fs_metrics.width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
-		fs_metrics.height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
-
-		fs_metrics.x_advance = 0;
-		fs_metrics.y_advance = DOUBLE_FROM_26_6 (advance) * y_factor;
-	    }
-	 } else {
-	    fs_metrics.width  = DOUBLE_FROM_26_6 (metrics->width) * x_factor;
-	    fs_metrics.height = DOUBLE_FROM_26_6 (metrics->height) * y_factor;
-
-	    if (!vertical_layout) {
-		fs_metrics.x_bearing = DOUBLE_FROM_26_6 (metrics->horiBearingX) * x_factor;
-		fs_metrics.y_bearing = DOUBLE_FROM_26_6 (-metrics->horiBearingY) * y_factor;
-
-		if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-		    fs_metrics.x_advance = DOUBLE_FROM_26_6 (metrics->horiAdvance) * x_factor;
-		else
-		    fs_metrics.x_advance = DOUBLE_FROM_16_16 (glyph->linearHoriAdvance) * x_factor;
-		fs_metrics.y_advance = 0 * y_factor;
-	    } else {
-		fs_metrics.x_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingX) * x_factor;
-		fs_metrics.y_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingY) * y_factor;
-
-		fs_metrics.x_advance = 0 * x_factor;
-		if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-		    fs_metrics.y_advance = DOUBLE_FROM_26_6 (metrics->vertAdvance) * y_factor;
-		else
-		    fs_metrics.y_advance = DOUBLE_FROM_16_16 (glyph->linearVertAdvance) * y_factor;
-	    }
-	 }
-
-	_cairo_scaled_glyph_set_metrics (scaled_glyph,
-					 &scaled_font->base,
-					 &fs_metrics);
     }
 
     if (info & CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE) {
