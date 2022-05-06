@@ -337,6 +337,9 @@ if freetype_dep.found()
     if not cc.links(files('meson-cc-tests/ft_has_color.c'), dependencies: freetype_dep, name: 'FT has color')
       conf.set('FT_HAS_COLOR', '(0)')
     endif
+    if cc.has_type('FT_SVG_Document', dependencies: freetype_dep, prefix: '#include <freetype/otsvg.h>')
+      conf.set('HAVE_FT_SVG_DOCUMENT', 1)
+    endif
     check_funcs += ft_check_funcs
     deps += [freetype_dep]
   endif

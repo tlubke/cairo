@@ -285,7 +285,7 @@ cairo_svg_sources = cairo-svg-surface.c
 
 cairo_ft_headers = cairo-ft.h
 cairo_ft_private = cairo-ft-private.h
-cairo_ft_sources = cairo-ft-font.c
+cairo_ft_sources = cairo-ft-font.c cairo-svg-glyph-render.c
 
 # These are private, even though they look like public headers
 cairo_test_surfaces_private = \

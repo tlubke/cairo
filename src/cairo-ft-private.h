@@ -55,6 +55,21 @@ _cairo_scaled_font_is_ft (cairo_scaled_font_t *scaled_font);
 cairo_private unsigned int
 _cairo_ft_scaled_font_get_load_flags (cairo_scaled_font_t *scaled_font);
 
+#if HAVE_FT_SVG_DOCUMENT
+
+typedef struct FT_Color_ FT_Color;
+
+cairo_private cairo_status_t
+_cairo_render_svg_glyph (const char           *svg_document,
+                         unsigned long         first_glyph,
+                         unsigned long         last_glyph,
+                         unsigned long         glyph,
+                         double                units_per_em,
+                         FT_Color             *palette,
+                         int                   num_palette_entries,
+                         cairo_t              *cr);
+#endif
+
 CAIRO_END_DECLS
 
 #endif /* CAIRO_HAS_FT_FONT */
