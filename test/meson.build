@@ -425,6 +425,10 @@ test_ft_font_sources = [
   'ft-text-antialias-none.c',
 ]
 
+test_ft_svg_font_sources = [
+  'ft-svg-color-font.c',
+]
+
 test_gl_sources = [
   'gl-device-release.c',
   'gl-oversized-surface.c',
@@ -525,6 +529,9 @@ endif
 
 if feature_conf.get('CAIRO_HAS_FT_FONT', 0) == 1 and feature_conf.get('CAIRO_HAS_FC_FONT', 0) == 1
   test_sources += test_ft_font_sources
+  if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1
+    test_sources += test_ft_svg_font_sources
+  endif
 endif
 
 if feature_conf.get('CAIRO_HAS_QUARTZ_SURFACE', 0) == 1
