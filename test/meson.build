@@ -429,6 +429,10 @@ test_ft_svg_font_sources = [
   'ft-svg-color-font.c',
 ]
 
+test_ft_svg_ttx_font_sources = [
+  'ft-svg-cairo-logo.c',
+]
+
 test_gl_sources = [
   'gl-device-release.c',
   'gl-oversized-surface.c',
@@ -519,6 +523,10 @@ ps2png_sources = [
   'ps2png.c',
 ]
 
+test_ttx_fonts = [
+  'cairo-logo-font.ttx',
+]
+
 build_any2ppm = false
 has_multipage_surfaces = false
 add_fallback_resolution = false
@@ -531,6 +539,9 @@ if feature_conf.get('CAIRO_HAS_FT_FONT', 0) == 1 and feature_conf.get('CAIRO_HAS
   test_sources += test_ft_font_sources
   if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1
     test_sources += test_ft_svg_font_sources
+    if conf.get('CAIRO_CAN_TEST_TTX_FONT', 0) == 1
+      test_sources += test_ft_svg_ttx_font_sources
+    endif
   endif
 endif
 
@@ -644,8 +655,20 @@ endforeach
 if build_machine.system() != 'windows'
   run_command('ln', '-sf',
               meson.current_source_dir(),
-              join_paths(meson.current_build_dir(), 'srcdir'),
+              meson.current_build_dir() / 'srcdir',
               check: true)
+endif
+
+if ttx.found()
+  # By default, if the output file exists, ttx creates a new name. We specify the full
+  # output name to make ttx overwrite the existing file instead of creating a new file.
+  foreach ttx_font : test_ttx_fonts
+    custom_target(ttx_font,
+                  input: ttx_font,
+                  command: [ ttx, '-q', '-o', '@OUTDIR@' / '@BASENAME@.ttf', '@INPUT@' ],
+                  output: '@BASENAME@.ttf',
+                  build_by_default: true)
+  endforeach
 endif
 
 env = environment()

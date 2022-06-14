@@ -323,6 +323,11 @@ cairo_t *
 cairo_test_create (cairo_surface_t *surface,
 		   const cairo_test_context_t *ctx);
 
+/* Set font face from a font file in build or src dir, using the FT backend. */
+cairo_test_status_t
+cairo_test_ft_select_font_from_file (cairo_t      *cr,
+                                     const char   *filename);
+
 CAIRO_END_DECLS
 
 #endif
