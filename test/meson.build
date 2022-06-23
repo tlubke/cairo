@@ -431,6 +431,7 @@ test_ft_svg_font_sources = [
 
 test_ft_svg_ttx_font_sources = [
   'ft-svg-cairo-logo.c',
+  'ft-svg-render.c'
 ]
 
 test_gl_sources = [
@@ -525,6 +526,13 @@ ps2png_sources = [
 
 test_ttx_fonts = [
   'cairo-logo-font.ttx',
+  'cairo-svg-test-doc.ttx',
+  'cairo-svg-test-fill.ttx',
+  'cairo-svg-test-gradient.ttx',
+  'cairo-svg-test-path.ttx',
+  'cairo-svg-test-shapes.ttx',
+  'cairo-svg-test-stroke.ttx',
+  'cairo-svg-test-transform.ttx',
 ]
 
 build_any2ppm = false
@@ -681,3 +689,9 @@ test('cairo', exe,
   suite: ['cairo-test-suite', 'slow'],
   workdir: meson.current_build_dir(),
   depends: test_depends)
+
+# The SVG renderer debug tools can only be built if the _cairo_debug_svg_render()
+# function has been exposed by defining DEBUG_SVG_RENDER
+if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.get_define('DEBUG_SVG_RENDER') != ''
+  subdir('svg')
+endif
