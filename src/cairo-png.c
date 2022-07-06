@@ -360,6 +360,10 @@ write_png (cairo_surface_t	*surface,
 	bpc = 8;
 	png_color_type = PNG_COLOR_TYPE_GRAY;
 	break;
+    case CAIRO_FORMAT_A4:
+	bpc = 4;
+	png_color_type = PNG_COLOR_TYPE_GRAY;
+	break;
     case CAIRO_FORMAT_A1:
 	bpc = 1;
 	png_color_type = PNG_COLOR_TYPE_GRAY;

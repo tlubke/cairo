@@ -502,6 +502,8 @@ _cairo_xlib_display_get_xrender_format (cairo_xlib_display_t	*display,
 	switch (format) {
 	case CAIRO_FORMAT_A1:
 	    pict_format = PictStandardA1; break;
+	case CAIRO_FORMAT_A4:
+	    pict_format = PictStandardA4; break;
 	case CAIRO_FORMAT_A8:
 	    pict_format = PictStandardA8; break;
 	case CAIRO_FORMAT_RGB24:

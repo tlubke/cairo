@@ -422,11 +422,12 @@ typedef enum _cairo_format {
     CAIRO_FORMAT_ARGB32    = 0,
     CAIRO_FORMAT_RGB24     = 1,
     CAIRO_FORMAT_A8        = 2,
-    CAIRO_FORMAT_A1        = 3,
-    CAIRO_FORMAT_RGB16_565 = 4,
-    CAIRO_FORMAT_RGB30     = 5,
-    CAIRO_FORMAT_RGB96F    = 6,
-    CAIRO_FORMAT_RGBA128F  = 7
+    CAIRO_FORMAT_A4        = 3,
+    CAIRO_FORMAT_A1        = 4,
+    CAIRO_FORMAT_RGB16_565 = 5,
+    CAIRO_FORMAT_RGB30     = 6,
+    CAIRO_FORMAT_RGB96F    = 7,
+    CAIRO_FORMAT_RGBA128F  = 8
 } cairo_format_t;
 
 

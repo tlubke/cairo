@@ -2857,6 +2857,7 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 		    r->base.render_rows = _fill_xrgb32_lerp_opaque_spans;
 		    break;
 		case CAIRO_FORMAT_A1:
+		case CAIRO_FORMAT_A4:
 		case CAIRO_FORMAT_RGB16_565:
 		case CAIRO_FORMAT_RGB30:
 		case CAIRO_FORMAT_RGB96F:
@@ -2874,6 +2875,7 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 		    r->base.render_rows = _fill_xrgb32_lerp_spans;
 		    break;
 		case CAIRO_FORMAT_A1:
+		case CAIRO_FORMAT_A4:
 		case CAIRO_FORMAT_RGB16_565:
 		case CAIRO_FORMAT_RGB30:
 		case CAIRO_FORMAT_RGB96F:

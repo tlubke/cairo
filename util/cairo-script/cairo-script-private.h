@@ -178,10 +178,13 @@
 #define csi_private	    csi_private_no_warn csi_warn
 
 #define CSI_BITSWAP8(c) ((((c) * 0x0802LU & 0x22110LU) | ((c) * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16)
+#define CSI_NIBBLESWAP(c) ((c >> 4) & 0x0F0F0F0F) | ((c & 0x0F0F0F0F) << 4)
 #ifdef WORDS_BIGENDIAN
 #define CSI_BITSWAP8_IF_LITTLE_ENDIAN(c) (c)
+#define CSI_NIBBLESWAP_IF_LITTLE_ENDIAN(c) (c)
 #else
 #define CSI_BITSWAP8_IF_LITTLE_ENDIAN(c) CSI_BITSWAP8(c)
+#define CSI_NIBBLESWAP_IF_LITTLE_ENDIAN(c) CSI_NIBBLESWAP(c)
 #endif
 
 typedef enum _csi_status {

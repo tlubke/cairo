@@ -49,6 +49,7 @@ set_pixel_black(uint8_t *data, int stride,
     case CAIRO_FORMAT_RGB96F:
     case CAIRO_FORMAT_RGB30:
     case CAIRO_FORMAT_A8:
+    case CAIRO_FORMAT_A4:
     case CAIRO_FORMAT_A1:
     case CAIRO_FORMAT_INVALID:
     default:
