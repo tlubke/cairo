@@ -55,6 +55,7 @@ format_to_string (cairo_format_t format)
 {
     switch (format) {
     case CAIRO_FORMAT_A1:     return "a1";
+    case CAIRO_FORMAT_A4:     return "a4";
     case CAIRO_FORMAT_A8:     return "a8";
     case CAIRO_FORMAT_RGB16_565:  return "rgb16";
     case CAIRO_FORMAT_RGB24:  return "rgb24";

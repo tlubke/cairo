@@ -915,6 +915,7 @@ _format_to_string (cairo_format_t format)
     case CAIRO_FORMAT_RGB24:   return "RGB24";
     case CAIRO_FORMAT_RGB16_565: return "RGB16_565";
     case CAIRO_FORMAT_A8:      return "A8";
+    case CAIRO_FORMAT_A4:      return "A4";
     case CAIRO_FORMAT_A1:      return "A1";
     case CAIRO_FORMAT_INVALID: return "INVALID";
     }
@@ -1259,6 +1260,12 @@ _write_image_surface (cairo_output_stream_t *output,
 	    data += stride;
 	}
 	break;
+    case CAIRO_FORMAT_A4:
+	for (row = image->height; row--; ) {
+	    _cairo_output_stream_write(output, data, (width+1)/2);
+	    data += stride;
+	}
+	break;
     case CAIRO_FORMAT_A8:
 	for (row = image->height; row--; ) {
 	    _cairo_output_stream_write (output, data, width);
@@ -1310,6 +1317,15 @@ _write_image_surface (cairo_output_stream_t *output,
 	    _cairo_output_stream_write (output, rowdata, (width+7)/8);
 	    data += stride;
 	}
+	break;
+    case CAIRO_FORMAT_A4:
+	for (row = image->height; row--; ) {
+	    int col;
+	    for (col = 0; col < (width + 1)/2; col++)
+	    rowdata[col] = CAIRO_NIBBLESWAP (data[col]);
+	    _cairo_output_stream_write (output, rowdata, (width+1)/2);
+	    data += stride;
+    }
 	break;
     case CAIRO_FORMAT_A8:
 	for (row = image->height; row--; ) {
@@ -1458,6 +1474,9 @@ _emit_image_surface (cairo_script_surface_t *surface,
 	switch (clone->format) {
 	case CAIRO_FORMAT_A1:
 	    len = (clone->width + 7)/8;
+	    break;
+	case CAIRO_FORMAT_A4:
+	    len = (clone->width + 1)/2;
 	    break;
 	case CAIRO_FORMAT_A8:
 	    len = clone->width;

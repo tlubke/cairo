@@ -2952,6 +2952,9 @@ _image_read_raw (csi_t *ctx,
     case CAIRO_FORMAT_A1:
 	instride = rowlen = (width+7)/8;
 	break;
+    case CAIRO_FORMAT_A4:
+	instride = rowlen = (width+1)/2;
+	break;
     case CAIRO_FORMAT_A8:
 	instride = rowlen = width;
 	break;
@@ -3043,6 +3046,12 @@ err_decompress:
 			row[x] = CSI_BITSWAP8_IF_LITTLE_ENDIAN (byte);
 		    }
 		    break;
+		case CAIRO_FORMAT_A4:
+		    for (x = rowlen; x--; ) {
+			uint8_t byte = *--bp;
+			row[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
+		    }
+		    break;
 		case CAIRO_FORMAT_A8:
 		    for (x = width; x--; )
 			row[x] = *--bp;
@@ -3092,6 +3101,12 @@ err_decompress:
 		    uint8_t byte = *--bp;
 		    data[x] = CSI_BITSWAP8_IF_LITTLE_ENDIAN (byte);
 		}
+		break;
+	    case CAIRO_FORMAT_A4:
+		for (x = rowlen; x--; ) {
+		    uint8_t byte = *--bp;
+		    data[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
+        }
 		break;
 	    case CAIRO_FORMAT_A8:
 		for (x = width; x--; )
@@ -3180,6 +3195,12 @@ err_decompress:
 		for (x = 0; x < len; x++) {
 		    uint8_t byte = data[x];
 		    data[x] = CSI_BITSWAP8_IF_LITTLE_ENDIAN (byte);
+		}
+		break;
+		case CAIRO_FORMAT_A4:
+		for (x = 0; x < len; x++) {
+		    uint8_t byte = data[x];
+		    data[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
 		}
 		break;
 	    case CAIRO_FORMAT_RGB16_565:

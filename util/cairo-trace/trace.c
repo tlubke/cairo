@@ -100,6 +100,12 @@
  */
 #define CAIRO_BITSWAP8(c) ((((c) * 0x0802LU & 0x22110LU) | ((c) * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16)
 
+/* Reverse the nibbles (4-bit halves of a byte) in a 32-bit value:
+ * Devised by Sean Anderson, July 13, 2001.
+ * Source: http://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel
+ */
+#define CAIRO_NIBBLESWAP(c) ((c >> 4) & 0x0F0F0F0F) | ((c & 0x0F0F0F0F) << 4)
+
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #ifdef __MINGW32__
 #define CAIRO_PRINTF_FORMAT(fmt_index, va_index)                        \
@@ -1524,6 +1530,7 @@ _format_to_string (cairo_format_t format)
 	f(RGB24);
 	f(RGB16_565);
 	f(A8);
+	f(A4);
 	f(A1);
     }
 #undef f
@@ -1545,6 +1552,7 @@ _format_to_content_string (cairo_format_t format)
     case CAIRO_FORMAT_RGB16_565:
 	return "COLOR";
     case CAIRO_FORMAT_A8:
+    case CAIRO_FORMAT_A4:
     case CAIRO_FORMAT_A1:
 	return "ALPHA";
     }
@@ -1679,6 +1687,7 @@ _emit_image (cairo_surface_t *image,
 
     switch (format) {
     case CAIRO_FORMAT_A1:        len = (width + 7)/8; break;
+    case CAIRO_FORMAT_A4:        len = (width + 1)/2; break;
     case CAIRO_FORMAT_A8:        len =  width; break;
     case CAIRO_FORMAT_RGB16_565: len = 2*width; break;
     case CAIRO_FORMAT_RGB24:     len = 3*width; break;
@@ -1707,6 +1716,7 @@ _emit_image (cairo_surface_t *image,
 	}
 	break;
     case CAIRO_FORMAT_A1:
+    case CAIRO_FORMAT_A4:
     case CAIRO_FORMAT_A8:
     case CAIRO_FORMAT_RGB16_565:
     case CAIRO_FORMAT_RGB30:
@@ -1737,6 +1747,15 @@ _emit_image (cairo_surface_t *image,
 	    for (col = 0; col < (width + 7)/8; col++)
 		rowdata[col] = CAIRO_BITSWAP8 (data[col]);
 	    _write_data (&stream, rowdata, (width+7)/8);
+	    data += stride;
+	}
+	break;
+    case CAIRO_FORMAT_A4:
+	for (row = height; row--; ){
+	    int col;
+	    for (col = 0; col < (width + 1)/2; col++)
+	    rowdata[col] = CAIRO_NIBBLESWAP (data[col]);
+	    _write_data (&stream, rowdata, (width+1)/2);
 	    data += stride;
 	}
 	break;

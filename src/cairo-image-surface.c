@@ -105,6 +105,8 @@ _cairo_format_from_pixman_format (pixman_format_code_t pixman_format)
 	return CAIRO_FORMAT_RGB24;
     case PIXMAN_a8:
 	return CAIRO_FORMAT_A8;
+    case PIXMAN_a4:
+	return CAIRO_FORMAT_A4;
     case PIXMAN_a1:
 	return CAIRO_FORMAT_A1;
     case PIXMAN_r5g6b5:
@@ -121,7 +123,7 @@ _cairo_format_from_pixman_format (pixman_format_code_t pixman_format)
     case PIXMAN_a4b4g4r4: case PIXMAN_x4b4g4r4: case PIXMAN_r3g3b2:
     case PIXMAN_b2g3r3:   case PIXMAN_a2r2g2b2: case PIXMAN_a2b2g2r2:
     case PIXMAN_c8:       case PIXMAN_g8:       case PIXMAN_x4a4:
-    case PIXMAN_a4:       case PIXMAN_r1g2b1:   case PIXMAN_b1g2r1:
+    case PIXMAN_r1g2b1:   case PIXMAN_b1g2r1:
     case PIXMAN_a1r1g1b1: case PIXMAN_a1b1g1r1: case PIXMAN_c4:
     case PIXMAN_g4:       case PIXMAN_g1:
     case PIXMAN_yuy2:     case PIXMAN_yv12:
@@ -328,6 +330,9 @@ _cairo_format_to_pixman_format_code (cairo_format_t format)
     switch (format) {
     case CAIRO_FORMAT_A1:
 	ret = PIXMAN_a1;
+	break;
+    case CAIRO_FORMAT_A4:
+	ret = PIXMAN_a4;
 	break;
     case CAIRO_FORMAT_A8:
 	ret = PIXMAN_a8;
@@ -721,6 +726,7 @@ _cairo_content_from_format (cairo_format_t format)
     case CAIRO_FORMAT_RGB16_565:
 	return CAIRO_CONTENT_COLOR;
     case CAIRO_FORMAT_A8:
+    case CAIRO_FORMAT_A4:
     case CAIRO_FORMAT_A1:
 	return CAIRO_CONTENT_ALPHA;
     case CAIRO_FORMAT_INVALID:
@@ -747,6 +753,8 @@ _cairo_format_bits_per_pixel (cairo_format_t format)
 	return 16;
     case CAIRO_FORMAT_A8:
 	return 8;
+    case CAIRO_FORMAT_A4:
+	return 4;
     case CAIRO_FORMAT_A1:
 	return 1;
     case CAIRO_FORMAT_INVALID:

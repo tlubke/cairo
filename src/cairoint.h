@@ -165,6 +165,12 @@ do {					\
  */
 #define CAIRO_BITSWAP8(c) ((((c) * 0x0802LU & 0x22110LU) | ((c) * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16)
 
+/* Reverse the nibbles (4-bit halves of a byte) in a 32-bit value:
+ * Devised by Sean Anderson, July 13, 2001.
+ * Source: http://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel
+ */
+#define CAIRO_NIBBLESWAP(c) ((c >> 4) & 0x0F0F0F0F) | ((c & 0x0F0F0F0F) << 4)
+
 /* Return the number of 1 bits in mask.
  *
  * GCC 3.4 supports a "population count" builtin, which on many targets is
