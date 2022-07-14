@@ -125,13 +125,13 @@ fedora autotools build:
     when: 'always'
     expire_in: "7 days"
     paths:
-      - config.log
-      - test/*.log
-      - test/pdiff/*.log
-      - test/output
+      - builddir/meson-logs/*
+      - builddir/test/*.log
+      - builddir/test/pdiff/*.log
+      - builddir/test/output
     exclude:
-      - "test/**/*.cs"
-      - "test/**/*.trace"
+      - "builddir/test/**/*.cs"
+      - "builddir/test/**/*.trace"
 
 test fedora meson pdf:
   extends: '.test fedora meson'
