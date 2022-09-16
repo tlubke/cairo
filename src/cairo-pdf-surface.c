@@ -779,7 +779,7 @@ cairo_pdf_get_versions (cairo_pdf_version_t const	**versions,
 const char *
 cairo_pdf_version_to_string (cairo_pdf_version_t version)
 {
-    if (version >= CAIRO_PDF_VERSION_LAST)
+    if (version < 0 || version >= CAIRO_PDF_VERSION_LAST)
 	return NULL;
 
     return _cairo_pdf_version_strings[version];
