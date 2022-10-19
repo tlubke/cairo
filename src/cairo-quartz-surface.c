@@ -901,7 +901,7 @@ _cairo_quartz_cairo_repeating_surface_pattern_to_quartz (cairo_quartz_surface_t 
 
     switch (spattern->base.extend) {
     case CAIRO_EXTEND_NONE:
-	break;
+    case CAIRO_EXTEND_PAD:
     case CAIRO_EXTEND_REPEAT:
 	pbounds.size.width = extents.width;
 	pbounds.size.height = extents.height;
@@ -910,10 +910,6 @@ _cairo_quartz_cairo_repeating_surface_pattern_to_quartz (cairo_quartz_surface_t 
 	pbounds.size.width = 2.0 * extents.width;
 	pbounds.size.height = 2.0 * extents.height;
 	info->do_reflect = TRUE;
-	break;
-    case CAIRO_EXTEND_PAD:
-	pbounds.size.width = extents.width;
-	pbounds.size.height = extents.height;
 	break;
     }
     rw = pbounds.size.width;
