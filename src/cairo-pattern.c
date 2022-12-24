@@ -681,6 +681,8 @@ slim_hidden_def (cairo_pattern_create_rgb);
  * 1.  If the values passed in are outside that range, they will be
  * clamped.
  *
+ * The color is specified in the same way as in cairo_set_source_rgb().
+ *
  * Return value: the newly created #cairo_pattern_t if successful, or
  * an error pattern in case of no memory.  The caller owns the
  * returned object and should call cairo_pattern_destroy() when
@@ -4160,6 +4162,8 @@ _cairo_pattern_equal (const cairo_pattern_t *a, const cairo_pattern_t *b)
  *
  * Gets the solid color for a solid color pattern.
  *
+ * Note that the color and alpha values are not premultiplied.
+ *
  * Return value: %CAIRO_STATUS_SUCCESS, or
  * %CAIRO_STATUS_PATTERN_TYPE_MISMATCH if the pattern is not a solid
  * color pattern.
@@ -4241,6 +4245,8 @@ cairo_pattern_get_surface (cairo_pattern_t *pattern,
  * gradient pattern.  Values of @index range from 0 to n-1
  * where n is the number returned
  * by cairo_pattern_get_color_stop_count().
+ *
+ * Note that the color and alpha values are not premultiplied.
  *
  * Return value: %CAIRO_STATUS_SUCCESS, or %CAIRO_STATUS_INVALID_INDEX
  * if @index is not valid for the given pattern.  If the pattern is
@@ -4548,6 +4554,8 @@ slim_hidden_def (cairo_mesh_pattern_get_path);
  *
  * Valid values for @corner_num are from 0 to 3 and identify the
  * corners as explained in cairo_pattern_create_mesh().
+ *
+ * Note that the color and alpha values are not premultiplied.
  *
  * Return value: %CAIRO_STATUS_SUCCESS, or %CAIRO_STATUS_INVALID_INDEX
  * if @patch_num or @corner_num is not valid for @pattern. If
