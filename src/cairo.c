@@ -918,6 +918,8 @@ slim_hidden_def (cairo_set_source_rgb);
  * range 0 to 1. If the values passed in are outside that range, they
  * will be clamped.
  *
+ * Note that the color and alpha values are not premultiplied.
+ *
  * The default source pattern is opaque black, (that is, it is
  * equivalent to cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0)).
  *
