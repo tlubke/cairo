@@ -506,13 +506,13 @@ if host_machine.system() == 'windows'
   ]
 
   cpp_compiler = meson.get_compiler('cpp')
-  d2d_dep = cpp_compiler.find_library('d2d1', required: false)
-  dwrite_dep = cpp_compiler.find_library('dwrite', required: false)
+  d2d_dep = cpp_compiler.find_library('d2d1', required: get_option('dwrite'))
+  dwrite_dep = cpp_compiler.find_library('dwrite', required: get_option('dwrite'))
   d2d_header = cpp_compiler.has_header('d2d1.h')
   d2d_3_header = cpp_compiler.has_header('d2d1_3.h')
   dwrite_header = cpp_compiler.has_header('dwrite.h')
   dwrite_3_header = cpp_compiler.has_header('dwrite_3.h')
-  wincodec_dep = cpp_compiler.find_library('windowscodecs', required: false)
+  wincodec_dep = cpp_compiler.find_library('windowscodecs', required: get_option('dwrite'))
   wincodec_header = cpp_compiler.has_header('wincodec.h')
 
   if d2d_dep.found() and dwrite_dep.found() and d2d_header and dwrite_header and wincodec_dep.found() and wincodec_header
