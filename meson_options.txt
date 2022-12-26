@@ -1,4 +1,5 @@
 # Cairo font backends
+option('dwrite', type : 'feature', value : 'auto')
 option('fontconfig', type : 'feature', value : 'auto')
 option('freetype', type : 'feature', value : 'auto')
 
