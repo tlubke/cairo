@@ -2309,6 +2309,7 @@ DONE:
     if (height)
 	*height = _cairo_fixed_to_double (bbox.p2.y - bbox.p1.y);
 }
+slim_hidden_def (cairo_recording_surface_ink_extents);
 
 cairo_status_t
 _cairo_recording_surface_get_bbox (cairo_recording_surface_t *surface,

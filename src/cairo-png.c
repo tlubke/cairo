@@ -987,3 +987,4 @@ cairo_image_surface_create_from_png_stream (cairo_read_func_t	read_func,
 
     return read_png (&png_closure);
 }
+slim_hidden_def (cairo_image_surface_create_from_png_stream);
