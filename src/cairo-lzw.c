@@ -369,9 +369,6 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
 	 * lookup. */
 	_lzw_buf_store_bits (&buf, prev, code_bits);
 
-	if (bytes_remaining == 0)
-	    break;
-
 	LZW_SYMBOL_SET_CODE (*slot, code_next++, prev, next);
 
 	if (code_next > LZW_BITS_BOUNDARY(code_bits))
@@ -384,6 +381,9 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
 		code_next = LZW_CODE_FIRST;
 	    }
 	}
+
+	if (bytes_remaining == 0)
+	    break;
     }
 
     /* The LZW footer is an end-of-data code. */
