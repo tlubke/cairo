@@ -39,8 +39,6 @@ record-replay-extend-reflect
 record-replay-extend-repeat
 record-select-font-face
 record-text-transform
-round-join-bug-520-round
-round-join-bug-520-bevel
 simple-edge
 subsurface
 subsurface-outside-target
