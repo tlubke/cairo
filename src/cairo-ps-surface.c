@@ -3713,11 +3713,11 @@ _cairo_ps_surface_emit_surface (cairo_ps_surface_t          *surface,
 
 	status = _cairo_memory_stream_destroy (surface->stream, &data, &length);
 	free (data);
+	surface->stream = old_stream;
 	if (unlikely (status))
 	    return status;
 
 	params->approx_size = length;
-	surface->stream = old_stream;
 	_cairo_pdf_operators_set_stream (&surface->pdf_operators,
 					 surface->stream);
     }

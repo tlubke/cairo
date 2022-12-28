@@ -8,7 +8,7 @@ include:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '34'
-  FDO_DISTRIBUTION_TAG: '2021-08-26.0'
+  FDO_DISTRIBUTION_TAG: '2021-09-20.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
@@ -73,6 +73,8 @@ fedora image:
       librsvg2-devel
       gtk2-devel
       poppler-glib-devel
+      libspectre-devel
+      ghostscript
       pixman-devel
       systemd-devel
       systemd-udev
@@ -136,6 +138,24 @@ test fedora autotools pdf:
     - export CAIRO_TEST_IGNORE_pdf_argb32=$(tr '\n' ',' < .gitlab-ci/ignore-pdf-argb32.txt)
     - export CAIRO_TEST_IGNORE_pdf_rgb24=$(tr '\n' ',' < .gitlab-ci/ignore-pdf-rgb24.txt)
     - export CAIRO_TEST_TARGET=pdf
+    - xvfb-run make check V=1 VERBOSE=1
+
+test fedora autotools ps2:
+  extends: '.test fedora autotools'
+  script:
+    - export CAIRO_TEST_IGNORE_ps2_argb32=$(tr '\n' ',' < .gitlab-ci/ignore-ps2-argb32.txt)
+    - export CAIRO_TEST_IGNORE_ps2_rgb24=$(tr '\n' ',' < .gitlab-ci/ignore-ps2-rgb24.txt)
+    - export CAIRO_TEST_TARGET=ps2
+    - export CAIRO_TEST_UGLY_HACK_TO_IGNORE_PS_FAILURES=1
+    - xvfb-run make check V=1 VERBOSE=1
+
+test fedora autotools ps3:
+  extends: '.test fedora autotools'
+  script:
+    - export CAIRO_TEST_IGNORE_ps3_argb32=$(tr '\n' ',' < .gitlab-ci/ignore-ps3-argb32.txt)
+    - export CAIRO_TEST_IGNORE_ps3_rgb24=$(tr '\n' ',' < .gitlab-ci/ignore-ps3-rgb24.txt)
+    - export CAIRO_TEST_TARGET=ps3
+    - export CAIRO_TEST_UGLY_HACK_TO_IGNORE_PS_FAILURES=1
     - xvfb-run make check V=1 VERBOSE=1
 
 test fedora autotools script:
