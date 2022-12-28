@@ -369,7 +369,10 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
 	 * lookup. */
 	_lzw_buf_store_bits (&buf, prev, code_bits);
 
-	LZW_SYMBOL_SET_CODE (*slot, code_next++, prev, next);
+	if (likely (slot != NULL))
+	    LZW_SYMBOL_SET_CODE (*slot, code_next, prev, next);
+
+	code_next++;
 
 	if (code_next > LZW_BITS_BOUNDARY(code_bits))
 	{
