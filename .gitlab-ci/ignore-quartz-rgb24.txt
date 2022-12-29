@@ -67,8 +67,6 @@ record-replay-extend-repeat
 record-select-font-face
 record-text-transform
 rel-path
-round-join-bug-520-round
-round-join-bug-520-bevel
 scale-source-surface-paint
 set-source
 shifted-operator
