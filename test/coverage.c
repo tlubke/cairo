@@ -491,7 +491,8 @@ CAIRO_TEST (coverage_column_triangles,
 	    "Check the fidelity of the rasterisation.",
 	    NULL, /* keywords */
 	    "target=raster", /* requirements */
-	    WIDTH, HEIGHT,
+	    /* Smaller height since this test does not vary by y-coordinate */
+	    WIDTH, 4,
 	    NULL, column_triangles)
 CAIRO_TEST (coverage_triangles,
 	    "Check the fidelity of the rasterisation.",
