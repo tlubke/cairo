@@ -176,9 +176,14 @@ static void *(*old_malloc)(size_t);
 static void *(*old_realloc)(void *, size_t);
 static int enable_hook = 0;
 
+static void init(void);
+
 void *
 malloc(size_t size)
 {
+    if (!old_malloc)
+      init ();
+
     if (enable_hook) {
 	enable_hook = 0;
 	void *caller = __builtin_return_address(0);
@@ -192,6 +197,9 @@ malloc(size_t size)
 void *
 realloc(void *ptr, size_t size)
 {
+    if (!old_malloc)
+      init ();
+
     if (enable_hook) {
 	enable_hook = 0;
 	void *caller = __builtin_return_address(0);
@@ -202,7 +210,7 @@ realloc(void *ptr, size_t size)
     return old_realloc (ptr, size);
 }
 
-static void __attribute__ ((constructor))
+static void
 init(void)
 {
     old_malloc = dlsym(RTLD_NEXT, "malloc");
