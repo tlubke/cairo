@@ -6454,47 +6454,6 @@ _cairo_pdf_emit_imagemask (cairo_image_surface_t *image,
 }
 
 static cairo_int_status_t
-_cairo_pdf_surface_analyze_user_font_subset (cairo_scaled_font_subset_t *font_subset,
-					     void		        *closure)
-{
-    cairo_pdf_surface_t *surface = closure;
-    cairo_int_status_t status = CAIRO_INT_STATUS_SUCCESS;
-    cairo_int_status_t status2;
-    unsigned int i;
-    cairo_surface_t *type3_surface;
-    cairo_output_stream_t *null_stream;
-
-    null_stream = _cairo_null_stream_create ();
-    type3_surface = _cairo_type3_glyph_surface_create (font_subset->scaled_font,
-						       null_stream,
-						       _cairo_pdf_emit_imagemask,
-						       surface->font_subsets,
-						       FALSE);
-    if (unlikely (type3_surface->status)) {
-	status2 = _cairo_output_stream_destroy (null_stream);
-	return type3_surface->status;
-    }
-
-    _cairo_type3_glyph_surface_set_font_subsets_callback (type3_surface,
-							  _cairo_pdf_surface_add_font,
-							  surface);
-
-    for (i = 0; i < font_subset->num_glyphs; i++) {
-	status = _cairo_type3_glyph_surface_analyze_glyph (type3_surface,
-							   font_subset->glyphs[i]);
-	if (unlikely (status))
-	    break;
-    }
-
-    cairo_surface_destroy (type3_surface);
-    status2 = _cairo_output_stream_destroy (null_stream);
-    if (status == CAIRO_INT_STATUS_SUCCESS)
-	status = status2;
-
-    return status;
-}
-
-static cairo_int_status_t
 _cairo_pdf_surface_emit_type3_font_subset (cairo_pdf_surface_t		*surface,
 					   cairo_scaled_font_subset_t	*font_subset)
 {
@@ -6730,12 +6689,6 @@ static cairo_int_status_t
 _cairo_pdf_surface_emit_font_subsets (cairo_pdf_surface_t *surface)
 {
     cairo_int_status_t status;
-
-    status = _cairo_scaled_font_subsets_foreach_user (surface->font_subsets,
-						      _cairo_pdf_surface_analyze_user_font_subset,
-						      surface);
-    if (unlikely (status))
-	goto BAIL;
 
     status = _cairo_scaled_font_subsets_foreach_unscaled (surface->font_subsets,
                                                           _cairo_pdf_surface_emit_unscaled_font_subset,

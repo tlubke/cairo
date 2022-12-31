@@ -105,6 +105,7 @@ typedef struct _cairo_recording_surface_replay_params {
     cairo_recording_replay_type_t type;
     cairo_recording_region_type_t region;
     const cairo_color_t *foreground_color;
+    cairo_bool_t foreground_used;
 } cairo_recording_surface_replay_params_t;
 
 static const cairo_surface_backend_t cairo_recording_surface_backend;
@@ -1829,7 +1830,11 @@ _cairo_recording_surface_replay_internal (cairo_recording_surface_t	*surface,
     }
     _cairo_surface_wrapper_set_inverse_transform (&wrapper, params->surface_transform);
     _cairo_surface_wrapper_set_clip (&wrapper, params->target_clip);
-    _cairo_surface_wrapper_set_foreground_color (&wrapper, params->foreground_color);
+
+    if (params->foreground_color) {
+	params->target->foreground_source = _cairo_pattern_create_solid (params->foreground_color);
+	params->target->foreground_used = FALSE;
+    }
 
     /* Compute the extents of the target clip in recorded device space */
     if (! _cairo_surface_wrapper_get_target_extents (&wrapper, params->surface_is_unbounded, &extents))
@@ -2019,6 +2024,12 @@ _cairo_recording_surface_replay_internal (cairo_recording_surface_t	*surface,
     }
 
 done:
+    if (params->foreground_color) {
+	cairo_pattern_destroy (params->target->foreground_source);
+	params->target->foreground_source = NULL;
+	params->foreground_used = params->target->foreground_used;
+    }
+
     _cairo_surface_wrapper_fini (&wrapper);
     return _cairo_surface_set_error (&surface->base, status);
 }
@@ -2151,11 +2162,13 @@ _cairo_recording_surface_replay (cairo_surface_t *surface,
 }
 
 cairo_status_t
-_cairo_recording_surface_replay_with_foreground_color (cairo_surface_t *surface,
-                                                       cairo_surface_t *target,
-                                                       const cairo_color_t *color)
+_cairo_recording_surface_replay_with_foreground_color (cairo_surface_t     *surface,
+                                                       cairo_surface_t     *target,
+						       const cairo_color_t *foreground_color,
+						       cairo_bool_t        *foreground_used)
 {
     cairo_recording_surface_replay_params_t params;
+    cairo_status_t status;
 
     params.surface_extents = NULL;
     params.surface_transform = NULL;
@@ -2164,9 +2177,13 @@ _cairo_recording_surface_replay_with_foreground_color (cairo_surface_t *surface,
     params.surface_is_unbounded = FALSE;
     params.type = CAIRO_RECORDING_REPLAY;
     params.region = CAIRO_RECORDING_REGION_ALL;
-    params.foreground_color = color;
+    params.foreground_color = foreground_color;
+    params.foreground_used = FALSE;
 
-    return _cairo_recording_surface_replay_internal ((cairo_recording_surface_t *) surface, &params);
+    status = _cairo_recording_surface_replay_internal ((cairo_recording_surface_t *) surface, &params);
+    *foreground_used = params.foreground_used;
+
+    return status;
 }
 
 cairo_status_t

@@ -107,3 +107,4 @@ tighten-bounds
 unbounded-operator
 xcb-surface-source
 xlib-surface-source
+user-font-color

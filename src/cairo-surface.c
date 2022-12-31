@@ -134,7 +134,9 @@ const cairo_surface_t name = {					\
       CAIRO_HINT_STYLE_DEFAULT,		/* hint_style */	\
       CAIRO_HINT_METRICS_DEFAULT,	/* hint_metrics */	\
       CAIRO_ROUND_GLYPH_POS_DEFAULT	/* round_glyph_positions */	\
-    }					/* font_options */	\
+    },					/* font_options */		\
+    NULL,                               /* foreground_source */		\
+    FALSE,                              /* foreground_used */   \
 }
 
 /* XXX error object! */
@@ -439,6 +441,9 @@ _cairo_surface_init (cairo_surface_t			*surface,
     surface->snapshot_of = NULL;
 
     surface->has_font_options = FALSE;
+
+    surface->foreground_source = NULL;
+    surface->foreground_used = FALSE;
 }
 
 static void
@@ -975,6 +980,9 @@ cairo_surface_destroy (cairo_surface_t *surface)
 
     _cairo_user_data_array_fini (&surface->user_data);
     _cairo_user_data_array_fini (&surface->mime_data);
+
+    if (surface->foreground_source)
+	cairo_pattern_destroy (surface->foreground_source);
 
     if (surface->owns_device)
         cairo_device_destroy (surface->device);
@@ -2196,6 +2204,11 @@ _cairo_surface_paint (cairo_surface_t		*surface,
     if (unlikely (status))
 	return status;
 
+    if (source->is_userfont_foreground && surface->foreground_source) {
+	source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
+
     status = surface->backend->paint (surface, op, source, clip);
     is_clear = op == CAIRO_OPERATOR_CLEAR && clip == NULL;
     if (status != CAIRO_INT_STATUS_NOTHING_TO_DO || is_clear) {
@@ -2245,6 +2258,11 @@ _cairo_surface_mask (cairo_surface_t		*surface,
     status = _cairo_surface_begin_modification (surface);
     if (unlikely (status))
 	return status;
+
+    if (source->is_userfont_foreground && surface->foreground_source) {
+	source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
 
     status = surface->backend->mask (surface, op, source, mask, clip);
     if (status != CAIRO_INT_STATUS_NOTHING_TO_DO) {
@@ -2301,6 +2319,16 @@ _cairo_surface_fill_stroke (cairo_surface_t	    *surface,
     status = _cairo_surface_begin_modification (surface);
     if (unlikely (status))
 	return status;
+
+    if (fill_source->is_userfont_foreground && surface->foreground_source) {
+	fill_source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
+
+    if (stroke_source->is_userfont_foreground && surface->foreground_source) {
+	stroke_source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
 
     if (surface->backend->fill_stroke) {
 	cairo_matrix_t dev_ctm = *stroke_ctm;
@@ -2376,6 +2404,11 @@ _cairo_surface_stroke (cairo_surface_t			*surface,
     if (unlikely (status))
 	return status;
 
+    if (source->is_userfont_foreground && surface->foreground_source) {
+	source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
+
     status = surface->backend->stroke (surface, op, source,
 				       path, stroke_style,
 				       ctm, ctm_inverse,
@@ -2420,6 +2453,11 @@ _cairo_surface_fill (cairo_surface_t		*surface,
     status = _cairo_surface_begin_modification (surface);
     if (unlikely (status))
 	return status;
+
+    if (source->is_userfont_foreground && surface->foreground_source) {
+	source = surface->foreground_source;
+	surface->foreground_used = TRUE;
+    }
 
     status = surface->backend->fill (surface, op, source,
 				     path, fill_rule,
@@ -2900,6 +2938,9 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
     status = _cairo_surface_begin_modification (surface);
     if (unlikely (status))
 	return status;
+
+    if (source->is_userfont_foreground && surface->foreground_source)
+	source = surface->foreground_source;
 
     if (_cairo_scaled_font_has_color_glyphs (scaled_font) &&
 	scaled_font->options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)

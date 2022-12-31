@@ -50,3 +50,4 @@ text-rotate
 text-unhinted-metrics
 tighten-bounds
 unbounded-operator
+user-font-color
