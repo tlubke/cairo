@@ -430,7 +430,7 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
         for (i = 0; i < count; i++) {
             end = decode_index_offset (p, offset_size);
             p += offset_size;
-            if (p > end_ptr || end < start)
+            if (p > end_ptr || end < start || data + end > end_ptr)
                 return CAIRO_INT_STATUS_UNSUPPORTED;
             element.length = end - start;
             element.is_copy = FALSE;
