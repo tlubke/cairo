@@ -182,7 +182,9 @@ _cairo_type3_glyph_surface_finish (void *abstract_surface)
 {
     cairo_type3_glyph_surface_t *surface = abstract_surface;
 
-    return _cairo_pdf_operators_fini (&surface->pdf_operators);
+    cairo_status_t status = _cairo_pdf_operators_fini (&surface->pdf_operators);
+    _cairo_surface_clipper_reset (&surface->clipper);
+    return status;
 }
 
 static cairo_int_status_t
