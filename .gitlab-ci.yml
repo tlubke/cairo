@@ -246,6 +246,8 @@ fedora meson build:
     - (cd doc/public && bash "check-doc-syntax.sh")
     # FIXME: The following line really needs gtk-doc to run first
     - (cd doc/public && DOC_MODULE=cairo bash "check-doc-coverage.sh")
+    # Check for duplicate reference images
+    - ./test/check-refs.sh "$(pwd)/builddir/test/pdiff/perceptualdiff"
 
     - ninja -C builddir install
   artifacts:
