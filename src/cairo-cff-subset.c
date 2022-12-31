@@ -390,7 +390,7 @@ encode_index_offset (unsigned char *p, int offset_size, unsigned long offset)
     return p + offset_size;
 }
 
-static unsigned long
+static size_t
 decode_index_offset(unsigned char *p, int off_size)
 {
     unsigned long offset = 0;
@@ -413,7 +413,7 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
     unsigned char *data, *p;
     cairo_status_t status;
     int offset_size, count, i;
-    unsigned long start, end = 0;
+    size_t start, end = 0;
 
     p = *ptr;
     if (p + 2 > end_ptr)
@@ -422,7 +422,7 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
     p += 2;
     if (count > 0) {
         offset_size = *p++;
-        if (p + (count + 1)*offset_size > end_ptr)
+        if (p + (count + 1)*offset_size > end_ptr || offset_size > 4)
             return CAIRO_INT_STATUS_UNSUPPORTED;
         data = p + offset_size*(count + 1) - 1;
         start = decode_index_offset (p, offset_size);
