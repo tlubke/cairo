@@ -412,8 +412,8 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
     cff_index_element_t element;
     unsigned char *data, *p;
     cairo_status_t status;
-    int offset_size, count, start, i;
-    int end = 0;
+    int offset_size, count, i;
+    unsigned long start, end = 0;
 
     p = *ptr;
     if (p + 2 > end_ptr)
@@ -430,7 +430,7 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
         for (i = 0; i < count; i++) {
             end = decode_index_offset (p, offset_size);
             p += offset_size;
-            if (p > end_ptr)
+            if (p > end_ptr || end < start)
                 return CAIRO_INT_STATUS_UNSUPPORTED;
             element.length = end - start;
             element.is_copy = FALSE;
@@ -875,7 +875,7 @@ cairo_cff_font_read_name (cairo_cff_font_t *font)
 
     cff_index_init (&index);
     status = cff_index_read (&index, &font->current_ptr, font->data_end);
-    if (!font->is_opentype) {
+    if (status == CAIRO_INT_STATUS_SUCCESS && !font->is_opentype) {
         element = _cairo_array_index (&index, 0);
 	p = element->data;
 	len = element->length;
