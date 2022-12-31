@@ -38,10 +38,10 @@
 
 #define BORDER 10
 #define TEXT_SIZE 64
-#define WIDTH  (TEXT_SIZE * 6 + 2*BORDER)
+#define WIDTH  (TEXT_SIZE * 12 + 2*BORDER)
 #define HEIGHT (TEXT_SIZE + 2*BORDER)
 
-#define TEXT   "abcdef"
+#define TEXT   "abcdefghijkl"
 
 
 static cairo_status_t
@@ -64,6 +64,7 @@ render_glyph_solid (cairo_t *cr, double width, double height, cairo_bool_t color
     cairo_rectangle (cr, 0, 0, width/2, height/2);
     cairo_fill (cr);
 
+    /* Draw the middle rectangle using the foreground color */
     if (color)
         cairo_set_source (cr, pattern);
     cairo_rectangle (cr, width/4, height/4, width/2, height/2);
@@ -133,6 +134,11 @@ test_scaled_font_render_color_glyph (cairo_scaled_font_t  *scaled_font,
         case 'c':
             render_glyph_text (cr, width, height, TRUE);
             break;
+
+            /* Ensure that the following glyphs are rendered with
+             * test_scaled_font_render_glyph() even if we draw
+             * something before returning.
+             */
         case 'd':
             render_glyph_solid (cr, width, height, TRUE);
             status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
@@ -145,6 +151,26 @@ test_scaled_font_render_color_glyph (cairo_scaled_font_t  *scaled_font,
             render_glyph_solid (cr, width, height, TRUE);
             status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
             break;
+        case 'g':
+            cairo_push_group (cr);
+            render_glyph_solid (cr, width, height, TRUE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        case 'h':
+            cairo_push_group (cr);
+            render_glyph_linear (cr, width, height, TRUE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        case 'i':
+            cairo_push_group (cr);
+            render_glyph_text (cr, width, height, TRUE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        default:
+            status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
     }
 
     return status;
@@ -170,6 +196,26 @@ test_scaled_font_render_glyph (cairo_scaled_font_t  *scaled_font,
         case 'f':
             render_glyph_text (cr, width, height, FALSE);
             break;
+        case 'j':
+            cairo_push_group (cr);
+            render_glyph_solid (cr, width, height, FALSE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        case 'k':
+            cairo_push_group (cr);
+            render_glyph_linear (cr, width, height, FALSE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        case 'l':
+            cairo_push_group (cr);
+            render_glyph_text (cr, width, height, FALSE);
+            cairo_pop_group_to_source (cr);
+            cairo_paint (cr);
+            break;
+        default:
+            return CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
     }
 
     return CAIRO_STATUS_SUCCESS;
