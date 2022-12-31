@@ -14,6 +14,9 @@ if CAIRO_HAS_FT_FONT
 test_sources += $(ft_font_test_sources)
 if CAIRO_HAS_FC_FONT
 test_sources += $(fc_font_test_sources)
+if HAVE_FT_SVG_DOCUMENT
+test_sources += $(fc_svg_font_test_sources)
+endif
 endif
 endif
 

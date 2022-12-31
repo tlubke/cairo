@@ -468,6 +468,9 @@ if test "x$use_ft" = "xyes"; then
 
   AC_CHECK_FUNCS(FT_Get_X11_Font_Format FT_GlyphSlot_Embolden FT_GlyphSlot_Oblique FT_Load_Sfnt_Table FT_Library_SetLcdFilter FT_Get_Var_Design_Coordinates FT_Done_MM_Var FT_Palette_Select)
 
+  AC_CHECK_TYPES([FT_SVG_Document], [have_ft_svg=yes], [have_ft_svg=no], [[#include <freetype/otsvg.h>]])
+  AM_CONDITIONAL(HAVE_FT_SVG_DOCUMENT, test "x$have_ft_svg=" = "xyes")
+
   AC_MSG_CHECKING(for FT_HAS_COLOR)
   AC_LINK_IFELSE([AC_LANG_PROGRAM([
 #include <ft2build.h>

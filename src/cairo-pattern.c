@@ -812,6 +812,7 @@ cairo_pattern_create_linear (double x0, double y0, double x1, double y1)
 
     return &pattern->base.base;
 }
+slim_hidden_def (cairo_pattern_create_linear);
 
 /**
  * cairo_pattern_create_radial:
@@ -866,6 +867,7 @@ cairo_pattern_create_radial (double cx0, double cy0, double radius0,
 
     return &pattern->base.base;
 }
+slim_hidden_def (cairo_pattern_create_radial);
 
 /* This order is specified in the diagram in the documentation for
  * cairo_pattern_create_mesh() */
@@ -1093,6 +1095,7 @@ cairo_pattern_get_type (cairo_pattern_t *pattern)
 {
     return pattern->type;
 }
+slim_hidden_def (cairo_pattern_get_type);
 
 /**
  * cairo_pattern_status:
@@ -2117,6 +2120,7 @@ cairo_pattern_set_extend (cairo_pattern_t *pattern, cairo_extend_t extend)
     pattern->extend = extend;
     _cairo_pattern_notify_observers (pattern, CAIRO_PATTERN_NOTIFY_EXTEND);
 }
+slim_hidden_def (cairo_pattern_set_extend);
 
 /**
  * cairo_pattern_get_extend:
@@ -4197,6 +4201,7 @@ cairo_pattern_get_rgba (cairo_pattern_t *pattern,
 
     return CAIRO_STATUS_SUCCESS;
 }
+slim_hidden_def (cairo_pattern_get_rgba);
 
 /**
  * cairo_pattern_get_surface:

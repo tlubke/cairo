@@ -559,6 +559,8 @@ _cairo_user_font_face_scaled_font_create (void                        *abstract_
     {
 	double fixed_scale, x_scale, y_scale;
 
+	user_scaled_font->snap_x_scale = 1.0;
+	user_scaled_font->snap_y_scale = 1.0;
 	user_scaled_font->extent_scale = user_scaled_font->base.scale_inverse;
 	status = _cairo_matrix_compute_basis_scale_factors (&user_scaled_font->extent_scale,
 						      &x_scale, &y_scale,

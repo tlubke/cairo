@@ -926,6 +926,12 @@ _paint_return_success (void			*surface,
 		       const cairo_pattern_t	*source,
 		       const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -936,6 +942,18 @@ _mask_return_success (void			*surface,
 		      const cairo_pattern_t	*mask,
 		      const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
+    if (mask->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) mask;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -951,6 +969,12 @@ _stroke_return_success (void				*surface,
 			cairo_antialias_t		 antialias,
 			const cairo_clip_t		*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -964,6 +988,12 @@ _fill_return_success (void			*surface,
 		      cairo_antialias_t		 antialias,
 		      const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -976,6 +1006,12 @@ _show_glyphs_return_success (void			*surface,
 			     cairo_scaled_font_t	*scaled_font,
 			     const cairo_clip_t		*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 

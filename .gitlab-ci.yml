@@ -96,6 +96,7 @@ fedora image:
       dejavu-sans-mono-fonts
       dejavu-serif-fonts
       google-noto-emoji-color-fonts
+      fonttools
 
 fedora autotools build:
   extends:

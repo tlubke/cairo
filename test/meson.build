@@ -427,6 +427,15 @@ test_ft_font_sources = [
   'ft-text-antialias-none.c',
 ]
 
+test_ft_svg_font_sources = [
+  'ft-svg-color-font.c',
+]
+
+test_ft_svg_ttx_font_sources = [
+  'ft-svg-cairo-logo.c',
+  'ft-svg-render.c'
+]
+
 test_gl_sources = [
   'gl-device-release.c',
   'gl-oversized-surface.c',
@@ -517,6 +526,17 @@ ps2png_sources = [
   'ps2png.c',
 ]
 
+test_ttx_fonts = [
+  'cairo-logo-font.ttx',
+  'cairo-svg-test-doc.ttx',
+  'cairo-svg-test-fill.ttx',
+  'cairo-svg-test-gradient.ttx',
+  'cairo-svg-test-path.ttx',
+  'cairo-svg-test-shapes.ttx',
+  'cairo-svg-test-stroke.ttx',
+  'cairo-svg-test-transform.ttx',
+]
+
 build_any2ppm = false
 has_multipage_surfaces = false
 add_fallback_resolution = false
@@ -527,6 +547,12 @@ endif
 
 if feature_conf.get('CAIRO_HAS_FT_FONT', 0) == 1 and feature_conf.get('CAIRO_HAS_FC_FONT', 0) == 1
   test_sources += test_ft_font_sources
+  if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1
+    test_sources += test_ft_svg_font_sources
+    if conf.get('CAIRO_CAN_TEST_TTX_FONT', 0) == 1
+      test_sources += test_ft_svg_ttx_font_sources
+    endif
+  endif
 endif
 
 if feature_conf.get('CAIRO_HAS_QUARTZ_SURFACE', 0) == 1
@@ -639,8 +665,20 @@ endforeach
 if build_machine.system() != 'windows'
   run_command('ln', '-sf',
               meson.current_source_dir(),
-              join_paths(meson.current_build_dir(), 'srcdir'),
+              meson.current_build_dir() / 'srcdir',
               check: true)
+endif
+
+if ttx.found()
+  # By default, if the output file exists, ttx creates a new name. We specify the full
+  # output name to make ttx overwrite the existing file instead of creating a new file.
+  foreach ttx_font : test_ttx_fonts
+    custom_target(ttx_font,
+                  input: ttx_font,
+                  command: [ ttx, '-q', '-o', '@OUTDIR@' / '@BASENAME@.ttf', '@INPUT@' ],
+                  output: '@BASENAME@.ttf',
+                  build_by_default: true)
+  endforeach
 endif
 
 env = environment()
@@ -653,3 +691,9 @@ test('cairo', exe,
   suite: ['cairo-test-suite', 'slow'],
   workdir: meson.current_build_dir(),
   depends: test_depends)
+
+# The SVG renderer debug tools can only be built if the _cairo_debug_svg_render()
+# function has been exposed by defining DEBUG_SVG_RENDER
+if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.get_define('DEBUG_SVG_RENDER') != ''
+  subdir('svg')
+endif

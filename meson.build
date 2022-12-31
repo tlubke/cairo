@@ -302,6 +302,8 @@ if fontconfig_dep.found()
   }]
 endif
 
+ttx = find_program('ttx', required: false)
+
 freetype_dep = dependency('freetype2',
   required: get_option('freetype'),
   version: freetype_required_version,
@@ -336,6 +338,12 @@ if freetype_dep.found()
   else
     if not cc.links(files('meson-cc-tests/ft_has_color.c'), dependencies: freetype_dep, name: 'FT has color')
       conf.set('FT_HAS_COLOR', '(0)')
+    endif
+    if cc.has_type('FT_SVG_Document', dependencies: freetype_dep, prefix: '#include <freetype/otsvg.h>')
+      conf.set('HAVE_FT_SVG_DOCUMENT', 1)
+      if ttx.found()
+        conf.set('CAIRO_CAN_TEST_TTX_FONT', 1)
+      endif
     endif
     check_funcs += ft_check_funcs
     deps += [freetype_dep]

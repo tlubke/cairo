@@ -425,6 +425,9 @@ fc_font_test_sources = \
 	ft-text-vertical-layout-type3.c \
 	ft-text-antialias-none.c
 
+fc_svg_font_test_sources = \
+	ft-svg-color-font.c
+
 gl_surface_test_sources = \
 	gl-device-release.c \
 	gl-oversized-surface.c \
