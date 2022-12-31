@@ -259,11 +259,13 @@ void
 _cairo_output_stream_write (cairo_output_stream_t *stream,
 			    const void *data, size_t length)
 {
-    if (length == 0)
+    if (length == 0 || stream->status)
 	return;
 
-    if (stream->status)
+    if (stream->closed) {
+	stream->status = CAIRO_STATUS_WRITE_ERROR;
 	return;
+    }
 
     stream->status = stream->write_func (stream, data, length);
     stream->position += length;
@@ -277,9 +279,6 @@ _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
     const char hex_chars[] = "0123456789abcdef";
     char buffer[2];
     unsigned int i, column;
-
-    if (stream->status)
-	return;
 
     for (i = 0, column = 0; i < length; i++, column++) {
 	if (column == 38) {
@@ -406,9 +405,6 @@ _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
     const char *f, *start;
     int length_modifier, width;
     cairo_bool_t var_width;
-
-    if (stream->status)
-	return;
 
     f = fmt;
     p = buffer;
@@ -785,9 +781,6 @@ _cairo_memory_stream_copy (cairo_output_stream_t *base,
 			   cairo_output_stream_t *dest)
 {
     memory_stream_t *stream = (memory_stream_t *) base;
-
-    if (dest->status)
-	return;
 
     if (base->status) {
 	dest->status = base->status;
