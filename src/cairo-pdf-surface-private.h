@@ -95,6 +95,7 @@ typedef struct _cairo_pdf_source_surface_entry {
 typedef struct _cairo_pdf_source_surface {
     cairo_pattern_type_t type;
     cairo_surface_t *surface;
+    unsigned int region_id;
     cairo_pattern_t *raster_pattern;
     cairo_pdf_source_surface_entry_t *hash_entry;
 } cairo_pdf_source_surface_t;
@@ -279,9 +280,9 @@ struct _cairo_pdf_surface {
     cairo_array_t pages;
     cairo_array_t rgb_linear_functions;
     cairo_array_t alpha_linear_functions;
-    cairo_array_t page_patterns;
-    cairo_array_t page_surfaces;
-    cairo_array_t doc_surfaces;
+    cairo_array_t page_patterns; /* cairo_pdf_pattern_t */
+    cairo_array_t page_surfaces; /* cairo_pdf_source_surface_t */
+    cairo_array_t doc_surfaces; /* cairo_pdf_source_surface_t */
     cairo_hash_table_t *all_surfaces;
     cairo_array_t smask_groups;
     cairo_array_t knockout_group;

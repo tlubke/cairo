@@ -561,6 +561,7 @@ _cairo_pattern_init_for_surface (cairo_surface_pattern_t *pattern,
     _cairo_pattern_init (&pattern->base, CAIRO_PATTERN_TYPE_SURFACE);
 
     pattern->surface = cairo_surface_reference (surface);
+    pattern->region_array_id = 0;
 }
 
 static void

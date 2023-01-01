@@ -87,6 +87,12 @@ typedef struct _cairo_surface_pattern {
     cairo_pattern_t base;
 
     cairo_surface_t *surface;
+
+    /* This field is only used by the wrapper surface for retreiving
+     * the region id from the target during create regions and passing
+     * the region id to the target surface during playback.
+     */
+    unsigned int region_array_id;
 } cairo_surface_pattern_t;
 
 typedef struct _cairo_gradient_stop {

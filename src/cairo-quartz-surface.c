@@ -735,7 +735,8 @@ _cairo_surface_to_cgimage (cairo_surface_t       *source,
 	status = _cairo_recording_surface_replay_with_clip (source,
 							    matrix,
 							    &image_surface->base,
-							    NULL);
+							    NULL,
+							    FALSE);
 	if (unlikely (status)) {
 	    cairo_surface_destroy (&image_surface->base);
 	    return status;
