@@ -492,6 +492,7 @@ test_multi_page_sources = [
 ]
 
 test_fallback_resolution_sources = [
+  'create-regions.c',
   'fallback-resolution.c',
 ]
 
