@@ -348,6 +348,8 @@ _jbig2_get_next_segment (const unsigned char  *p,
 
     num_segs = p[0] >> 5;
     if (num_segs == 7) {
+	if (p + 4 >= end)
+	    return NULL;
 	num_segs = get_unaligned_be32 (p) & 0x1fffffff;
 	ref_seg_bytes = 4 + ((num_segs + 1)/8);
     } else {
