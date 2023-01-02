@@ -44,14 +44,4 @@ The "-D" options can also be used with "meson setup"
 
 Tests
 -----
-Refer to test/README. The main difference with running a test from a
-meson build is that the cairo-test-suite executable needs to be run in
-$builddir/test to find the image conversion executables but also needs
-to be told where the reference images are.
-
-eg
-  cd $builddir/test
-  srcdir="../../test" ./cairo-test-suite
-
-Where srcdir is the path to the "test" directory in the cairo source. The
-above example assumes $builddir is a directory in the cairo source tree.
+Refer to test/README.meson
