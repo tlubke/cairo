@@ -2768,6 +2768,7 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 	path = _cairo_path_create (path_fixed, cr);
 	_cairo_path_fixed_destroy (path_fixed);
 	cairo_append_path(cr, path);
+	cairo_path_destroy (path);
 	cairo_fill (cr);
     }
 
