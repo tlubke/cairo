@@ -81,4 +81,6 @@ text-antialias-subpixel-vbgr
 text-antialias-subpixel-vrgb
 text-unhinted-metrics
 thin-lines
+user-font-color
 user-font-proxy
+user-font-rescale

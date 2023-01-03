@@ -2944,6 +2944,7 @@ _cairo_ft_scaled_glyph_init_surface_svg_glyph (cairo_ft_scaled_font_t *scaled_fo
     cairo_surface_t *surface;
     int width, height;
     cairo_int_status_t status = CAIRO_STATUS_SUCCESS;
+    cairo_bool_t foreground_used;
 
     width = _cairo_fixed_integer_ceil (scaled_glyph->bbox.p2.x) -
 	_cairo_fixed_integer_floor (scaled_glyph->bbox.p1.x);
@@ -2958,7 +2959,8 @@ _cairo_ft_scaled_glyph_init_surface_svg_glyph (cairo_ft_scaled_font_t *scaled_fo
 
     status = _cairo_recording_surface_replay_with_foreground_color (scaled_glyph->recording_surface,
 								    surface,
-								    foreground_color);
+								    foreground_color,
+								    &foreground_used);
     if (unlikely (status)) {
 	cairo_surface_destroy(surface);
 	return status;
@@ -2967,7 +2969,7 @@ _cairo_ft_scaled_glyph_init_surface_svg_glyph (cairo_ft_scaled_font_t *scaled_fo
     _cairo_scaled_glyph_set_color_surface (scaled_glyph,
 					   &scaled_font->base,
 					   (cairo_image_surface_t *)surface,
-					   TRUE);
+					   foreground_used);
     surface = NULL;
 
     if (surface)

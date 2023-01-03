@@ -50,4 +50,6 @@ text-antialias-subpixel-rgb
 text-antialias-subpixel-vbgr
 text-antialias-subpixel-vrgb
 text-unhinted-metrics
+user-font-color
 user-font-proxy
+user-font-rescale
