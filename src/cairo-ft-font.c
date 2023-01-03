@@ -2768,6 +2768,7 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 	path = _cairo_path_create (path_fixed, cr);
 	_cairo_path_fixed_destroy (path_fixed);
 	cairo_append_path(cr, path);
+	cairo_path_destroy (path);
 	cairo_fill (cr);
     }
 
@@ -2803,7 +2804,7 @@ _cairo_ft_scaled_glyph_init_record_svg_glyph (cairo_ft_scaled_font_t *scaled_fon
     unsigned int num_palette_entries;
 
     /* Create NULL terminated SVG document */
-    svg_document = strndup((const char*)svg_doc->svg_document, svg_doc->svg_document_length);
+    svg_document = _cairo_strndup ((const char*)svg_doc->svg_document, svg_doc->svg_document_length);
 
     recording_surface =
 	cairo_recording_surface_create (CAIRO_CONTENT_COLOR_ALPHA, NULL);

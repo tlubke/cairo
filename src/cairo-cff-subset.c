@@ -890,12 +890,10 @@ cairo_cff_font_read_name (cairo_cff_font_t *font)
 		len -= 7;
 	    }
 	}
-        font->ps_name = _cairo_malloc (len + 1);
-        if (unlikely (font->ps_name == NULL))
-            return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-        memcpy (font->ps_name, p, len);
-        font->ps_name[len] = 0;
+	font->ps_name = _cairo_strndup ((char*)p, len);
+	if (unlikely (font->ps_name == NULL))
+	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
         status = _cairo_escape_ps_name (&font->ps_name);
     }

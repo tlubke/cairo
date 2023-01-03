@@ -311,13 +311,13 @@ typedef struct _cairo_svg_glyph_render {
 } cairo_svg_glyph_render_t;
 
 
-#define ERROR 1
-#define WARNING 2
-#define INFO 3
+#define SVG_RENDER_ERROR 1
+#define SVG_RENDER_WARNING 2
+#define SVG_RENDER_INFO 3
 
-#define print_error(render, ...) cairo_svg_glyph_render_printf(render, ERROR, ##__VA_ARGS__)
-#define print_warning(render, ...) cairo_svg_glyph_render_printf(render, WARNING, ##__VA_ARGS__)
-#define print_info(render, ...) cairo_svg_glyph_render_printf(render, INFO, ##__VA_ARGS__)
+#define print_error(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_ERROR, ##__VA_ARGS__)
+#define print_warning(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_WARNING, ##__VA_ARGS__)
+#define print_info(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_INFO, ##__VA_ARGS__)
 
 static void
 cairo_svg_glyph_render_printf (cairo_svg_glyph_render_t *svg_render,
@@ -333,10 +333,10 @@ cairo_svg_glyph_render_printf (cairo_svg_glyph_render_t *svg_render,
 
     if (svg_render->debug >= level ) {
         switch (level) {
-            case ERROR:
+            case SVG_RENDER_ERROR:
                 printf("ERROR: ");
                 break;
-            case WARNING:
+            case SVG_RENDER_WARNING:
                 printf("WARNING: ");
                 break;
         }
@@ -453,7 +453,7 @@ lookup_url_element (cairo_svg_glyph_render_t *svg_render, const char *url)
 
         const char *end = strpbrk(p, WHITE_SPACE_CHARS ")");
         if (end) {
-            char *id = strndup (p, end - p);
+            char *id = _cairo_strndup (p, end - p);
             element = lookup_element (svg_render, id);
             free (id);
         }
@@ -812,7 +812,7 @@ get_color (cairo_svg_glyph_render_t *svg_render,
             if (!end || end == s)
             return FALSE;
 
-            char *fallback = strndup (s, end - s);
+            char *fallback = _cairo_strndup (s, end - s);
             cairo_bool_t success = get_color (svg_render, fallback, color);
             free (fallback);
             return success;
@@ -920,7 +920,7 @@ parse_error (cairo_svg_glyph_render_t *svg_render,
     const char *start;
     const char *end;
 
-    if (svg_render->debug >= ERROR) {
+    if (svg_render->debug >= SVG_RENDER_ERROR) {
         printf("ERROR: ");
 	va_start (ap, fmt);
 	vprintf (fmt, ap);
@@ -965,7 +965,7 @@ append_attribute (cairo_svg_element_t *element, svg_attribute_t *attribute)
             end = strchr (p, ':');
             if (!end || end == p)
                 break;
-            attr.name = strndup (p, end - p);
+            attr.name = _cairo_strndup (p, end - p);
             p = end + 1;
             p = skip_space(p);
             end = strchr (p, ';');
@@ -974,7 +974,7 @@ append_attribute (cairo_svg_element_t *element, svg_attribute_t *attribute)
             if (end == p)
                 goto split_style_fail;
 
-            attr.value = strndup (p, end - p);
+            attr.value = _cairo_strndup (p, end - p);
             if (*end)
                 p = end + 1;
 
@@ -1067,7 +1067,7 @@ parse_attributes (cairo_svg_glyph_render_t *svg_render,
             goto fail;
         }
 
-        attr.name = strndup (p, end - p);
+        attr.name = _cairo_strndup (p, end - p);
         p = end;
 
         p = skip_space (p);
@@ -1092,7 +1092,7 @@ parse_attributes (cairo_svg_glyph_render_t *svg_render,
             goto fail;
         }
 
-        attr.value = strndup (p, end - p);
+        attr.value = _cairo_strndup (p, end - p);
         p = end + 1;
 
         if (!append_attribute (element, &attr))
@@ -1229,7 +1229,7 @@ parse_svg (cairo_svg_glyph_render_t *svg_render,
                 goto fail;
             }
 
-            name = strndup (p, end - p);
+            name = _cairo_strndup (p, end - p);
             p = end;
             p = skip_space (p);
             if (*p != '>') {
@@ -1275,7 +1275,7 @@ parse_svg (cairo_svg_glyph_render_t *svg_render,
             goto fail;
         }
 
-        name = strndup (p, end - p);
+        name = _cairo_strndup (p, end - p);
         p = end;
 
         new_elem = create_element (CONTAINER_ELEMENT, name);
@@ -3115,7 +3115,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
         if (strlen (s) > 0)
             svg_render->debug = atoi (s);
         else
-            svg_render->debug = ERROR;
+            svg_render->debug = SVG_RENDER_ERROR;
     }
 
     svg_render->cr = cr;
