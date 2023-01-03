@@ -311,13 +311,13 @@ typedef struct _cairo_svg_glyph_render {
 } cairo_svg_glyph_render_t;
 
 
-#define ERROR 1
-#define WARNING 2
-#define INFO 3
+#define SVG_RENDER_ERROR 1
+#define SVG_RENDER_WARNING 2
+#define SVG_RENDER_INFO 3
 
-#define print_error(render, ...) cairo_svg_glyph_render_printf(render, ERROR, ##__VA_ARGS__)
-#define print_warning(render, ...) cairo_svg_glyph_render_printf(render, WARNING, ##__VA_ARGS__)
-#define print_info(render, ...) cairo_svg_glyph_render_printf(render, INFO, ##__VA_ARGS__)
+#define print_error(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_ERROR, ##__VA_ARGS__)
+#define print_warning(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_WARNING, ##__VA_ARGS__)
+#define print_info(render, ...) cairo_svg_glyph_render_printf(render, SVG_RENDER_INFO, ##__VA_ARGS__)
 
 static void
 cairo_svg_glyph_render_printf (cairo_svg_glyph_render_t *svg_render,
@@ -333,10 +333,10 @@ cairo_svg_glyph_render_printf (cairo_svg_glyph_render_t *svg_render,
 
     if (svg_render->debug >= level ) {
         switch (level) {
-            case ERROR:
+            case SVG_RENDER_ERROR:
                 printf("ERROR: ");
                 break;
-            case WARNING:
+            case SVG_RENDER_WARNING:
                 printf("WARNING: ");
                 break;
         }
@@ -920,7 +920,7 @@ parse_error (cairo_svg_glyph_render_t *svg_render,
     const char *start;
     const char *end;
 
-    if (svg_render->debug >= ERROR) {
+    if (svg_render->debug >= SVG_RENDER_ERROR) {
         printf("ERROR: ");
 	va_start (ap, fmt);
 	vprintf (fmt, ap);
@@ -3115,7 +3115,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
         if (strlen (s) > 0)
             svg_render->debug = atoi (s);
         else
-            svg_render->debug = ERROR;
+            svg_render->debug = SVG_RENDER_ERROR;
     }
 
     svg_render->cr = cr;
