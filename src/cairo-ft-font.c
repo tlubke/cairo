@@ -2803,7 +2803,7 @@ _cairo_ft_scaled_glyph_init_record_svg_glyph (cairo_ft_scaled_font_t *scaled_fon
     unsigned int num_palette_entries;
 
     /* Create NULL terminated SVG document */
-    svg_document = strndup((const char*)svg_doc->svg_document, svg_doc->svg_document_length);
+    svg_document = _cairo_strndup ((const char*)svg_doc->svg_document, svg_doc->svg_document_length);
 
     recording_surface =
 	cairo_recording_surface_create (CAIRO_CONTENT_COLOR_ALPHA, NULL);

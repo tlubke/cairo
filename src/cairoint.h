@@ -943,6 +943,13 @@ _cairo_get_locale_decimal_point (void);
 cairo_private double
 _cairo_strtod (const char *nptr, char **endptr);
 
+#ifdef HAVE_STRNDUP
+#define _cairo_strndup strndup
+#else
+cairo_private char *
+_cairo_strndup (const char *s, size_t n);
+#endif
+
 /* cairo-path-fixed.c */
 cairo_private cairo_path_fixed_t *
 _cairo_path_fixed_create (void);
