@@ -3535,9 +3535,10 @@ _cairo_pdf_surface_emit_ccitt_image (cairo_pdf_surface_t              *surface,
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     /* ensure params_string is null terminated */
-    params = malloc (ccitt_params_string_len + 1);
-    memcpy (params, ccitt_params_string, ccitt_params_string_len);
-    params[ccitt_params_string_len] = 0;
+    params = _cairo_strndup ((const char *)ccitt_params_string, ccitt_params_string_len);
+    if (unlikely (params == NULL))
+	return _cairo_surface_set_error (&surface->base, CAIRO_STATUS_NO_MEMORY);
+
     status = _cairo_tag_parse_ccitt_params (params, &ccitt_params);
     if (unlikely(status))
 	return source->status;

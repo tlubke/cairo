@@ -3095,9 +3095,10 @@ _cairo_ps_surface_emit_ccitt_image (cairo_ps_surface_t          *surface,
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     /* ensure params_string is null terminated */
-    ccitt_params_string = malloc (ccitt_params_data_len + 1);
-    memcpy (ccitt_params_string, ccitt_params_data, ccitt_params_data_len);
-    ccitt_params_string[ccitt_params_data_len] = 0;
+    ccitt_params_string = _cairo_strndup ((const char *)ccitt_params_data, ccitt_params_data_len);
+    if (unlikely (ccitt_params_string == NULL))
+	return _cairo_surface_set_error (&surface->base, CAIRO_STATUS_NO_MEMORY);
+
     status = _cairo_tag_parse_ccitt_params (ccitt_params_string, &ccitt_params);
     if (unlikely(status))
 	return status;
@@ -3280,9 +3281,10 @@ _cairo_ps_surface_emit_eps (cairo_ps_surface_t          *surface,
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     /* ensure params_string is null terminated */
-    params_string = malloc (eps_params_string_len + 1);
-    memcpy (params_string, eps_params_string, eps_params_string_len);
-    params_string[eps_params_string_len] = 0;
+    params_string = _cairo_strndup ((const char *)eps_params_string, eps_params_string_len);
+    if (unlikely (params_string == NULL))
+	return _cairo_surface_set_error (&surface->base, CAIRO_STATUS_NO_MEMORY);
+
     status = _cairo_tag_parse_eps_params (params_string, &eps_params);
     if (unlikely(status))
 	return status;

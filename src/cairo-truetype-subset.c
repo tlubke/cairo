@@ -1,3 +1,4 @@
+/* -*- Mode: c; tab-width: 8; c-basic-offset: 4; indent-tabs-mode: t; -*- */
 /* cairo - a vector graphics library with display and print output
  *
  * Copyright © 2004 Red Hat, Inc
@@ -1470,14 +1471,10 @@ find_name (tt_name_t *name, unsigned long size, int name_id, int platform, int e
 	    if (offset + len > size)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    str = _cairo_malloc (len + 1);
+	    str = _cairo_strndup (((char*)name) + offset, len);
 	    if (str == NULL)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    memcpy (str,
-		    ((char*)name) + offset,
-		    len);
-	    str[len] = 0;
 	    break;
 	}
     }
@@ -1531,13 +1528,7 @@ find_name (tt_name_t *name, unsigned long size, int name_id, int platform, int e
 	}
     }
     if (has_tag) {
-	p = _cairo_malloc (len - 6);
-	if (unlikely (p == NULL)) {
-	    status =_cairo_error (CAIRO_STATUS_NO_MEMORY);
-	    goto fail;
-	}
-	memcpy (p, str + 7, len - 7);
-	p[len-7] = 0;
+	p = _cairo_strndup (str + 7, len - 7);
 	free (str);
 	str = p;
     }

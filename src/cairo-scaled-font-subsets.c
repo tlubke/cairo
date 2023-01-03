@@ -1,3 +1,4 @@
+/* -*- Mode: c; tab-width: 8; c-basic-offset: 4; indent-tabs-mode: t; -*- */
 /* cairo - a vector graphics library with display and print output
  *
  * Copyright © 2003 University of Southern California
@@ -404,12 +405,10 @@ _cairo_sub_font_glyph_lookup_unicode (cairo_scaled_font_t    *scaled_font,
     if (unicode != (uint32_t) -1) {
 	len = _cairo_ucs4_to_utf8 (unicode, buf);
 	if (len > 0) {
-	    *utf8_out = _cairo_malloc (len + 1);
-	    if (unlikely (*utf8_out == NULL))
-		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+            *utf8_out = _cairo_strndup (buf, len);
+            if (unlikely (*utf8_out == NULL))
+                return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    memcpy (*utf8_out, buf, len);
-	    (*utf8_out)[len] = 0;
 	    *utf8_len_out = len;
 	}
     }
@@ -441,12 +440,10 @@ _cairo_sub_font_glyph_map_to_unicode (cairo_sub_font_glyph_t *sub_font_glyph,
 	    }
 	} else {
 	    /* No existing mapping. Use the requested mapping */
-	    sub_font_glyph->utf8 = _cairo_malloc (utf8_len + 1);
-	    if (unlikely (sub_font_glyph->utf8 == NULL))
-		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+            sub_font_glyph->utf8 = _cairo_strndup (utf8, utf8_len);
+            if (unlikely (sub_font_glyph->utf8 == NULL))
+                return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    memcpy (sub_font_glyph->utf8, utf8, utf8_len);
-	    sub_font_glyph->utf8[utf8_len] = 0;
 	    sub_font_glyph->utf8_len = utf8_len;
 	    *is_mapped = TRUE;
 	}
@@ -612,13 +609,11 @@ _cairo_sub_font_map_glyph (cairo_sub_font_t	*sub_font,
 		if (ucs4_len == 1) {
 		    font_unicode = ucs4[0];
 		    free (font_utf8);
-		    font_utf8 = _cairo_malloc (text_utf8_len + 1);
-		    if (font_utf8 == NULL) {
-			free (ucs4);
-			return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+                    font_utf8 = _cairo_strndup (text_utf8, text_utf8_len);
+                    if (font_utf8 == NULL) {
+                        free (ucs4);
+                        return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		    }
-		    memcpy (font_utf8, text_utf8, text_utf8_len);
-		    font_utf8[text_utf8_len] = 0;
 		    font_utf8_len = text_utf8_len;
 		}
 		free (ucs4);

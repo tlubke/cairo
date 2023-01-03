@@ -366,12 +366,9 @@ parse_name (const char *attributes, const char *p, const char **end, char **s)
 	p2++;
 
     len = p2 - p;
-    name = _cairo_malloc (len + 1);
+    name = _cairo_strndup (p, len);
     if (unlikely (name == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
-
-    memcpy (name, p, len);
-    name[len] = 0;
     *s = name;
     *end = p2;
 
