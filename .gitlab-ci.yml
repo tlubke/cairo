@@ -133,6 +133,12 @@ fedora autotools build:
       - "builddir/test/**/*.cs"
       - "builddir/test/**/*.trace"
 
+fedora meson build check-refs.sh:
+  extends: '.test fedora meson'
+  script:
+    # Check for duplicate reference images
+    - ./test/check-refs.sh "$(pwd)/builddir/test/pdiff/perceptualdiff"
+
 test fedora meson pdf:
   extends: '.test fedora meson'
   script:
@@ -254,8 +260,6 @@ fedora meson build:
     - (cd doc/public && bash "check-doc-syntax.sh")
     # FIXME: The following line really needs gtk-doc to run first
     - (cd doc/public && DOC_MODULE=cairo bash "check-doc-coverage.sh")
-    # Check for duplicate reference images
-    - ./test/check-refs.sh "$(pwd)/builddir/test/pdiff/perceptualdiff"
 
     - ninja -C builddir install
   artifacts:
