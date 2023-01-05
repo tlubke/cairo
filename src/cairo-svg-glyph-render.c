@@ -2818,8 +2818,10 @@ update_graphics_state (cairo_svg_glyph_render_t *svg_render,
         cairo_set_miter_limit (svg_render->cr, value);
 
     p = get_attribute (element, "stroke-dasharray");
-    if (p)
+    if (p) {
+        free (gs->dash_array);
         gs->dash_array = strdup (p);
+    }
 
     get_float_or_percent_attribute (element, "stroke-dashoffset", svg_render->width, &gs->dash_offset);
     update_dash (svg_render, element);
