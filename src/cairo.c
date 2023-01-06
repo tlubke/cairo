@@ -1595,6 +1595,7 @@ cairo_identity_matrix (cairo_t *cr)
     if (unlikely (status))
 	_cairo_set_error (cr, status);
 }
+slim_hidden_def (cairo_identity_matrix);
 
 /**
  * cairo_user_to_device:
@@ -2874,6 +2875,7 @@ cairo_clip_extents (cairo_t *cr,
     if (unlikely (status))
 	_cairo_set_error (cr, status);
 }
+slim_hidden_def (cairo_clip_extents);
 
 /**
  * cairo_in_clip:

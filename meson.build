@@ -320,6 +320,7 @@ if freetype_dep.found()
   }]
 
   ft_check_funcs = [
+    'FT_Get_Color_Glyph_Paint',
     'FT_Get_X11_Font_Format',
     'FT_GlyphSlot_Embolden',
     'FT_GlyphSlot_Oblique',

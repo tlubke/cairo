@@ -130,6 +130,7 @@ cairo_feature_sources = {
   ],
   'cairo-ft': [
     'cairo-ft-font.c',
+    'cairo-colr-glyph-render.c',
     'cairo-svg-glyph-render.c'
   ],
 

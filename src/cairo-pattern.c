@@ -1048,6 +1048,7 @@ cairo_pattern_create_mesh (void)
 
     return &pattern->base;
 }
+slim_hidden_def (cairo_pattern_create_mesh);
 
 /**
  * cairo_pattern_reference:
@@ -1283,7 +1284,7 @@ cairo_mesh_pattern_begin_patch (cairo_pattern_t *pattern)
     for (i = 0; i < 4; i++)
 	mesh->has_color[i] = FALSE;
 }
-
+slim_hidden_def (cairo_mesh_pattern_begin_patch);
 
 static void
 _calc_control_point (cairo_mesh_patch_t *patch, int control_point)
@@ -1400,6 +1401,7 @@ cairo_mesh_pattern_end_patch (cairo_pattern_t *pattern)
 
     mesh->current_patch = NULL;
 }
+slim_hidden_def (cairo_mesh_pattern_end_patch);
 
 /**
  * cairo_mesh_pattern_curve_to:

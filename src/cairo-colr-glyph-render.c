@@ -29,23 +29,24 @@
  *      Matthias Clasen <mclasen@redhat.com>
  */
 
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
-
-#include <freetype/config/ftoption.h>
-#include <freetype/ftcolor.h>
-#include <freetype/ftglyph.h>
-#include <freetype/ftoutln.h>
-#include <freetype/ftsizes.h>
-
 #include "cairoint.h"
+#include "cairo-array-private.h"
 #include "cairo-ft-private.h"
 
-#include "cairo-array-private.h"
+#include <assert.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
-#ifdef TT_SUPPORT_COLRV1
+#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+
+#include <ft2build.h>
+#include FT_CONFIG_OPTIONS_H
+#include FT_COLOR_H
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+#include FT_SIZES_H
+
 
 /* {{{ Utilities */
 
@@ -829,27 +830,6 @@ _cairo_colr_glyph_bounds (FT_Face face,
   return CAIRO_STATUS_CLIP_NOT_REPRESENTABLE;
 }
 
-/* Return what COLR table version this glyph is using, 0 or 1.
- * Return -1 if the glyph is not in the COLR table.
- */
-int
-_cairo_colr_glyph_version (FT_Face face,
-                           unsigned long glyph)
-{
-  FT_OpaquePaint paint = { NULL, 0 };
-  FT_UInt glyph_index, color_index;
-  FT_LayerIterator iter;
-
-  if (FT_Get_Color_Glyph_Paint (face, glyph, FT_COLOR_INCLUDE_ROOT_TRANSFORM, &paint))
-    return 1;
-
-  iter.p = NULL;
-  if (FT_Get_Color_Glyph_Layer (face, glyph, &glyph_index, &color_index, &iter))
-    return 0;
-
-  return -1;
-}
-
 static int
 colorline_uses_foreground (FT_Face face,
                            FT_ColorLine *colorline)
@@ -1575,7 +1555,7 @@ add_sweep_gradient_patches (ColorLine *cl,
                                                a0,       c0,
                                                2 * M_PI, &color,
                                                pattern);
-                  goto done;
+                  return;
                 }
               else
                 {
@@ -1586,7 +1566,6 @@ add_sweep_gradient_patches (ColorLine *cl,
                 }
             }
         }
-done:
     }
 }
 
@@ -2106,6 +2085,6 @@ cleanup:
 
 /* }}} */
 
-#endif
+#endif /* HAVE_FT_GET_COLOR_GLYPH_PAINT */
 
 /* vim:set foldmethod=marker expandtab: */
