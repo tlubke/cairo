@@ -52,18 +52,6 @@
 
 /* {{{ Utilities */
 
-#ifndef CLAMP
-#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
-#endif
-
-#ifndef MIN
-#define MIN(x,y) ((x) < (y) ? (x) : (y))
-#endif
-
-#ifndef MAX
-#define MAX(x,y) ((x) > (y) ? (x) : (y))
-#endif
-
 typedef struct {
   float x, y;
 } Point;
@@ -430,501 +418,6 @@ get_path_for_glyph (FT_Face face,
   return CAIRO_STATUS_SUCCESS;
 }
 
-/* }}} */
-/* {{{ Bounds and miscellaneous info */
-
-typedef struct {
-  float xmin, ymin, xmax, ymax;
-} Bounds;
-
-static void
-union_bounds (Bounds *b1, Bounds *b2)
-{
-  b2->xmin = MIN (b1->xmin, b2->xmin);
-  b2->ymin = MIN (b1->ymin, b2->ymin);
-  b2->xmax = MAX (b1->xmax, b2->xmax);
-  b2->ymax = MAX (b1->ymax, b2->ymax);
-}
-
-static void
-intersect_bounds (Bounds *b1, Bounds *b2)
-{
-  b2->xmin = MAX (b1->xmin, b2->xmin);
-  b2->ymin = MAX (b1->ymin, b2->ymin);
-  b2->xmax = MIN (b1->xmax, b2->xmax);
-  b2->ymax = MIN (b1->ymax, b2->ymax);
-
-  if (b2->xmin > b2->ymax || b2->ymin > b2->ymax)
-    b2->xmin = b2->ymin = b2->xmax = b2->ymax = 0;
-}
-
-static void
-get_glyph_bounds (FT_Face face, unsigned int glyph_index, Bounds *bounds)
-{
-  FT_Load_Glyph (face, glyph_index, FT_LOAD_DEFAULT);
-
-  bounds->xmin = f26_6 (face->glyph->metrics.horiBearingX);
-  bounds->ymin = f26_6 (face->glyph->metrics.horiBearingY);
-  bounds->xmax = bounds->xmin + f26_6 (face->glyph->metrics.width);
-  bounds->ymax = - (bounds->ymin + f26_6 (face->glyph->metrics.height));
-}
-
-static void
-grow_bounds (Bounds *b, float x, float y)
-{
-  b->xmin = MIN (b->xmin, x);
-  b->ymin = MIN (b->ymin, y);
-  b->xmax = MAX (b->xmax, x);
-  b->ymax = MAX (b->ymax, y);
-}
-
-static void
-transform_bounds_f (Bounds *b, float xx, float yx, float xy, float yy, float dx, float dy)
-{
-  float x, y;
-  Bounds out;
-
-  out.xmin = out.xmax = b->xmin * xx + b->ymin * xy + dx;
-  out.ymin = out.ymax = b->xmin * yx + b->ymin * yy + dy;
-
-  x = b->xmax * xx + b->ymax * xy + dx;
-  y = b->xmax * yx + b->ymax * yy + dy;
-  grow_bounds (&out, x, y);
-
-  x = b->xmax * xx + b->ymin * xy + dx;
-  y = b->xmax * yx + b->ymin * yy + dy;
-  grow_bounds (&out, x, y);
-
-  x = b->xmin * xx + b->ymax * xy + dx;
-  y = b->xmin * yx + b->ymax * yy + dy;
-  grow_bounds (&out, x, y);
-
-  *b = out;
-}
-
-static void
-transform_bounds (Bounds *b, FT_Affine23 *affine)
-{
-  float xx, xy, yx, yy, dx, dy;
-
-  xx = f16_16 (affine->xx);
-  yx = f16_16 (affine->yx);
-  xy = f16_16 (affine->xy);
-  yy = f16_16 (affine->yy);
-  dx = f16_16 (affine->dx);
-  dy = f16_16 (affine->dy);
-
-  transform_bounds_f (b, xx, yx, xy, yy, dx, dy);
-}
-
-static void
-translate_bounds (Bounds *b, float dx, float dy)
-{
-  b->xmin = b->xmin + dx;
-  b->ymin = b->ymin + dy;
-  b->xmax = b->xmax + dx;
-  b->ymax = b->ymax + dy;
-}
-
-static void
-rotate_bounds (Bounds *b, float r)
-{
-  float c, s;
-
-  c = cosf (r);
-  s = sinf (r);
-  transform_bounds_f (b, c, s, -s, c, 0, 0);
-}
-
-static void
-scale_bounds (Bounds *b, float sx, float sy)
-{
-  transform_bounds_f (b, sx, 0, 0, sy, 0, 0);
-}
-
-static void
-skew_bounds (Bounds *b, float ax, float ay)
-{
-  transform_bounds_f (b, 1, tanf (ay), - tanf (ax), 1, 0, 0);
-}
-
-static int
-compute_bounds (FT_Face face, FT_OpaquePaint *paint, Bounds *bounds, int drop_transform)
-{
-  FT_COLR_Paint p;
-  FT_Size orig_size;
-  FT_Size unscaled_size;
-  FT_Matrix orig_transform;
-  FT_Vector orig_delta;
-  int ret = 1;
-
-  if (!FT_Get_Paint (face, *paint, &p))
-    return 0;
-
-  if (drop_transform)
-    {
-      FT_Matrix transform;
-      FT_Vector delta;
-
-      orig_size = face->size;
-      FT_New_Size (face, &unscaled_size);
-      FT_Activate_Size (unscaled_size);
-      FT_Set_Char_Size (face, face->units_per_EM << 6, 0, 0, 0);
-
-      transform.xx = transform.yy = 1 << 16;
-      transform.xy = transform.yx = 0;
-      delta.x = delta.y = 0;
-
-      FT_Get_Transform (face, &orig_transform, &orig_delta);
-      FT_Set_Transform (face, &transform, &delta);
-    }
-
-  switch (p.format)
-    {
-    case FT_COLR_PAINTFORMAT_COLR_LAYERS:
-      {
-        FT_OpaquePaint layer_paint = { NULL, 0 };
-        Bounds b;
-        int first = 1;
-
-        while (FT_Get_Paint_Layers (face, &p.u.colr_layers.layer_iterator, &layer_paint))
-          {
-            if (!compute_bounds (face, &layer_paint, &b, FALSE))
-              {
-                ret = 0;
-                break;
-              }
-
-            if (first)
-              {
-                *bounds = b;
-                first = 0;
-              }
-            else
-              union_bounds (&b, bounds);
-          }
-        //printf ("Layer bounds: %f %f %f %f\n", bounds->xmin, bounds->ymin, bounds->xmax, bounds->ymax);
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_SOLID:
-      ret = 0; // Solid is unbounded
-      break;
-
-    case FT_COLR_PAINTFORMAT_LINEAR_GRADIENT:
-    case FT_COLR_PAINTFORMAT_RADIAL_GRADIENT:
-    case FT_COLR_PAINTFORMAT_SWEEP_GRADIENT:
-      ret = 0; // Gradients are unbounded
-      break;
-
-    case FT_COLR_PAINTFORMAT_GLYPH:
-      get_glyph_bounds (face, p.u.glyph.glyphID, bounds);
-      //printf ("Glyph bounds: %f %f %f %f\n", bounds->xmin, bounds->ymin, bounds->xmax, bounds->ymax);
-      break;
-
-    case FT_COLR_PAINTFORMAT_COLR_GLYPH:
-      get_glyph_bounds (face, p.u.colr_glyph.glyphID, bounds);
-      //printf ("Glyph bounds: %f %f %f %f\n", bounds->xmin, bounds->ymin, bounds->xmax, bounds->ymax);
-      break;
-
-    case FT_COLR_PAINTFORMAT_TRANSFORM:
-      {
-        if (!compute_bounds (face, &p.u.transform.paint, bounds, FALSE))
-          ret = 0;
-        else
-          {
-            transform_bounds (bounds, &p.u.transform.affine);
-            //printf ("Transform bounds: %f %f %f %f\n", bounds->xmin, bounds->ymin, bounds->xmax, bounds->ymax);
-          }
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_TRANSLATE:
-      {
-        if (!compute_bounds (face, &p.u.translate.paint, bounds, FALSE))
-          ret = 0;
-        else
-          translate_bounds (bounds,
-                            f16_16 (p.u.translate.dx),
-                            f16_16 (p.u.translate.dy));
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_ROTATE:
-      {
-        if (!compute_bounds (face, &p.u.rotate.paint, bounds, FALSE))
-          ret = 0;
-        else
-          {
-            translate_bounds (bounds,
-                              - f16_16 (p.u.rotate.center_x),
-                              - f16_16 (p.u.rotate.center_y));
-            rotate_bounds (bounds,
-                           f16_16 (p.u.rotate.angle) * M_PI);
-            translate_bounds (bounds,
-                              f16_16 (p.u.rotate.center_x),
-                              f16_16 (p.u.rotate.center_y));
-          }
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_SCALE:
-      {
-        if (!compute_bounds (face, &p.u.scale.paint, bounds, FALSE))
-          ret = 0;
-        else
-          {
-            translate_bounds (bounds,
-                              - f16_16 (p.u.scale.center_x),
-                              - f16_16 (p.u.scale.center_y));
-            scale_bounds (bounds,
-                          f16_16 (p.u.scale.scale_x),
-                          f16_16 (p.u.scale.scale_y));
-            translate_bounds (bounds,
-                              f16_16 (p.u.scale.center_x),
-                              f16_16 (p.u.scale.center_y));
-          }
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_SKEW:
-      {
-        if (!compute_bounds (face, &p.u.skew.paint, bounds, FALSE))
-          ret = 0;
-        else
-          {
-            translate_bounds (bounds,
-                              - f16_16 (p.u.skew.center_x),
-                              - f16_16 (p.u.skew.center_y));
-            skew_bounds (bounds,
-                         f16_16 (p.u.skew.x_skew_angle) * M_PI,
-                         f16_16 (p.u.skew.y_skew_angle) * M_PI);
-            translate_bounds (bounds,
-                              f16_16 (p.u.skew.center_x),
-                              f16_16 (p.u.skew.center_y));
-          }
-      }
-      break;
-    case FT_COLR_PAINTFORMAT_COMPOSITE:
-      switch ((int)p.u.composite.composite_mode)
-        {
-        case FT_COLR_COMPOSITE_CLEAR:
-          bounds->xmin = bounds->xmax = bounds->ymin = bounds->ymax = 0;
-          break;
-        case FT_COLR_COMPOSITE_SRC:
-        case FT_COLR_COMPOSITE_SRC_OUT:
-          ret = compute_bounds (face, &p.u.composite.source_paint, bounds, FALSE);
-          break;
-        case FT_COLR_COMPOSITE_DEST:
-        case FT_COLR_COMPOSITE_DEST_OUT:
-          ret = compute_bounds (face, &p.u.composite.backdrop_paint, bounds, FALSE);
-          break;
-        case FT_COLR_COMPOSITE_SRC_IN:
-        case FT_COLR_COMPOSITE_DEST_IN:
-          {
-            if (compute_bounds (face, &p.u.composite.source_paint, bounds, FALSE))
-              {
-                Bounds b;
-                if (compute_bounds (face, &p.u.composite.backdrop_paint, &b, FALSE))
-                  intersect_bounds (&b, bounds);
-              }
-            else
-              ret = compute_bounds (face, &p.u.composite.backdrop_paint, bounds, FALSE);
-          }
-          break;
-        default:
-          {
-            if (compute_bounds (face, &p.u.composite.source_paint, bounds, FALSE))
-              {
-                Bounds b;
-
-                if (compute_bounds (face, &p.u.composite.backdrop_paint, &b, FALSE))
-                  union_bounds (&b, bounds);
-                else
-                  ret = 0;
-              }
-            else
-              ret = 0;
-          }
-          break;
-        }
-      break;
-    case FT_COLR_PAINT_FORMAT_MAX:
-    case FT_COLR_PAINTFORMAT_UNSUPPORTED:
-    default:
-      ret = 0;
-      break;
-    }
-
-  if (drop_transform)
-    {
-      FT_Set_Transform (face, &orig_transform, &orig_delta);
-      FT_Activate_Size (orig_size);
-      FT_Done_Size (unscaled_size);
-    }
-
-  return ret;
-}
-
-/* Compute bounds; we don't calculate tight bounds, since
- * we don't need to. So we use control boxes for outlines
- * and transform the bounding boxes.
- */
-static cairo_status_t
-_cairo_colr_glyph_bounds (FT_Face face,
-                          unsigned int glyph,
-                          float *xmin,
-                          float *ymin,
-                          float *xmax,
-                          float *ymax)
-{
-  FT_ClipBox box;
-  FT_OpaquePaint paint = { NULL, 0 };
-
-  if (FT_Get_Color_Glyph_ClipBox (face, glyph, &box))
-    {
-      *xmin = f26_6 (box.bottom_left.x);
-      *ymin = f26_6 (box.bottom_left.y);
-      *xmax = f26_6 (box.top_right.x);
-      *ymax = f26_6 (box.top_right.y);
-      //printf ("bounds from ClipBox\n");
-      return CAIRO_STATUS_SUCCESS;
-    }
-  if (FT_Get_Color_Glyph_Paint (face, glyph, FT_COLOR_INCLUDE_ROOT_TRANSFORM, &paint))
-    {
-      Bounds bounds;
-      compute_bounds (face, &paint, &bounds, TRUE);
-      *xmin = bounds.xmin;
-      *ymin = bounds.ymin;
-      *xmax = bounds.xmax;
-      *ymax = bounds.ymax;
-      //printf ("bounds from Paint\n");
-      return CAIRO_STATUS_SUCCESS;
-    }
-  if (1)
-    {
-      FT_UInt glyph_index, color_index;
-      FT_LayerIterator iter;
-      int count = 0;
-      Bounds bounds;
-
-      iter.p = NULL;
-      while (FT_Get_Color_Glyph_Layer (face, glyph, &glyph_index, &color_index, &iter))
-        {
-          Bounds b;
-
-          get_glyph_bounds (face, glyph_index, &b);
-
-          if (count > 0)
-            union_bounds (&b, &bounds);
-          else
-            bounds = b;
-
-          count++;
-        }
-
-      if (count > 0)
-        {
-          *xmin = bounds.xmin;
-          *ymin = bounds.ymin;
-          *xmax = bounds.xmax;
-          *ymax = bounds.ymax;
-          //printf ("bounds from Layers\n");
-          return CAIRO_STATUS_SUCCESS;
-        }
-    }
-
-  return CAIRO_STATUS_CLIP_NOT_REPRESENTABLE;
-}
-
-static int
-colorline_uses_foreground (FT_Face face,
-                           FT_ColorLine *colorline)
-{
-  FT_ColorStop stop;
-
-  while (FT_Get_Colorline_Stops (face, &stop, &colorline->color_stop_iterator))
-    {
-      if (stop.color.palette_index == 0xffff)
-        return TRUE;
-    }
-
-  return FALSE;
-}
-
-static int
-paint_uses_foreground (FT_Face face,
-                       FT_OpaquePaint *paint)
-{
-  FT_COLR_Paint p;
-  FT_OpaquePaint layer_paint;
-
-  if (!FT_Get_Paint (face, *paint, &p))
-    return FALSE;
-
-  switch (p.format)
-    {
-    case FT_COLR_PAINTFORMAT_COLR_LAYERS:
-      while (FT_Get_Paint_Layers (face, &p.u.colr_layers.layer_iterator, &layer_paint))
-        {
-          if (paint_uses_foreground (face, &layer_paint))
-            return TRUE;
-        }
-      return FALSE;
-    case FT_COLR_PAINTFORMAT_SOLID:
-      return p.u.solid.color.palette_index == 0xffff;
-    case FT_COLR_PAINTFORMAT_LINEAR_GRADIENT:
-      return colorline_uses_foreground (face, &p.u.linear_gradient.colorline);
-    case FT_COLR_PAINTFORMAT_RADIAL_GRADIENT:
-      return colorline_uses_foreground (face, &p.u.radial_gradient.colorline);
-    case FT_COLR_PAINTFORMAT_SWEEP_GRADIENT:
-      return colorline_uses_foreground (face, &p.u.sweep_gradient.colorline);
-    case FT_COLR_PAINTFORMAT_GLYPH:
-      return paint_uses_foreground (face, &p.u.glyph.paint);
-    case FT_COLR_PAINTFORMAT_COLR_GLYPH:
-      return _cairo_colr_glyph_uses_foreground (face, p.u.glyph.glyphID);
-    case FT_COLR_PAINTFORMAT_TRANSFORM:
-      return paint_uses_foreground (face, &p.u.transform.paint);
-    case FT_COLR_PAINTFORMAT_TRANSLATE:
-      return paint_uses_foreground (face, &p.u.translate.paint);
-    case FT_COLR_PAINTFORMAT_ROTATE:
-      return paint_uses_foreground (face, &p.u.rotate.paint);
-    case FT_COLR_PAINTFORMAT_SCALE:
-      return paint_uses_foreground (face, &p.u.scale.paint);
-    case FT_COLR_PAINTFORMAT_SKEW:
-      return paint_uses_foreground (face, &p.u.skew.paint);
-    case FT_COLR_PAINTFORMAT_COMPOSITE:
-      return paint_uses_foreground (face, &p.u.composite.source_paint) ||
-             paint_uses_foreground (face, &p.u.composite.backdrop_paint);
-    case FT_COLR_PAINT_FORMAT_MAX:
-    case FT_COLR_PAINTFORMAT_UNSUPPORTED:
-    default:
-      assert (0);
-    }
-}
-
-/* Return TRUE if the paint graph for glyph refers to
- * the foreground color (i.e. uses the color index 0xffff.
- */
-int
-_cairo_colr_glyph_uses_foreground (FT_Face face,
-                                   unsigned long glyph)
-{
-  FT_OpaquePaint paint = { NULL, 0 };
-  FT_UInt glyph_index, color_index;
-  FT_LayerIterator iter;
-
-  if (FT_Get_Color_Glyph_Paint (face, glyph, FT_COLOR_INCLUDE_ROOT_TRANSFORM, &paint))
-    return paint_uses_foreground (face, &paint);
-
-  iter.p = NULL;
-  if (FT_Get_Color_Glyph_Layer (face, glyph, &glyph_index, &color_index, &iter))
-    {
-      do
-        {
-          if (color_index == 0xffff)
-            return TRUE;
-        }
-      while (FT_Get_Color_Glyph_Layer (face, glyph, &glyph_index, &color_index, &iter));
-    }
-
-  return FALSE;
-}
 
 /* }}} */
 /* {{{ cairo_colr_glyph_render_t implementation */
@@ -933,7 +426,7 @@ typedef struct cairo_colr_glyph_render_t cairo_colr_glyph_render_t;
 
 struct cairo_colr_glyph_render_t {
   FT_Face face;
-  const cairo_color_t *foreground_color;
+  cairo_pattern_t *foreground_color;
   FT_Color *palette;
   unsigned int num_palette_entries;
   int level;
@@ -973,51 +466,25 @@ draw_paint_colr_layers (cairo_colr_glyph_render_t *render,
 static void
 get_palette_color (cairo_colr_glyph_render_t *render,
                    FT_ColorIndex *ci,
-                   cairo_color_t *color)
+                   cairo_color_t *color,
+                   cairo_bool_t *is_foreground_color)
 {
-  if (ci->palette_index == 0xffff)
-    *color = *render->foreground_color;
-  else
-    {
-      if (ci->palette_index >= render->num_palette_entries)
-        {
-          fprintf (stderr, "Ignoring out-of-range palette index");
-          *color = *render->foreground_color;
-        }
-      else
-        {
-          FT_Color c = render->palette[ci->palette_index];
-          color->red = c.red / 255.0;
-          color->green = c.green / 255.0;
-          color->blue = c.blue / 255.0;
-       }
-    }
-  color->alpha = f2_14 (ci->alpha);
-}
+    cairo_bool_t foreground = FALSE;
 
-static void
-get_palette_color_v0 (cairo_colr_glyph_render_t *render,
-                      FT_UInt color_index,
-                      cairo_color_t *color)
-{
-  if (color_index == 0xffff)
-    *color = *render->foreground_color;
-  else
-    {
-      if (color_index >= render->num_palette_entries)
-        {
-          fprintf (stderr, "Ignoring out-of-range palette index");
-          *color = *render->foreground_color;
-        }
-      else
-        {
-          FT_Color c = render->palette[color_index];
-          color->red = c.red / 255.0;
-          color->green = c.green / 255.0;
-          color->blue = c.blue / 255.0;
-          color->alpha = c.alpha / 255.0;
-        }
+    if (ci->palette_index == 0xffff || ci->palette_index >= render->num_palette_entries) {
+        color->red = 0;
+        color->green = 0;
+        color->blue = 0;
+        foreground = TRUE;
+    } else {
+        FT_Color c = render->palette[ci->palette_index];
+        color->red = c.red / 255.0;
+        color->green = c.green / 255.0;
+        color->blue = c.blue / 255.0;
     }
+    color->alpha = f2_14 (ci->alpha);
+    if (foreground)
+        *is_foreground_color = TRUE;
 }
 
 static cairo_status_t
@@ -1026,13 +493,18 @@ draw_paint_solid (cairo_colr_glyph_render_t *render,
                   cairo_t *cr)
 {
   cairo_color_t color;
+  cairo_bool_t is_foreground_color;
 
 #if DEBUG_COLR
   printf ("%*sDraw PaintSolid\n", 2 * render->level, "");
 #endif
 
-  get_palette_color (render, &solid->color, &color);
-  cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
+  get_palette_color (render, &solid->color, &color, &is_foreground_color);
+  if (is_foreground_color) {
+      cairo_set_source (cr, render->foreground_color);
+  } else
+      cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
+
   cairo_paint (cr);
 
   return CAIRO_STATUS_SUCCESS;
@@ -1092,7 +564,7 @@ read_colorline (cairo_colr_glyph_render_t *render,
   while (FT_Get_Colorline_Stops (render->face, &stop, &colorline->color_stop_iterator))
     {
       cl->stops[i].position = f16_16 (stop.stop_offset);
-      get_palette_color (render, &stop.color, &cl->stops[i].color);
+      get_palette_color (render, &stop.color, &cl->stops[i].color, NULL);
       i++;
     }
 
@@ -1972,38 +1444,6 @@ draw_colr_glyph (cairo_colr_glyph_render_t *render,
     {
       status = draw_paint (render, &paint, cr);
     }
-  else
-    {
-      FT_UInt glyph_index, color_index;
-      FT_LayerIterator iter;
-
-      iter.p = NULL;
-      while (FT_Get_Color_Glyph_Layer (render->face, glyph, &glyph_index, &color_index, &iter))
-        {
-          cairo_color_t color;
-          cairo_path_t *path;
-
-          get_palette_color_v0 (render, color_index, &color);
-          status = get_path_for_glyph (render->face, glyph_index, &path);
-          if (unlikely (status)) {
-            if (path)
-              cairo_path_destroy (path);
-            break;
-          }
-
-          cairo_save (cr);
-
-          cairo_new_path (cr);
-          cairo_append_path (cr, path);
-          cairo_clip (cr);
-          cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
-          cairo_paint (cr);
-
-          cairo_restore (cr);
-
-          cairo_path_destroy (path);
-        }
-    }
 
   cairo_restore (cr);
 
@@ -2017,23 +1457,15 @@ draw_colr_glyph (cairo_colr_glyph_render_t *render,
  * using the given colors.
  */
 cairo_status_t
-_cairo_render_colr_glyph (FT_Face face,
-                          unsigned long glyph,
-                          FT_UShort palette_index,
-                          const cairo_color_t *foreground_color,
-                          cairo_image_surface_t **out_surface)
+_cairo_render_colr_v1_glyph (FT_Face face,
+                             unsigned long glyph,
+                             FT_UShort palette_index,
+                             cairo_t              *cr)
 {
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
-  float xmin, ymin, xmax, ymax;
   cairo_colr_glyph_render_t *colr_render = NULL;
   FT_Color *palette = NULL;
   FT_Palette_Data palette_data;
-  cairo_surface_t *surface = NULL;
-  cairo_pattern_t *pattern = NULL;
-  cairo_t *cr = NULL;
-  cairo_matrix_t matrix;
-
-  *out_surface = NULL;
 
 #if DEBUG_COLR
   printf ("_cairo_render_colr_glyph  glyph index: %ld\n", glyph);
@@ -2055,61 +1487,18 @@ _cairo_render_colr_glyph (FT_Face face,
   colr_render->face = face;
   colr_render->palette = palette;
   colr_render->num_palette_entries = palette_data.num_palette_entries;
-  colr_render->foreground_color = foreground_color;
+  colr_render->foreground_color = cairo_pattern_reference (cairo_get_source (cr));
   colr_render->level = 0;
-
-  status = _cairo_colr_glyph_bounds (face, glyph, &xmin, &ymin, &xmax, &ymax);
-  if (unlikely (status))
-    goto cleanup;
-
-  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
-                                        ceil (xmax - xmin),
-                                        ceil (ymax - ymin));
-  if (unlikely (surface == NULL)) {
-    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-    goto cleanup;
-  }
-
-  cairo_surface_set_device_offset (surface, - xmin,  - ymin);
-
-  cr = cairo_create (surface);
-
-  cairo_push_group (cr);
 
   status = draw_colr_glyph (colr_render,
                             glyph,
                             FT_COLOR_INCLUDE_ROOT_TRANSFORM,
                             cr);
-
-  pattern = cairo_pop_group (cr);
-
-  if (unlikely (status))
-    goto cleanup;
-
-  /* Flip the result */
-  cairo_matrix_init_scale (&matrix, 1, -1);
-  cairo_matrix_translate (&matrix, 0, - (ymax - ymin) -  2 * ymin);
-  cairo_pattern_set_matrix (pattern, &matrix);
-  cairo_set_source (cr, pattern);
-
-  cairo_paint (cr);
-
-  /* Adjust the device offset to keep the glyphs reference
-   * point at the origin
-   */
-  cairo_surface_set_device_offset (surface, - xmin,  ymax);
-
-  *out_surface = (cairo_image_surface_t *) surface;
-  surface = NULL;
-
+  
 cleanup:
 
-  if (cr)
-    cairo_destroy (cr);
-  if (surface)
-    cairo_surface_destroy (surface);
-  if (pattern)
-    cairo_pattern_destroy (pattern);
+  cairo_pattern_destroy (colr_render->foreground_color);
+
   if (colr_render)
     free (colr_render);
 

@@ -70,17 +70,13 @@ _cairo_render_svg_glyph (const char           *svg_document,
                          cairo_t              *cr);
 #endif
 
+#if HAVE_FT_GET_COLOR_GLYPH_PAINT
 cairo_private cairo_status_t
-_cairo_render_colr_glyph (FT_Face                 face,
-                          unsigned long           glyph,
-                          FT_UShort               palette_index,
-                          const cairo_color_t    *foreground_color,
-                          cairo_image_surface_t **surface);
-
-cairo_private int
-_cairo_colr_glyph_uses_foreground (FT_Face              face,
-                                   unsigned long        glyph);
-
+_cairo_render_colr_v1_glyph (FT_Face                 face,
+                             unsigned long           glyph,
+                             FT_UShort               palette_index,
+                             cairo_t                *cr);
+#endif
 
 CAIRO_END_DECLS
 
