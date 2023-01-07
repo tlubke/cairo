@@ -47,6 +47,8 @@
 #include FT_OUTLINE_H
 #include FT_SIZES_H
 
+/* #define DEBUG_COLR 1 */
+
 
 /* {{{ Utilities */
 
@@ -462,9 +464,9 @@ get_glyph_bounds (FT_Face face, unsigned int glyph_index, Bounds *bounds)
   FT_Load_Glyph (face, glyph_index, FT_LOAD_DEFAULT);
 
   bounds->xmin = f26_6 (face->glyph->metrics.horiBearingX);
-  bounds->ymax = f26_6 (face->glyph->metrics.horiBearingY);
+  bounds->ymin = f26_6 (face->glyph->metrics.horiBearingY);
   bounds->xmax = bounds->xmin + f26_6 (face->glyph->metrics.width);
-  bounds->ymin = - (bounds->ymin + f26_6 (face->glyph->metrics.height));
+  bounds->ymax = - (bounds->ymin + f26_6 (face->glyph->metrics.height));
 }
 
 static void
@@ -949,7 +951,9 @@ draw_paint_colr_layers (cairo_colr_glyph_render_t *render,
   FT_OpaquePaint paint;
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintColrLayers\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintColrLayers\n", 2 * render->level, "");
+#endif
 
   while (FT_Get_Paint_Layers (render->face, &colr_layers->layer_iterator, &paint))
     {
@@ -1023,7 +1027,9 @@ draw_paint_solid (cairo_colr_glyph_render_t *render,
 {
   cairo_color_t color;
 
-  //printf ("%*sDraw PaintSolid\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintSolid\n", 2 * render->level, "");
+#endif
 
   get_palette_color (render, &solid->color, &color);
   cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
@@ -1085,7 +1091,7 @@ read_colorline (cairo_colr_glyph_render_t *render,
   i = 0;
   while (FT_Get_Colorline_Stops (render->face, &stop, &colorline->color_stop_iterator))
     {
-      cl->stops[i].position = f2_14 (stop.stop_offset);
+      cl->stops[i].position = f16_16 (stop.stop_offset);
       get_palette_color (render, &stop.color, &cl->stops[i].color);
       i++;
     }
@@ -1174,7 +1180,9 @@ draw_paint_linear_gradient (cairo_colr_glyph_render_t *render,
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
   float min, max;
 
-  //printf ("%*sDraw PaintLinearGradient\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintLinearGradient\n", 2 * render->level, "");
+#endif
 
   cl = read_colorline (render, &gradient->colorline);
   if (unlikely (cl == NULL))
@@ -1187,6 +1195,7 @@ draw_paint_linear_gradient (cairo_colr_glyph_render_t *render,
   interpolate_points (&p0, &p1, max, &pp1);
 
   pattern = cairo_pattern_create_linear (pp0.x, pp0.y, pp1.x, pp1.y);
+
   cairo_pattern_set_extend (pattern, cairo_extend (gradient->colorline.extend));
 
   for (int i = 0; i < cl->n_stops; i++)
@@ -1220,7 +1229,9 @@ draw_paint_radial_gradient (cairo_colr_glyph_render_t *render,
   cairo_pattern_t *pattern;
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintRadialGradient\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintRadialGradient\n", 2 * render->level, "");
+#endif
 
   cl = read_colorline (render, &gradient->colorline);
   if (unlikely (cl == NULL))
@@ -1582,7 +1593,9 @@ draw_paint_sweep_gradient (cairo_colr_glyph_render_t *render,
   cairo_pattern_t *pattern;
   cairo_extend_t extend;
 
-  //printf ("%*sDraw PaintSweepGradient\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintSweepGradient\n", 2 * render->level, "");
+#endif
 
   cl = read_colorline (render, &gradient->colorline);
   if (unlikely (cl == NULL))
@@ -1622,7 +1635,9 @@ draw_paint_glyph (cairo_colr_glyph_render_t *render,
   cairo_path_t *path;
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintGlyph\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintGlyph\n", 2 * render->level, "");
+#endif
 
   status = get_path_for_glyph (render->face, glyph->glyphID, &path);
   if (unlikely (status))
@@ -1669,7 +1684,9 @@ draw_paint_transform (cairo_colr_glyph_render_t *render,
   cairo_matrix_t t;
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintTransform\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintTransform\n", 2 * render->level, "");
+#endif
 
   cairo_matrix_init (&t,
                      f16_16 (transform->affine.xx),
@@ -1696,7 +1713,9 @@ draw_paint_translate (cairo_colr_glyph_render_t *render,
 {
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintTranslate\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintTranslate\n", 2 * render->level, "");
+#endif
 
   cairo_save (cr);
 
@@ -1715,7 +1734,9 @@ draw_paint_rotate (cairo_colr_glyph_render_t *render,
 {
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintRotate\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintRotate\n", 2 * render->level, "");
+#endif
 
   cairo_save (cr);
 
@@ -1736,7 +1757,9 @@ draw_paint_scale (cairo_colr_glyph_render_t *render,
 {
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintScale\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintScale\n", 2 * render->level, "");
+#endif
 
   cairo_save (cr);
 
@@ -1758,7 +1781,9 @@ draw_paint_skew (cairo_colr_glyph_render_t *render,
   cairo_matrix_t s;
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintSkew\n", 2 * render->level, "");
+#if DEBUG_COLR
+  printf ("%*sDraw PaintSkew\n", 2 * render->level, "");
+#endif
 
   cairo_save (cr);
 
@@ -1780,7 +1805,10 @@ draw_paint_composite (cairo_colr_glyph_render_t *render,
 {
   cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-  //printf ("%*sDraw PaintComposite\n", 2 * render->level, "");
+
+#if DEBUG_COLR
+  printf ("%*sDraw PaintComposite\n", 2 * render->level, "");
+#endif
 
   cairo_save (cr);
 
@@ -1937,6 +1965,7 @@ draw_colr_glyph (cairo_colr_glyph_render_t *render,
       cairo_new_path (cr);
       cairo_rectangle (cr, xmin, ymin, xmax - xmin, ymax - ymin);
       cairo_clip (cr);
+      printf("%f %f %f %f\n", xmin, ymin, xmax, ymax);
     }
 
   if (FT_Get_Color_Glyph_Paint (render->face, glyph, root, &paint))
@@ -2005,6 +2034,10 @@ _cairo_render_colr_glyph (FT_Face face,
   cairo_matrix_t matrix;
 
   *out_surface = NULL;
+
+#if DEBUG_COLR
+  printf ("_cairo_render_colr_glyph  glyph index: %ld\n", glyph);
+#endif
 
   colr_render = _cairo_malloc (sizeof (cairo_colr_glyph_render_t));
   if (unlikely (colr_render == NULL)) {
