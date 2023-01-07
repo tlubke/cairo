@@ -248,17 +248,19 @@ _cairo_ft_resolve_pattern (FcPattern		      *pattern,
 
 #endif
 
-static cairo_status_t
-_ft_to_cairo_error (FT_Error error)
+cairo_status_t
+_cairo_ft_to_cairo_error (FT_Error error)
 {
   /* Currently we don't get many (any?) useful statuses here.
    * Populate as needed. */
   switch (error)
   {
-  case FT_Err_Out_Of_Memory:
-      return CAIRO_STATUS_NO_MEMORY;
-  default:
-      return CAIRO_STATUS_FREETYPE_ERROR;
+      case FT_Err_Ok:
+	  return CAIRO_STATUS_SUCCESS;
+      case FT_Err_Out_Of_Memory:
+	  return CAIRO_STATUS_NO_MEMORY;
+      default:
+	  return CAIRO_STATUS_FREETYPE_ERROR;
   }
 }
 
@@ -758,7 +760,7 @@ _cairo_ft_unscaled_font_lock_face (cairo_ft_unscaled_font_t *unscaled)
     {
 	unscaled->lock_count--;
 	CAIRO_MUTEX_UNLOCK (unscaled->mutex);
-	_cairo_error_throw (_ft_to_cairo_error (error));
+	_cairo_error_throw (_cairo_ft_to_cairo_error (error));
 	return NULL;
     }
 
@@ -915,7 +917,7 @@ _cairo_ft_unscaled_font_set_scale (cairo_ft_unscaled_font_t *unscaled,
 			      sf.y_scale * 64.0 + .5,
 			      0, 0);
     if (error)
-      return _cairo_error (_ft_to_cairo_error (error));
+      return _cairo_error (_cairo_ft_to_cairo_error (error));
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -1357,7 +1359,7 @@ _get_bitmap_surface (FT_Bitmap		     *bitmap,
 
 	    error = FT_Bitmap_Convert( library, bitmap, &tmp, align );
 	    if (error)
-		return _cairo_error (_ft_to_cairo_error (error));
+		return _cairo_error (_cairo_ft_to_cairo_error (error));
 
 	    FT_Bitmap_Done( library, bitmap );
 	    *bitmap = tmp;
@@ -1565,7 +1567,7 @@ _render_glyph_outline (FT_Face                    face,
 #endif
 
 	if (error)
-	    return _cairo_error (_ft_to_cairo_error (error));
+	    return _cairo_error (_cairo_ft_to_cairo_error (error));
 
 	bitmap_size = _compute_xrender_bitmap_size (&bitmap,
 						    face->glyph,
@@ -2268,10 +2270,9 @@ _cubic_to (FT_Vector *control1, FT_Vector *control2,
     return 0;
 }
 
-static cairo_status_t
-_decompose_glyph_outline (FT_Face		  face,
-			  cairo_font_options_t	 *options,
-			  cairo_path_fixed_t	**pathp)
+cairo_status_t
+_cairo_ft_face_decompose_glyph_outline (FT_Face		     face,
+					cairo_path_fixed_t **pathp)
 {
     static const FT_Outline_Funcs outline_funcs = {
 	(FT_Outline_MoveToFunc)_move_to,
@@ -2765,7 +2766,7 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 	    goto cleanup;
 	}
 
-	status = _decompose_glyph_outline (face, &scaled_font->ft_options.base, &path_fixed);
+	status = _cairo_ft_face_decompose_glyph_outline (face, &path_fixed);
 	if (unlikely (status))
 	    return status;
 
@@ -3513,8 +3514,7 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
 	    }
 
 	    if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
-		status = _decompose_glyph_outline (face, &scaled_font->ft_options.base,
-						   &path);
+		status = _cairo_ft_face_decompose_glyph_outline (face, &path);
 	    } else {
 		status = CAIRO_INT_STATUS_UNSUPPORTED;
 	    }
@@ -3656,7 +3656,7 @@ _cairo_ft_is_synthetic (void	        *abstract_font,
 
 	error = FT_Get_MM_Var (face, &mm_var);
 	if (error) {
-	    status = _cairo_error (_ft_to_cairo_error (error));
+	    status = _cairo_error (_cairo_ft_to_cairo_error (error));
 	    goto cleanup;
 	}
 

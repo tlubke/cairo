@@ -32,6 +32,7 @@
 #include "cairoint.h"
 #include "cairo-array-private.h"
 #include "cairo-ft-private.h"
+#include "cairo-path-private.h"
 
 #include <assert.h>
 #include <math.h>
@@ -181,242 +182,6 @@ cairo_extend (FT_PaintExtend extend)
 }
 
 /* }}} */
-/* {{{ Paths */
-
-typedef struct {
-  cairo_array_t points;
-  int needs_move;
-  int last_move_op;
-} path_data_t;
-
-static cairo_status_t
-close_path (path_data_t *pdata)
-{
-  cairo_path_data_t p;
-  int status;
-
-  if (pdata->last_move_op < 0)
-    return CAIRO_STATUS_SUCCESS;
-
-  p.header.type = CAIRO_PATH_LINE_TO;
-  p.header.length = 2;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p = *(cairo_path_data_t *) _cairo_array_index (&pdata->points, pdata->last_move_op + 1);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.header.type = CAIRO_PATH_CLOSE_PATH;
-  p.header.length = 1;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  pdata->needs_move = 1;
-  pdata->last_move_op = -1;
-
-  return CAIRO_STATUS_SUCCESS;
-}
-
-static int
-move_to (const FT_Vector *to,
-         void *data)
-{
-  path_data_t *pdata = data;
-  cairo_path_data_t p;
-  cairo_status_t status;
-
-  status = close_path (pdata);
-  if (unlikely (status))
-    return status;
-
-  pdata->needs_move = 0;
-  pdata->last_move_op = pdata->points.num_elements;
-
-  p.header.type = CAIRO_PATH_MOVE_TO;
-  p.header.length = 2;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = to->x / (float) (1 << 6);
-  p.point.y = to->y / (float) (1 << 6);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  return CAIRO_STATUS_SUCCESS;
-}
-
-static int
-line_to (const FT_Vector *to,
-         void *data)
-{
-  path_data_t *pdata = data;
-  cairo_path_data_t p;
-  cairo_status_t status;
-
-  if (pdata->needs_move)
-    return move_to (to, data);
-
-  p.header.type = CAIRO_PATH_LINE_TO;
-  p.header.length = 2;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = to->x / (float) (1 << 6);
-  p.point.y = to->y / (float) (1 << 6);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  return CAIRO_STATUS_SUCCESS;
-}
-
-static int
-conic_to (const FT_Vector *control,
-          const FT_Vector *to,
-          void *data)
-{
-  path_data_t *pdata = data;
-  cairo_path_data_t p;
-  double cx, cy;
-  double x0, y0;
-  double x1, y1;
-  double x2, y2;
-  double x3, y3;
-  cairo_status_t status;
-
-  assert (!pdata->needs_move);
-  assert (pdata->points.num_elements > 0);
-
-  p.header.type = CAIRO_PATH_CURVE_TO;
-  p.header.length = 4;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p = *(cairo_path_data_t *) _cairo_array_index (&pdata->points, pdata->points.num_elements - 2);
-
-  x0 = p.point.x;
-  y0 = p.point.y;
-
-  cx = control->x / (float) (1 << 6);
-  cy = control->y / (float) (1 << 6);
-
-  x3 = to->x / (float) (1 << 6);
-  y3 = to->y / (float) (1 << 6);
-
-  x1 = x0 + (2./3.) * (cx - x0);
-  y1 = y0 + (2./3.) * (cy - y0);
-
-  x2 = x3 + (2./3.) * (cx - x3);
-  y2 = y3 + (2./3.) * (cy - y3);
-
-  p.point.x = x1;
-  p.point.y = y1;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = x2;
-  p.point.y = y2;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = x3;
-  p.point.y = y3;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  return CAIRO_STATUS_SUCCESS;
-}
-
-static int
-cubic_to (const FT_Vector *control1,
-          const FT_Vector *control2,
-          const FT_Vector *to,
-          void *data)
-{
-  path_data_t *pdata = data;
-  cairo_path_data_t p;
-  cairo_status_t status;
-
-  assert (!pdata->needs_move);
-  assert (pdata->points.num_elements > 0);
-
-  p.header.type = CAIRO_PATH_CURVE_TO;
-  p.header.length = 4;
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = control1->x / (float) (1 << 6);
-  p.point.y = control1->y / (float) (1 << 6);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = control2->x / (float) (1 << 6);
-  p.point.y = control2->y / (float) (1 << 6);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  p.point.x = to->x / (float) (1 << 6);
-  p.point.y = to->y / (float) (1 << 6);
-  status = _cairo_array_append (&pdata->points, &p);
-  if (unlikely (status))
-    return status;
-
-  return CAIRO_STATUS_SUCCESS;
-}
-
-static cairo_status_t
-get_path_for_glyph (FT_Face face,
-                    unsigned int glyph,
-                    cairo_path_t **path)
-{
-  path_data_t pdata;
-  FT_Outline_Funcs callbacks = {
-    move_to, line_to, conic_to, cubic_to, 0, 0
-  };
-  FT_Error error;
-
-  *path = NULL;
-
-  error = FT_Load_Glyph (face, glyph, FT_LOAD_DEFAULT);
-  if (error != 0)
-    return CAIRO_STATUS_INVALID_PATH_DATA;
-
-  _cairo_array_init (&pdata.points, sizeof (cairo_path_data_t));
-  pdata.needs_move = 1;
-  pdata.last_move_op = -1;
-
-  if (FT_Outline_Decompose (&face->glyph->outline, &callbacks, &pdata) != 0)
-    {
-      _cairo_array_fini (&pdata.points);
-      return CAIRO_STATUS_INVALID_PATH_DATA;
-    }
-
-  close_path (&pdata);
-
-  *path = _cairo_malloc (sizeof (cairo_path_t));
-  if (unlikely (path == NULL))
-    return CAIRO_STATUS_NO_MEMORY;
-
-  (*path)->status = CAIRO_STATUS_SUCCESS;
-  (*path)->data = (cairo_path_data_t *) pdata.points.elements;
-  (*path)->num_data = pdata.points.num_elements;
-
-  return CAIRO_STATUS_SUCCESS;
-}
 
 
 /* }}} */
@@ -1104,33 +869,42 @@ draw_paint_glyph (cairo_colr_glyph_render_t *render,
                   FT_PaintGlyph *glyph,
                   cairo_t *cr)
 {
-  cairo_path_t *path;
-  cairo_status_t status = CAIRO_STATUS_SUCCESS;
+    cairo_path_fixed_t *path_fixed;
+    cairo_path_t *path;
+    cairo_status_t status = CAIRO_STATUS_SUCCESS;
+    FT_Error error;
 
 #if DEBUG_COLR
-  printf ("%*sDraw PaintGlyph\n", 2 * render->level, "");
+    printf ("%*sDraw PaintGlyph\n", 2 * render->level, "");
 #endif
 
-  status = get_path_for_glyph (render->face, glyph->glyphID, &path);
-  if (unlikely (status))
-    goto cleanup;
+    error = FT_Load_Glyph (render->face, glyph->glyphID, FT_LOAD_DEFAULT);
+    status = _cairo_ft_to_cairo_error (error);
+    if (unlikely (status))
+        return status;
 
-  cairo_save (cr);
+    status = _cairo_ft_face_decompose_glyph_outline (render->face, &path_fixed);
+    if (unlikely (status))
+        return status;
 
-  cairo_new_path (cr);
-  cairo_append_path (cr, path);
-  cairo_clip (cr);
+    cairo_save (cr);
+    cairo_identity_matrix (cr);
+    path = _cairo_path_create (path_fixed, cr);
+    _cairo_path_fixed_destroy (path_fixed);
+    cairo_restore (cr);
 
-  status = draw_paint (render, &glyph->paint, cr);
+    cairo_save (cr);
 
-  cairo_restore (cr);
-
-cleanup:
-
-  if (path)
+    cairo_new_path (cr);
+    cairo_append_path (cr, path);
     cairo_path_destroy (path);
+    cairo_clip (cr);
 
-  return status;
+    status = draw_paint (render, &glyph->paint, cr);
+
+    cairo_restore (cr);
+
+    return status;
 }
 
 static cairo_status_t draw_colr_glyph (cairo_colr_glyph_render_t *render,

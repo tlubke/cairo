@@ -55,6 +55,13 @@ _cairo_scaled_font_is_ft (cairo_scaled_font_t *scaled_font);
 cairo_private unsigned int
 _cairo_ft_scaled_font_get_load_flags (cairo_scaled_font_t *scaled_font);
 
+cairo_private cairo_status_t
+_cairo_ft_to_cairo_error (FT_Error error);
+
+cairo_private cairo_status_t
+_cairo_ft_face_decompose_glyph_outline (FT_Face		     face,
+					cairo_path_fixed_t **pathp);
+
 #if HAVE_FT_SVG_DOCUMENT
 
 typedef struct FT_Color_ FT_Color;
