@@ -320,7 +320,6 @@ if freetype_dep.found()
   }]
 
   ft_check_funcs = [
-    'FT_Get_Color_Glyph_Paint',
     'FT_Get_X11_Font_Format',
     'FT_GlyphSlot_Embolden',
     'FT_GlyphSlot_Oblique',
@@ -345,6 +344,11 @@ if freetype_dep.found()
       if ttx.found()
         conf.set('CAIRO_CAN_TEST_TTX_FONT', 1)
       endif
+    endif
+    # When FT COLRv1 API is no longer experimental we can change this to a
+    # version check for the stable COLRv1 API.
+    if cc.get_define('DEBUG_ENABLE_COLR_V1') != ''
+      conf.set('HAVE_FT_COLR_V1', 1)
     endif
     check_funcs += ft_check_funcs
     deps += [freetype_dep]

@@ -2792,7 +2792,7 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 }
 #endif
 
-#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+#if HAVE_FT_COLR_V1
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_init_record_colr_v1_glyph (cairo_ft_scaled_font_t *scaled_font,
 						  cairo_scaled_glyph_t   *scaled_glyph,
@@ -3250,7 +3250,7 @@ _cairo_ft_scaled_glyph_is_colr_v1 (cairo_ft_scaled_font_t *scaled_font,
 				   cairo_scaled_glyph_t   *scaled_glyph,
 				   FT_Face                 face)
 {
-#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+#if HAVE_FT_COLR_V1
     FT_OpaquePaint paint = { NULL, 0 };
 
     if (FT_Get_Color_Glyph_Paint (face,
@@ -3351,7 +3351,7 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
     }
 #endif
 
-#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+#if HAVE_FT_COLR_V1
     if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1) {
 	status = (cairo_int_status_t)_cairo_ft_scaled_glyph_init_record_colr_v1_glyph (scaled_font,
 										       scaled_glyph,

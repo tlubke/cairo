@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+#if HAVE_FT_COLR_V1
 
 #include <ft2build.h>
 #include FT_CONFIG_OPTIONS_H
@@ -1232,4 +1232,4 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
     return status;
 }
 
-#endif /* HAVE_FT_GET_COLOR_GLYPH_PAINT */
+#endif /* HAVE_FT_COLR_V1 */

@@ -77,7 +77,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
                          cairo_t              *cr);
 #endif
 
-#if HAVE_FT_GET_COLOR_GLYPH_PAINT
+#if HAVE_FT_COLR_V1
 cairo_private cairo_status_t
 _cairo_render_colr_v1_glyph (FT_Face                 face,
                              unsigned long           glyph,
