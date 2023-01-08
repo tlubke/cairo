@@ -98,20 +98,6 @@ fedora image:
       google-noto-emoji-color-fonts
       fonttools
 
-fedora autotools build:
-  extends:
-    - '.fdo.distribution-image@fedora'
-    - '.ccache_setup'
-  stage: 'build'
-  script:
-    - ./autogen.sh
-    - make V=1 VERBOSE=1 -j $(nproc)
-  artifacts:
-    when: 'always'
-    expire_in: '2 days'
-    paths:
-      - "*"
-
 .test fedora meson:
   dependencies:
     - 'fedora meson build'
