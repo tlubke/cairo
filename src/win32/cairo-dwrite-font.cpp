@@ -738,28 +738,14 @@ public:
 	return;
     }
 
-    cairo_fixed_t GetFixedX(const D2D1_POINT_2F &point)
-    {
-	unsigned int control_word;
-	_controlfp_s(&control_word, _CW_DEFAULT, MCW_PC);
-	return _cairo_fixed_from_double(point.x);
-    }
-
-    cairo_fixed_t GetFixedY(const D2D1_POINT_2F &point)
-    {
-	unsigned int control_word;
-	_controlfp_s(&control_word, _CW_DEFAULT, MCW_PC);
-	return _cairo_fixed_from_double(point.y);
-    }
-
     IFACEMETHODIMP_(void) BeginFigure(
 	D2D1_POINT_2F startPoint,
 	D2D1_FIGURE_BEGIN figureBegin)
     {
 	mStartPoint = startPoint;
 	cairo_status_t status = _cairo_path_fixed_move_to(mCairoPath,
-							  GetFixedX(startPoint),
-							  GetFixedY(startPoint));
+							  _cairo_fixed_from_double(startPoint.x),
+							  _cairo_fixed_from_double(startPoint.y));
 	(void)status; /* squelch warning */
     }
 
@@ -768,8 +754,8 @@ public:
     {
 	if (figureEnd == D2D1_FIGURE_END_CLOSED) {
 	    cairo_status_t status = _cairo_path_fixed_line_to(mCairoPath,
-							      GetFixedX(mStartPoint),
-							      GetFixedY(mStartPoint));
+							      _cairo_fixed_from_double(mStartPoint.x),
+							      _cairo_fixed_from_double(mStartPoint.y));
 	    (void)status; /* squelch warning */
 	}
     }
@@ -780,12 +766,12 @@ public:
     {
 	for (unsigned int i = 0; i < beziersCount; i++) {
 	    cairo_status_t status = _cairo_path_fixed_curve_to(mCairoPath,
-							       GetFixedX(beziers[i].point1),
-							       GetFixedY(beziers[i].point1),
-							       GetFixedX(beziers[i].point2),
-							       GetFixedY(beziers[i].point2),
-							       GetFixedX(beziers[i].point3),
-							       GetFixedY(beziers[i].point3));
+							       _cairo_fixed_from_double(beziers[i].point1.x),
+							       _cairo_fixed_from_double(beziers[i].point1.y),
+							       _cairo_fixed_from_double(beziers[i].point2.x),
+							       _cairo_fixed_from_double(beziers[i].point2.y),
+							       _cairo_fixed_from_double(beziers[i].point3.x),
+							       _cairo_fixed_from_double(beziers[i].point3.y));
 	    (void)status; /* squelch warning */
 	}
     }
@@ -796,8 +782,8 @@ public:
     {
 	for (unsigned int i = 0; i < pointsCount; i++) {
 	    cairo_status_t status = _cairo_path_fixed_line_to(mCairoPath,
-							      GetFixedX(points[i]),
-							      GetFixedY(points[i]));
+							      _cairo_fixed_from_double(points[i].x),
+							      _cairo_fixed_from_double(points[i].y));
 	    (void)status; /* squelch warning */
 	}
     }
