@@ -1176,9 +1176,7 @@ cairo_scaled_font_create (cairo_font_face_t          *font_face,
 
     status = font_face->backend->scaled_font_create (font_face, font_matrix,
 						     ctm, options, &scaled_font);
-    /* Did we leave the backend in an error state? */
     if (unlikely (status)) {
-	status = _cairo_font_face_set_error (font_face, status);
 	_cairo_scaled_font_map_unlock ();
 	if (font_face != original_font_face)
 	    cairo_font_face_destroy (font_face);
