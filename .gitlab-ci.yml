@@ -240,7 +240,7 @@ fedora meson build:
     - touch builddir/src/.libs/libfoo.so
     # Run all the tests, except for the big test executable which
     # gets run separately
-    - meson test -C builddir --no-suite=slow
+    - meson test -C builddir --no-suite=slow --print-errorlogs
 
     # TODO: These aren't set up as Meson tests yet
     - (cd doc/public && bash "check-doc-syntax.sh")
