@@ -166,8 +166,8 @@ _cairo_paginated_surface_get_recording (cairo_surface_t *surface)
 
 cairo_status_t
 _cairo_paginated_surface_set_size (cairo_surface_t	*surface,
-				   int			 width,
-				   int			 height)
+				   double		 width,
+				   double		 height)
 {
     cairo_paginated_surface_t *paginated_surface;
     cairo_status_t status;
