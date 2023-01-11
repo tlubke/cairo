@@ -615,7 +615,8 @@ _cairo_recording_surface_acquire_source_image (void			 *abstract_surface,
 	return CAIRO_STATUS_SUCCESS;
     }
 
-    assert (! surface->unbounded);
+    if (surface->unbounded)
+	return CAIRO_INT_STATUS_UNSUPPORTED;
     image = _cairo_image_surface_create_with_content (surface->base.content,
 						      surface->extents.width,
 						      surface->extents.height);
