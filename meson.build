@@ -495,6 +495,8 @@ if host_machine.system() == 'darwin' and not get_option('quartz').disabled()
 endif
 
 if host_machine.system() == 'windows'
+  add_project_arguments('-DWIN32_LEAN_AND_MEAN', '-DNOMINMAX', language: ['c', 'cpp'])
+
   win32_extra_deps = [
     cc.find_library('gdi32'),
     cc.find_library('msimg32'),
@@ -545,6 +547,10 @@ if host_machine.system() == 'windows'
     if cpp_compiler.has_header('dwrite_3.h') and cpp_compiler.get_define('__MINGW32__') == ''
       conf.set('HAVE_DWRITE_3_H', 1)
     endif
+
+    add_project_arguments('-DWINVER=_WIN32_WINNT_WIN10', '-D_WIN32_WINNT=_WIN32_WINNT_WIN10', '-DNTDDI_VERSION=NTDDI_WIN10_RS3', language: ['c', 'cpp'])
+  else
+    add_project_arguments('-DWINVER=_WIN32_WINNT_WIN2K', '-D_WIN32_WINNT=_WIN32_WINNT_WIN2K', language: ['c', 'cpp'])
   endif
 endif
 
