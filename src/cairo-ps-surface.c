@@ -3295,7 +3295,11 @@ _cairo_ps_surface_emit_eps (cairo_ps_surface_t          *surface,
 				 eps_width,
 				 eps_height);
 
+    _cairo_output_stream_printf (surface->stream,
+				 "%%%%BeginDocument: Document%d\n",
+				 params->src_surface->unique_id);
     _cairo_output_stream_write (surface->stream, eps_data, eps_data_len);
+    _cairo_output_stream_printf (surface->stream, "%%%%EndDocument");
     _cairo_output_stream_printf (surface->stream, "\ncairo_eps_end\n");
 
     return CAIRO_STATUS_SUCCESS;
