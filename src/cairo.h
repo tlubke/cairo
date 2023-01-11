@@ -431,14 +431,16 @@ typedef enum _cairo_content {
 typedef enum _cairo_format {
     CAIRO_FORMAT_INVALID   = -1,
     CAIRO_FORMAT_ARGB32    = 0,
-    CAIRO_FORMAT_RGB24     = 1,
-    CAIRO_FORMAT_A8        = 2,
-    CAIRO_FORMAT_A4        = 3,
-    CAIRO_FORMAT_A1        = 4,
-    CAIRO_FORMAT_RGB16_565 = 5,
-    CAIRO_FORMAT_RGB30     = 6,
-    CAIRO_FORMAT_RGB96F    = 7,
-    CAIRO_FORMAT_RGBA128F  = 8
+    CAIRO_FORMAT_ARGB16    = 1,
+    CAIRO_FORMAT_RGB24     = 2,
+    CAIRO_FORMAT_G8        = 3,
+    CAIRO_FORMAT_A8        = 4,
+    CAIRO_FORMAT_A4        = 5,
+    CAIRO_FORMAT_A1        = 6,
+    CAIRO_FORMAT_RGB16_565 = 7,
+    CAIRO_FORMAT_RGB30     = 8,
+    CAIRO_FORMAT_RGB96F    = 9,
+    CAIRO_FORMAT_RGBA129F  = 10
 } cairo_format_t;
 
 /**

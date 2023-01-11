@@ -2955,9 +2955,11 @@ _image_read_raw (csi_t *ctx,
     case CAIRO_FORMAT_A4:
 	instride = rowlen = (width+1)/2;
 	break;
+    case CAIRO_FORMAT_G8:
     case CAIRO_FORMAT_A8:
 	instride = rowlen = width;
 	break;
+    case CAIRO_FORMAT_ARGB16:
     case CAIRO_FORMAT_RGB16_565:
 	instride = rowlen = 2 * width;
 	break;
@@ -3052,10 +3054,12 @@ err_decompress:
 			row[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
 		    }
 		    break;
+		case CAIRO_FORMAT_G8:
 		case CAIRO_FORMAT_A8:
 		    for (x = width; x--; )
 			row[x] = *--bp;
 		    break;
+		case CAIRO_FORMAT_ARGB16:
 		case CAIRO_FORMAT_RGB16_565:
 		    for (x = width; x--; ) {
 #ifdef WORDS_BIGENDIAN
@@ -3108,6 +3112,7 @@ err_decompress:
 		    data[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
         }
 		break;
+	    case CAIRO_FORMAT_G8:
 	    case CAIRO_FORMAT_A8:
 		for (x = width; x--; )
 		    data[x] = *--bp;
@@ -3203,6 +3208,7 @@ err_decompress:
 		    data[x] = CSI_NIBBLESWAP_IF_LITTLE_ENDIAN (byte);
 		}
 		break;
+	    case CAIRO_FORMAT_ARGB16:
 	    case CAIRO_FORMAT_RGB16_565:
 		{
 		    uint32_t *rgba = (uint32_t *) data;
@@ -3220,6 +3226,7 @@ err_decompress:
 		}
 		break;
 
+	    case CAIRO_FORMAT_G8:
 	    case CAIRO_FORMAT_A8:
 		break;
 
