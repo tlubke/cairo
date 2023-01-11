@@ -42,12 +42,14 @@ set_pixel_black(uint8_t *data, int stride,
     case CAIRO_FORMAT_RGB24:
 	*(uint32_t *)(data + y * stride + 4*x) = black_pixel_argb;
 	break;
+    case CAIRO_FORMAT_ARGB16:
     case CAIRO_FORMAT_RGB16_565:
 	*(uint16_t *)(data + y * stride + 2*x) = black_pixel;
 	break;
     case CAIRO_FORMAT_RGBA128F:
     case CAIRO_FORMAT_RGB96F:
     case CAIRO_FORMAT_RGB30:
+    case CAIRO_FORMAT_G8:
     case CAIRO_FORMAT_A8:
     case CAIRO_FORMAT_A4:
     case CAIRO_FORMAT_A1:

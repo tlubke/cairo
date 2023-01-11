@@ -508,6 +508,14 @@ _cairo_xlib_display_get_xrender_format (cairo_xlib_display_t	*display,
 	    pict_format = PictStandardA8; break;
 	case CAIRO_FORMAT_RGB24:
 	    pict_format = PictStandardRGB24; break;
+    case CAIRO_FORMAT_G8:
+        xrender_format = _cairo_xlib_display_get_xrender_format_for_pixman(display,
+									       PIXMAN_g8);
+	    break;
+    case CAIRO_FORMAT_RGB16_565:
+        xrender_format = _cairo_xlib_display_get_xrender_format_for_pixman(display,
+									       PIXMAN_a4b4g4r4);
+	    break;
 	case CAIRO_FORMAT_RGB16_565:
 	    xrender_format = _cairo_xlib_display_get_xrender_format_for_pixman(display,
 									       PIXMAN_r5g6b5);

@@ -196,12 +196,14 @@ write_ppm (cairo_surface_t *surface, int fd)
 
     switch (format) {
     case CAIRO_FORMAT_ARGB32:
+    case CAIRO_FORMAT_ARGB16:
 	/* XXX need true alpha for svg */
 	format_str = "P7";
 	break;
     case CAIRO_FORMAT_RGB24:
 	format_str = "P6";
 	break;
+    case CAIRO_FORMAT_G8:
     case CAIRO_FORMAT_A8:
 	format_str = "P5";
 	break;
@@ -226,6 +228,11 @@ write_ppm (cairo_surface_t *surface, int fd)
 			  buf, sizeof (buf), len,
 			  (unsigned char *) row, 4 * width);
 	    break;
+	case CAIRO_FORMAT_ARGB16:
+	    len = _cairo_write (fd,
+			  buf, sizeof (buf), len,
+			  (unsigned char *) row, 2 * width);
+	    break;
 	case CAIRO_FORMAT_RGB24:
 	    for (i = 0; i < width; i++) {
 		unsigned char rgb[3];
@@ -238,6 +245,7 @@ write_ppm (cairo_surface_t *surface, int fd)
 			      rgb, 3);
 	    }
 	    break;
+	case CAIRO_FORMAT_G8:
 	case CAIRO_FORMAT_A8:
 	    len = _cairo_write (fd,
 			  buf, sizeof (buf), len,

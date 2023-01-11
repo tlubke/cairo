@@ -2858,6 +2858,8 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 		    break;
 		case CAIRO_FORMAT_A1:
 		case CAIRO_FORMAT_A4:
+		case CAIRO_FORMAT_G8:
+		case CAIRO_FORMAT_ARGB16:
 		case CAIRO_FORMAT_RGB16_565:
 		case CAIRO_FORMAT_RGB30:
 		case CAIRO_FORMAT_RGB96F:
@@ -2876,6 +2878,8 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 		    break;
 		case CAIRO_FORMAT_A1:
 		case CAIRO_FORMAT_A4:
+		case CAIRO_FORMAT_G8:
+		case CAIRO_FORMAT_ARGB16:
 		case CAIRO_FORMAT_RGB16_565:
 		case CAIRO_FORMAT_RGB30:
 		case CAIRO_FORMAT_RGB96F:

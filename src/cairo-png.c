@@ -348,6 +348,13 @@ write_png (cairo_surface_t	*surface,
 	else
 	    png_color_type = PNG_COLOR_TYPE_RGB_ALPHA;
 	break;
+    case CAIRO_FORMAT_ARGB16:
+	bpc = 4;
+	if ( _cairo_image_analyze_transparency (clone) == CAIRO_IMAGE_IS_OPAQUE)
+	    png_color_type = PNG_COLOR_TYPE_RGB;
+	else
+	    png_color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+	break;
     case CAIRO_FORMAT_RGB30:
 	bpc = 10;
 	png_color_type = PNG_COLOR_TYPE_RGB;
@@ -355,6 +362,10 @@ write_png (cairo_surface_t	*surface,
     case CAIRO_FORMAT_RGB24:
 	bpc = 8;
 	png_color_type = PNG_COLOR_TYPE_RGB;
+	break;
+    case CAIRO_FORMAT_G8:
+	bpc = 8;
+	png_color_type = PNG_COLOR_TYPE_GRAY;
 	break;
     case CAIRO_FORMAT_A8:
 	bpc = 8;
