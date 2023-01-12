@@ -43,7 +43,6 @@
 
 #include "cairo-error-private.h"
 
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 typedef struct _cairo_wgl_context {
