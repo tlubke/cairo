@@ -97,9 +97,6 @@ endif
 
 add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
-# Autotools compatibility
-add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
-
 # Make sure source directory hasn't been configured with autotools
 fs = import('fs')
 if fs.exists('config.h') or fs.exists('src/cairo-features.h') or fs.exists('src/cairo-supported-features.h')
