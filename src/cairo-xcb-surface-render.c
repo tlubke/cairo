@@ -1266,7 +1266,8 @@ _cairo_xcb_surface_picture (cairo_xcb_surface_t *target,
 	if (unlikely (status))
 	    return (cairo_xcb_picture_t *) _cairo_surface_create_in_error (status);
 
-	if (image->format != CAIRO_FORMAT_INVALID) {
+	if (image->format != CAIRO_FORMAT_INVALID &&
+	    image->format < ARRAY_LENGTH (target->screen->connection->standard_formats)) {
 	    xcb_render_pictformat_t format;
 
 	    format = target->screen->connection->standard_formats[image->format];

@@ -96,6 +96,7 @@ test_sources = [
   'create-for-stream.c',
   'create-from-broken-png-stream.c',
   'create-from-png.c',
+  'create-from-png-16bit.c',
   'create-from-png-stream.c',
   'culled-glyphs.c',
   'curve-to-as-line-to.c',
