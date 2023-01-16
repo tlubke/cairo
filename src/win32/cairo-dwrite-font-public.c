@@ -69,7 +69,7 @@
  * Creates a new font for the DWrite font backend based on a
  * DWrite font face. This font can then be used with
  * cairo_set_font_face() or cairo_scaled_font_create().
-
+ *
  * Here is an example of how this function might be used:
  * <informalexample><programlisting><![CDATA[
  * #include <cairo-win32.h>

@@ -2,11 +2,17 @@ How to use cairo's test suite
 =============================
 Using this test should be as simple as running:
 
-  meson test -C $builddir
+  meson test -C $builddir -v
 
 assuming that the cairo distribution in the directory above has been
 configured and built in $builddir. The test suite here will use the
 locally compiled library rather than installed version.
+
+The above command runs some source code as well as the rendering
+tests. All the rendering tests are in a single meson test named
+"cairo". It can be run with:
+
+  meson test -C $builddir -v cairo
 
 The results of the test suite run are summarized in an index.html file
 written to $builddir, which, when viewed in a web browser makes it
@@ -24,16 +30,23 @@ any release. See below for hints and rules governing the use of the suite.
 Running specific tests
 ----------------------
 During development it is desirable to only run a single test or groups
-of related tests. The test suite is built as a single binary,
-"cairo-test-suite", which allows you to choose individual or
-categories of tests to run.
+of related tests. Individual tests can be run by specifying the tests
+names as arguments to the cairo test.
 
-The cairo-test-suite executable needs to be run in $builddir/test in
-order to find the image conversion executables. Simply running the
-executable will run all tests. eg
+  meson test -v cairo --test-args "record-neg-extents-unbounded record-neg-extents-bounded"
+
+The test suite is built as a single binary, "cairo-test-suite", which
+can be run directly instead of via meson. This may be more convenient
+when specifying multiple test arguments. The executable needs to be
+run in $builddir/test in order to find the image conversion
+executables. Simply running the executable will run all tests. eg
 
   cd $builddir/test
   ./cairo-test-suite
+
+Normally the executable will use the locally compiled library. But if
+you have a LD_LIBRARY_PATH defined or built cairo with an -rpath, the
+executable may not link with the locally compiled library.
 
 Individual tests can be run be specifying the tests names as arguments
 to cairo-test-suite. For example, to run specific tests:
@@ -125,10 +138,10 @@ CAIRO_TEST_MODE
     CAIRO_TEST_MODE="full,foreground"
 
 CAIRO_TESTS
-  A list of test to run. This is equivalebt to listing the tests as
+  A list of test to run. This is equivalent to listing the tests as
   arguments to cairo=test-suite. eg
     CAIRO_TESTS="record-neg-extents-unbounded record-neg-extents-bounded"
-  The tests may be separated by anyh of " \t,:;".
+  The tests may be separated by any of " \t,:;".
 
 srcdir
   The test suite needs to find the "test" directory in the source
@@ -241,22 +254,23 @@ eg
 
 The recommended practice for creating reference images for a new test is:
 
-1. Create a <test name>.ref.png reference image from the *.image.argb32.out.png output.
+1. Create a <test name>.ref.png reference image from <test name>.image.argb32.out.png
+output.
 
 2. Push to gitlab and check the CI result.
 
-3. If the image target fails, copy the *.image.argb32.out.png output
+3. If the image target fails, copy the <test name>.image.argb32.out.png output
 from CI and use as the reference image.
 
 4. Once the image target passes in CI, check that the other targets
-pass. If any fail, create *.<target>.ref.png reference images if the
+pass. If any fail, create <test name>.<target>.ref.png reference images if the
 output appears correct.
 
 5. If a target output is incorrect, try to determine if the cairo
 target output is correct. eg view pdf files in Adobe Reader. If the
 cairo target output is correct, it can be assumed the image converson
 from target to png is buggy. File a bug against the conversion tool
-and create a *.<target>.xfail.png reference image.
+and create a <test name>.<target>.xfail.png reference image.
 
 In all cases, before creating a reference image from test output, the
 image should be viewed to ensure that it is correct.

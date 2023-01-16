@@ -71,7 +71,6 @@
  *
  * Note: Win32 GDI fonts do not support color fonts. Use DWrite fonts
  * if color font support is required.
-
  **/
 
 /**

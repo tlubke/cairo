@@ -44,4 +44,4 @@ The "-D" options can also be used with "meson setup"
 
 Tests
 -----
-Refer to test/README.meson
+Refer to test/README
