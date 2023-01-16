@@ -66,18 +66,19 @@
 #include "cairo-composite-rectangles-private.h"
 #include "cairo-default-context-private.h"
 #include "cairo-error-private.h"
+#include "cairo-image-info-private.h"
 #include "cairo-image-surface-inline.h"
 #include "cairo-list-inline.h"
-#include "cairo-scaled-font-subsets-private.h"
+#include "cairo-output-stream-private.h"
 #include "cairo-paginated-private.h"
+#include "cairo-recording-surface-inline.h"
 #include "cairo-recording-surface-private.h"
+#include "cairo-scaled-font-subsets-private.h"
 #include "cairo-surface-clipper-private.h"
 #include "cairo-surface-snapshot-inline.h"
 #include "cairo-surface-subsurface-private.h"
-#include "cairo-output-stream-private.h"
-#include "cairo-type3-glyph-surface-private.h"
-#include "cairo-image-info-private.h"
 #include "cairo-tag-attributes-private.h"
+#include "cairo-type3-glyph-surface-private.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -176,6 +177,7 @@ typedef enum {
 typedef struct  {
     /* input params */
     cairo_surface_t *src_surface;
+    unsigned int regions_id;
     cairo_operator_t op;
     const cairo_rectangle_int_t *src_surface_extents;
     cairo_bool_t src_surface_bounded;
@@ -286,6 +288,8 @@ _cairo_ps_form_pluck (void *entry, void *closure)
 
     _cairo_hash_table_remove (patterns, &surface_entry->base);
     free (surface_entry->unique_id);
+    if (_cairo_surface_is_recording (surface_entry->src_surface) && surface_entry->regions_id != 0)
+	_cairo_recording_surface_region_array_remove (surface_entry->src_surface, surface_entry->regions_id);
     cairo_surface_destroy (surface_entry->src_surface);
     free (surface_entry);
 }
@@ -3308,6 +3312,7 @@ _cairo_ps_surface_emit_eps (cairo_ps_surface_t          *surface,
 static cairo_status_t
 _cairo_ps_surface_emit_recording_surface (cairo_ps_surface_t          *surface,
 					  cairo_surface_t             *recording_surface,
+					  unsigned int                 regions_id,
 					  const cairo_rectangle_int_t *recording_extents,
 					  cairo_bool_t                 subsurface)
 {
@@ -3378,6 +3383,7 @@ _cairo_ps_surface_emit_recording_surface (cairo_ps_surface_t          *surface,
     }
 
     status = _cairo_recording_surface_replay_region (recording_surface,
+						     regions_id,
 						     subsurface ? recording_extents : NULL,
 						     &surface->base,
 						     CAIRO_RECORDING_REGION_NATIVE);
@@ -3530,6 +3536,9 @@ _cairo_ps_surface_use_form (cairo_ps_surface_t           *surface,
     source_entry->unique_id = unique_id;
     source_entry->id = surface->num_forms++;
     source_entry->src_surface = cairo_surface_reference (params->src_surface);
+    source_entry->regions_id = params->regions_id;
+    if (_cairo_surface_is_recording (source_entry->src_surface) && source_entry->regions_id != 0)
+	_cairo_recording_surface_region_array_reference (source_entry->src_surface, source_entry->regions_id);
     source_entry->src_surface_extents = *params->src_surface_extents;
     source_entry->src_surface_bounded = params->src_surface_bounded;
     source_entry->required_extents = *params->src_op_extents;
@@ -3662,11 +3671,13 @@ _cairo_ps_surface_emit_surface (cairo_ps_surface_t          *surface,
 	    cairo_surface_subsurface_t *sub = (cairo_surface_subsurface_t *) params->src_surface;
 	    status = _cairo_ps_surface_emit_recording_surface (surface,
 							       sub->target,
+							       params->regions_id,
 							       &sub->extents,
 							       TRUE);
 	} else {
 	    status = _cairo_ps_surface_emit_recording_surface (surface,
 							       params->src_surface,
+							       params->regions_id,
 							       params->src_op_extents,
 							       FALSE);
 	}
@@ -3709,6 +3720,7 @@ _cairo_ps_form_emit (void *entry, void *closure)
     cairo_output_stream_t *old_stream;
 
     params.src_surface = form->src_surface;
+    params.regions_id = form->regions_id;
     params.op = CAIRO_OPERATOR_OVER;
     params.src_surface_extents = &form->src_surface_extents;
     params.src_surface_bounded = form->src_surface_bounded;
@@ -3850,10 +3862,16 @@ _cairo_ps_surface_paint_surface (cairo_ps_surface_t     *surface,
     cairo_path_fixed_t path;
     cairo_emit_surface_params_t params;
     cairo_image_surface_t *image = NULL;
+    unsigned int region_id = 0;
 
     status = _cairo_pdf_operators_flush (&surface->pdf_operators);
     if (unlikely (status))
 	return status;
+
+    if (pattern->type == CAIRO_PATTERN_TYPE_SURFACE) {
+	cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) pattern;
+	region_id = surface_pattern->region_array_id;
+    }
 
     status = _cairo_ps_surface_acquire_source_surface_from_pattern (surface,
 								    pattern,
@@ -3940,6 +3958,7 @@ _cairo_ps_surface_paint_surface (cairo_ps_surface_t     *surface,
     cairo_matrix_translate (&ps_p2d, x_offset, y_offset);
 
     params.src_surface = image ? &image->base : source_surface;
+    params.regions_id = image ? 0 : region_id;
     params.op = op;
     params.src_surface_extents = &src_surface_extents;
     params.src_surface_bounded = src_surface_bounded;
@@ -3994,11 +4013,17 @@ _cairo_ps_surface_emit_surface_pattern (cairo_ps_surface_t      *surface,
     cairo_rectangle_int_t src_op_extents;
     cairo_emit_surface_params_t params;
     cairo_extend_t extend = cairo_pattern_get_extend (pattern);
+    unsigned int region_id = 0;
 
     cairo_p2d = pattern->matrix;
     status = cairo_matrix_invert (&cairo_p2d);
     /* cairo_pattern_set_matrix ensures the matrix is invertible */
     assert (status == CAIRO_STATUS_SUCCESS);
+
+    if (pattern->type == CAIRO_PATTERN_TYPE_SURFACE) {
+	cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) pattern;
+	region_id = surface_pattern->region_array_id;
+    }
 
     status = _cairo_ps_surface_acquire_source_surface_from_pattern (surface,
 								    pattern,
@@ -4093,6 +4118,7 @@ _cairo_ps_surface_emit_surface_pattern (cairo_ps_surface_t      *surface,
     old_paint_proc = surface->paint_proc;
     surface->paint_proc = TRUE;
     params.src_surface = image ? &image->base : source_surface;
+    params.regions_id = image ? 0 : region_id;
     params.op = op;
     params.src_surface_extents = &pattern_extents;
     params.src_surface_bounded = bounded;

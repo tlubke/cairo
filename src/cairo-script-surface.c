@@ -2509,7 +2509,7 @@ _cairo_script_surface_paint (void			*abstract_surface,
 
     if (_cairo_surface_wrapper_is_active (&surface->wrapper)) {
 	return _cairo_surface_wrapper_paint (&surface->wrapper,
-					     op, source, clip);
+					     op, source, 0, clip);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -2566,7 +2566,7 @@ _cairo_script_surface_mask (void			*abstract_surface,
 
     if (_cairo_surface_wrapper_is_active (&surface->wrapper)) {
 	return _cairo_surface_wrapper_mask (&surface->wrapper,
-					    op, source, mask, clip);
+					    op, source, 0, mask, 0, clip);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -2653,7 +2653,7 @@ _cairo_script_surface_stroke (void				*abstract_surface,
 
     if (_cairo_surface_wrapper_is_active (&surface->wrapper)) {
 	return _cairo_surface_wrapper_stroke (&surface->wrapper,
-					      op, source, path,
+					      op, source, 0, path,
 					      style,
 					      ctm, ctm_inverse,
 					      tolerance, antialias,
@@ -2734,7 +2734,7 @@ _cairo_script_surface_fill (void			*abstract_surface,
 
     if (_cairo_surface_wrapper_is_active (&surface->wrapper)) {
 	return _cairo_surface_wrapper_fill (&surface->wrapper,
-					    op, source, path,
+					    op, source, 0, path,
 					    fill_rule,
 					    tolerance,
 					    antialias,
@@ -3585,7 +3585,7 @@ _cairo_script_surface_show_text_glyphs (void			    *abstract_surface,
 
     if (_cairo_surface_wrapper_is_active (&surface->wrapper)){
 	return _cairo_surface_wrapper_show_text_glyphs (&surface->wrapper,
-							op, source,
+							op, source, 0,
 							utf8, utf8_len,
 							glyphs, num_glyphs,
 							clusters, num_clusters,

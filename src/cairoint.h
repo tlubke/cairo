@@ -1855,6 +1855,12 @@ _cairo_debug_print_matrix (FILE *file, const cairo_matrix_t *matrix);
 cairo_private void
 _cairo_debug_print_rect (FILE *file, const cairo_rectangle_int_t *rect);
 
+cairo_private const char *
+_cairo_debug_operator_to_string (cairo_operator_t op);
+
+cairo_private const char *
+_cairo_debug_status_to_string (cairo_int_status_t status);
+
 cairo_private cairo_status_t
 _cairo_bentley_ottmann_tessellate_rectilinear_polygon (cairo_traps_t	 *traps,
 						       const cairo_polygon_t *polygon,

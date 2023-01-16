@@ -42,6 +42,9 @@
 #endif
 
 #include <cairo.h>
+
+#if CAIRO_HAS_PDF_SURFACE
+
 #include <cairo-pdf.h>
 
 /* This test checks PDF with
@@ -604,3 +607,5 @@ CAIRO_TEST (pdf_tagged_text,
 	    NULL, /* requirements */
 	    0, 0,
 	    preamble, NULL)
+
+#endif /* CAIRO_HAS_PDF_SURFACE */

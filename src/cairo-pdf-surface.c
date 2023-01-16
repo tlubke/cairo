@@ -54,6 +54,7 @@
 #include "cairo-error-private.h"
 #include "cairo-image-surface-inline.h"
 #include "cairo-image-info-private.h"
+#include "cairo-recording-surface-inline.h"
 #include "cairo-recording-surface-private.h"
 #include "cairo-output-stream-private.h"
 #include "cairo-paginated-private.h"
@@ -1014,7 +1015,13 @@ _cairo_pdf_surface_clear (cairo_pdf_surface_t *surface)
     size = _cairo_array_num_elements (&surface->page_surfaces);
     for (i = 0; i < size; i++) {
 	src_surface = (cairo_pdf_source_surface_t *) _cairo_array_index (&surface->page_surfaces, i);
-	cairo_surface_destroy (src_surface->surface);
+	if (src_surface->type == CAIRO_PATTERN_TYPE_RASTER_SOURCE) {
+	    cairo_pattern_destroy (src_surface->raster_pattern);
+	} else {
+	    if (_cairo_surface_is_recording (src_surface->surface) && src_surface->region_id != 0)
+		_cairo_recording_surface_region_array_remove (src_surface->surface, src_surface->region_id);
+	    cairo_surface_destroy (src_surface->surface);
+	}
     }
     _cairo_array_truncate (&surface->page_surfaces, 0);
 
@@ -1723,6 +1730,7 @@ _cairo_pdf_surface_add_source_surface (cairo_pdf_surface_t	         *surface,
     _cairo_pdf_source_surface_init_key (surface_entry);
 
     src_surface.hash_entry = surface_entry;
+    src_surface.region_id = 0;
     if (source_pattern && source_pattern->type == CAIRO_PATTERN_TYPE_RASTER_SOURCE) {
 	src_surface.type = CAIRO_PATTERN_TYPE_RASTER_SOURCE;
 	src_surface.surface = NULL;
@@ -1734,6 +1742,16 @@ _cairo_pdf_surface_add_source_surface (cairo_pdf_surface_t	         *surface,
 	src_surface.type = CAIRO_PATTERN_TYPE_SURFACE;
 	src_surface.surface = cairo_surface_reference (source_surface);
 	src_surface.raster_pattern = NULL;
+	if (source_pattern) {
+	    cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source_pattern;
+	    src_surface.region_id = surface_pattern->region_array_id;
+	    if (_cairo_surface_is_recording (surface_pattern->surface) &&
+		surface_pattern->region_array_id != 0)
+	    {
+		_cairo_recording_surface_region_array_reference (surface_pattern->surface,
+								 surface_pattern->region_array_id);
+	    }
+	}
     }
 
     surface_entry->surface_res = _cairo_pdf_surface_new_object (surface);
@@ -2593,7 +2611,13 @@ _cairo_pdf_surface_finish (void *abstract_surface)
     size = _cairo_array_num_elements (&surface->doc_surfaces);
     for (i = 0; i < size; i++) {
 	_cairo_array_copy_element (&surface->doc_surfaces, i, &doc_surface);
-	cairo_surface_destroy (doc_surface.surface);
+	if (doc_surface.type == CAIRO_PATTERN_TYPE_RASTER_SOURCE) {
+	    cairo_pattern_destroy (doc_surface.raster_pattern);
+	} else {
+	    if (_cairo_surface_is_recording (doc_surface.surface) && doc_surface.region_id != 0)
+		_cairo_recording_surface_region_array_remove (doc_surface.surface, doc_surface.region_id);
+	    cairo_surface_destroy (doc_surface.surface);
+	}
     }
     _cairo_array_fini (&surface->doc_surfaces);
     _cairo_hash_table_foreach (surface->all_surfaces,
@@ -3720,6 +3744,7 @@ _cairo_pdf_surface_emit_recording_surface (cairo_pdf_surface_t        *surface,
     }
 
     status = _cairo_recording_surface_replay_region (source,
+						     pdf_source->region_id,
 						     is_subsurface ? extents : NULL,
 						     &surface->base,
 						     CAIRO_RECORDING_REGION_NATIVE);

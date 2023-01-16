@@ -654,6 +654,7 @@ _cairo_win32_printing_surface_paint_recording_pattern (cairo_win32_printing_surf
 
 	    SaveDC (surface->win32.dc); /* Allow clip path to be reset during replay */
 	    status = _cairo_recording_surface_replay_region (&recording_surface->base,
+							     pattern->region_array_id,
 							     is_subsurface ? &recording_extents : NULL,
 							     &surface->win32.base,
 							     CAIRO_RECORDING_REGION_NATIVE);
