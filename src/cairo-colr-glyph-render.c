@@ -264,11 +264,15 @@ draw_paint_solid (cairo_colr_glyph_render_t *render,
 
     get_palette_color (render, &solid->color, &color, &is_foreground_color);
     if (is_foreground_color)
+    {
 	cairo_set_source (cr, render->foreground_color);
+	cairo_paint_with_alpha (cr, color.alpha);
+    }
     else
+    {
 	cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
-
-    cairo_paint (cr);
+	cairo_paint (cr);
+    }
 
     return CAIRO_STATUS_SUCCESS;
 }
