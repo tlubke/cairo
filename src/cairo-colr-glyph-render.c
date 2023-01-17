@@ -1192,19 +1192,13 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
                              cairo_t              *cr)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
-    cairo_colr_glyph_render_t *colr_render = NULL;
+    cairo_colr_glyph_render_t colr_render;
     FT_Color *palette = NULL;
     FT_Palette_Data palette_data;
 
 #if DEBUG_COLR
     printf ("_cairo_render_colr_glyph  glyph index: %ld\n", glyph);
 #endif
-
-    colr_render = _cairo_malloc (sizeof (cairo_colr_glyph_render_t));
-    if (unlikely (colr_render == NULL)) {
-	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-	goto cleanup;
-    }
 
     if (FT_Palette_Data_Get (face, &palette_data) == 0 && palette_data.num_palettes > 0) {
 	if (palette_index >= palette_data.num_palettes)
@@ -1214,22 +1208,18 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
 	    palette = NULL;
     }
 
-    colr_render->face = face;
-    colr_render->palette = palette;
-    colr_render->num_palette_entries = palette_data.num_palette_entries;
-    colr_render->foreground_color = cairo_pattern_reference (cairo_get_source (cr));
-    colr_render->level = 0;
+    colr_render.face = face;
+    colr_render.palette = palette;
+    colr_render.num_palette_entries = palette_data.num_palette_entries;
+    colr_render.foreground_color = cairo_pattern_reference (cairo_get_source (cr));
+    colr_render.level = 0;
 
-    status = draw_colr_glyph (colr_render,
+    status = draw_colr_glyph (&colr_render,
 			      glyph,
 			      FT_COLOR_INCLUDE_ROOT_TRANSFORM,
 			      cr);
   
-  cleanup:
-    cairo_pattern_destroy (colr_render->foreground_color);
-
-    if (colr_render)
-	free (colr_render);
+    cairo_pattern_destroy (colr_render.foreground_color);
 
     return status;
 }
