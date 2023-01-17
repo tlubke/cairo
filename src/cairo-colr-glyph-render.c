@@ -1021,7 +1021,6 @@ draw_paint_composite (cairo_colr_glyph_render_t *render,
 
     cairo_save (cr);
 
-    cairo_push_group (cr);
     status = draw_paint (render, &composite->backdrop_paint, cr);
     if (unlikely (status)) {
 	cairo_pattern_destroy (cairo_pop_group (cr));
@@ -1038,9 +1037,6 @@ draw_paint_composite (cairo_colr_glyph_render_t *render,
 
     cairo_pop_group_to_source (cr);
     cairo_set_operator (cr, cairo_operator_from_ft_composite_mode (composite->composite_mode));
-    cairo_paint (cr);
-    cairo_pop_group_to_source (cr);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
     cairo_paint (cr);
 
   cleanup:
