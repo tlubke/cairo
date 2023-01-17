@@ -235,15 +235,17 @@ get_palette_color (cairo_colr_glyph_render_t *render,
         color->red = 0;
         color->green = 0;
         color->blue = 0;
+	color->alpha = 1;
         foreground = TRUE;
     } else {
         FT_Color c = render->palette[ci->palette_index];
         color->red = c.red / 255.0;
         color->green = c.green / 255.0;
         color->blue = c.blue / 255.0;
+	color->alpha = c.alpha / 255.0;
     }
 
-    color->alpha = double_from_2_14 (ci->alpha);
+    color->alpha *= double_from_2_14 (ci->alpha);
     if (foreground)
         *is_foreground_color = TRUE;
 }

@@ -3295,6 +3295,7 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
 
     /* We need to load color to determine if this is a color format. */
     int color_flag = 0;
+
 #ifdef FT_LOAD_COLOR
     if (scaled_font->unscaled->have_color && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
 	color_flag = FT_LOAD_COLOR;
@@ -3317,12 +3318,13 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
     if (is_svg_format) {
          glyph_priv->format = CAIRO_FT_GLYPH_TYPE_SVG;
     } else if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
-	if (_cairo_ft_scaled_glyph_is_colr_v1 (scaled_font, scaled_glyph, face))
-	    glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V1;
-	else if (_cairo_ft_scaled_glyph_is_colr_v0 (scaled_font, scaled_glyph, face))
-	    glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V0;
-	else
-	    glyph_priv->format = CAIRO_FT_GLYPH_TYPE_OUTLINE;
+	glyph_priv->format = CAIRO_FT_GLYPH_TYPE_OUTLINE;
+	if (color_flag) {
+	    if (_cairo_ft_scaled_glyph_is_colr_v1 (scaled_font, scaled_glyph, face))
+		glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V1;
+	    else if (_cairo_ft_scaled_glyph_is_colr_v0 (scaled_font, scaled_glyph, face))
+		glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V0;
+	}
     } else {
 	/* For anything else we let FreeType render a bitmap. */
 	 glyph_priv->format =  CAIRO_FT_GLYPH_TYPE_BITMAP;
@@ -3348,15 +3350,30 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
 										   scaled_glyph,
 										   face,
 										   &fs_metrics);
+	if (unlikely (status))
+	    return status;
     }
 #endif
 
 #if HAVE_FT_COLR_V1
     if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1) {
+	if (!hint_metrics) {
+	    status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
+							scaled_glyph,
+							face,
+							load_flags | color_flag,
+							FALSE,
+							vertical_layout);
+	    if (unlikely (status))
+		return status;
+	}
+
 	status = (cairo_int_status_t)_cairo_ft_scaled_glyph_init_record_colr_v1_glyph (scaled_font,
 										       scaled_glyph,
 										       face,
 										       &fs_metrics);
+	if (unlikely (status))
+	    return status;
     }
 #endif
 
