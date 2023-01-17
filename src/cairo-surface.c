@@ -1782,7 +1782,7 @@ slim_hidden_def (cairo_surface_mark_dirty_rectangle);
  * by the CTM when drawing to @surface. One common use for this is to
  * render to very high resolution display devices at a scale factor, so
  * that code that assumes 1 pixel will be a certain size will still work.
- * Setting a transformation via cairo_translate() isn't
+ * Setting a transformation via cairo_scale() isn't
  * sufficient to do this, since functions like
  * cairo_device_to_user() will expose the hidden scale.
  *
@@ -1834,7 +1834,7 @@ slim_hidden_def (cairo_surface_set_device_scale);
  * @x_scale: the scale in the X direction, in device units
  * @y_scale: the scale in the Y direction, in device units
  *
- * This function returns the previous device offset set by
+ * This function returns the previous device scale set by
  * cairo_surface_set_device_scale().
  *
  * Since: 1.14
