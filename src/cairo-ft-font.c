@@ -3350,15 +3350,30 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t     *scaled_font,
 										   scaled_glyph,
 										   face,
 										   &fs_metrics);
+	if (unlikely (status))
+	    return status;
     }
 #endif
 
 #if HAVE_FT_COLR_V1
     if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1) {
+	if (!hint_metrics) {
+	    status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
+							scaled_glyph,
+							face,
+							load_flags | color_flag,
+							FALSE,
+							vertical_layout);
+	    if (unlikely (status))
+		return status;
+	}
+
 	status = (cairo_int_status_t)_cairo_ft_scaled_glyph_init_record_colr_v1_glyph (scaled_font,
 										       scaled_glyph,
 										       face,
 										       &fs_metrics);
+	if (unlikely (status))
+	    return status;
     }
 #endif
 
