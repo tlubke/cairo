@@ -1753,6 +1753,7 @@ _cairo_gstate_set_font_options (cairo_gstate_t             *gstate,
 
     _cairo_gstate_unset_scaled_font (gstate);
 
+    _cairo_font_options_fini (&gstate->font_options);
     _cairo_font_options_init_copy (&gstate->font_options, options);
 }
 
@@ -1760,7 +1761,8 @@ void
 _cairo_gstate_get_font_options (cairo_gstate_t       *gstate,
 				cairo_font_options_t *options)
 {
-    *options = gstate->font_options;
+    _cairo_font_options_fini (options);
+    _cairo_font_options_init_copy (options, &gstate->font_options);
 }
 
 cairo_status_t
