@@ -1883,6 +1883,7 @@ _cairo_dwrite_scaled_font_create_win32_scaled_font (cairo_scaled_font_t *scaled_
     cairo_scaled_font_get_ctm (scaled_font, &ctm);
 
     cairo_font_options_t options;
+    _cairo_font_options_init_default (&options);
     cairo_scaled_font_get_font_options (scaled_font, &options);
 
     cairo_scaled_font_t *font = cairo_scaled_font_create (win32_face,

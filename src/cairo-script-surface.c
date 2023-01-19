@@ -3044,6 +3044,7 @@ _emit_scaled_font (cairo_script_surface_t *surface,
 	if (unlikely (status))
 	    return status;
 
+	_cairo_font_options_init_default (&options);
 	cairo_scaled_font_get_font_options (scaled_font, &options);
 	status = _emit_font_options (surface, &options);
 	if (unlikely (status))

@@ -3073,6 +3073,7 @@ cairo_scaled_font_get_font_options (cairo_scaled_font_t		*scaled_font,
 	return;
     }
 
+    _cairo_font_options_fini (options);
     _cairo_font_options_init_copy (options, &scaled_font->options);
 }
 slim_hidden_def (cairo_scaled_font_get_font_options);
