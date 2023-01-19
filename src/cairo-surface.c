@@ -2757,6 +2757,7 @@ composite_color_glyphs (cairo_surface_t             *surface,
 	font_face = cairo_scaled_font_get_font_face (scaled_font);
 	cairo_scaled_font_get_font_matrix (scaled_font, &font_matrix);
 	cairo_scaled_font_get_ctm (scaled_font, &ctm);
+	_cairo_font_options_init_default (&font_options);
 	cairo_scaled_font_get_font_options (scaled_font, &font_options);
 	cairo_matrix_scale (&ctm, x_scale, y_scale);
 	scaled_font = cairo_scaled_font_create (font_face,
