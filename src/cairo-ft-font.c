@@ -2831,7 +2831,8 @@ _cairo_ft_scaled_glyph_init_record_colr_v1_glyph (cairo_ft_scaled_font_t *scaled
     if (!_cairo_matrix_is_scale_0 (&scaled_font->base.scale)) {
 	status = _cairo_render_colr_v1_glyph (face,
 					      _cairo_scaled_glyph_index (scaled_glyph),
-					      scaled_font->base.options.palette_index,
+                                              palette,
+                                              num_palette_entries,
 					      cr);
 	if (status == CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED)
 	    status = CAIRO_INT_STATUS_UNSUPPORTED;

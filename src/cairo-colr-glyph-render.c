@@ -1188,29 +1188,20 @@ draw_colr_glyph (cairo_colr_glyph_render_t *render,
 cairo_status_t
 _cairo_render_colr_v1_glyph (FT_Face               face,
                              unsigned long         glyph,
-                             FT_UShort             palette_index,
+                             FT_Color             *palette,
+                             int                   num_palette_entries,
                              cairo_t              *cr)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
     cairo_colr_glyph_render_t colr_render;
-    FT_Color *palette = NULL;
-    FT_Palette_Data palette_data;
 
 #if DEBUG_COLR
     printf ("_cairo_render_colr_glyph  glyph index: %ld\n", glyph);
 #endif
 
-    if (FT_Palette_Data_Get (face, &palette_data) == 0 && palette_data.num_palettes > 0) {
-	if (palette_index >= palette_data.num_palettes)
-	    palette_index = CAIRO_COLOR_PALETTE_DEFAULT;
-
-	if (FT_Palette_Select (face, palette_index, &palette) != 0)
-	    palette = NULL;
-    }
-
     colr_render.face = face;
     colr_render.palette = palette;
-    colr_render.num_palette_entries = palette_data.num_palette_entries;
+    colr_render.num_palette_entries = num_palette_entries;
     colr_render.foreground_color = cairo_pattern_reference (cairo_get_source (cr));
     colr_render.level = 0;
 
