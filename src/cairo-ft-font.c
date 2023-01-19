@@ -2536,7 +2536,7 @@ _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
 	if (scaled_font->base.options.palette_index < palette_data.num_palettes)
 	    palette_index = scaled_font->base.options.palette_index;
 
-	num_entries = palette_data.num_palettes;
+	num_entries = palette_data.num_palette_entries;
 	if (FT_Palette_Select (face, palette_index, &entries) != 0) {
 	    num_entries = 0;
 	    entries = NULL;
