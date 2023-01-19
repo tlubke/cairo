@@ -58,7 +58,8 @@ static const cairo_font_options_t _cairo_font_options_nil = {
     CAIRO_ROUND_GLYPH_POS_DEFAULT,
     NULL, /* variations */
     CAIRO_COLOR_MODE_DEFAULT,
-    CAIRO_COLOR_PALETTE_DEFAULT
+    CAIRO_COLOR_PALETTE_DEFAULT,
+    NULL, 0, /* custom palette */
 };
 
 /**
@@ -79,6 +80,8 @@ _cairo_font_options_init_default (cairo_font_options_t *options)
     options->variations = NULL;
     options->color_mode = CAIRO_COLOR_MODE_DEFAULT;
     options->palette_index = CAIRO_COLOR_PALETTE_DEFAULT;
+    options->custom_palette = NULL;
+    options->custom_palette_size = 0;
 }
 
 void
@@ -94,6 +97,12 @@ _cairo_font_options_init_copy (cairo_font_options_t		*options,
     options->variations = other->variations ? strdup (other->variations) : NULL;
     options->color_mode = other->color_mode;
     options->palette_index = other->palette_index;
+    options->custom_palette_size = other->custom_palette_size;
+    options->custom_palette = NULL;
+    if (other->custom_palette) {
+        options->custom_palette = (cairo_palette_color_t *) malloc (sizeof (cairo_palette_color_t) * options->custom_palette_size);
+        memcpy (options->custom_palette, other->custom_palette, sizeof (cairo_palette_color_t) * options->custom_palette_size);
+    }
 }
 
 /**
@@ -164,6 +173,7 @@ void
 _cairo_font_options_fini (cairo_font_options_t *options)
 {
     free (options->variations);
+    free (options->custom_palette);
 }
 
 /**
@@ -266,6 +276,12 @@ cairo_font_options_merge (cairo_font_options_t       *options,
 	options->color_mode = other->color_mode;
     if (other->palette_index != CAIRO_COLOR_PALETTE_DEFAULT)
 	options->palette_index = other->palette_index;
+    if (other->custom_palette) {
+        options->custom_palette_size = other->custom_palette_size;
+        free (options->custom_palette);
+        options->custom_palette = (cairo_palette_color_t *) malloc (sizeof (cairo_palette_color_t) * options->custom_palette_size);
+        memcpy (options->custom_palette, other->custom_palette, sizeof (cairo_palette_color_t) * options->custom_palette_size);
+    }
 }
 slim_hidden_def (cairo_font_options_merge);
 
@@ -304,7 +320,12 @@ cairo_font_options_equal (const cairo_font_options_t *options,
              (options->variations != NULL && other->variations != NULL &&
               strcmp (options->variations, other->variations) == 0)) &&
 	    options->color_mode == other->color_mode &&
-	    options->palette_index == other->palette_index);
+	    options->palette_index == other->palette_index &&
+            ((options->custom_palette == NULL && other->custom_palette == NULL) ||
+             (options->custom_palette != NULL && other->custom_palette != NULL &&
+              options->custom_palette_size == other->custom_palette_size &&
+              memcmp (options->custom_palette, other->custom_palette,
+                      sizeof (cairo_palette_color_t) * options->custom_palette_size) == 0)));
 }
 slim_hidden_def (cairo_font_options_equal);
 
@@ -686,8 +707,12 @@ cairo_font_options_get_color_mode (const cairo_font_options_t *options)
  *
  * Sets the OpenType font color palette for the font options
  * object. OpenType color fonts with a CPAL table may contain multiple
- * palettes. The default color palette index is %CAIRO_COLOR_PALETTE_DEFAULT. If
- * @palette_index is invalid, the default palette is used.
+ * palettes. The default color palette index is %CAIRO_COLOR_PALETTE_DEFAULT.
+ *
+ * #cairo_font_options_t can also contain a custom palette, which will
+ * be used if @palette_index is %CAIRO_COLOR_PALETTE_CUSTOM.
+ *
+ * If @palette_index is invalid, the default palette is used.
  *
  * Since: 1.18
  **/
@@ -718,4 +743,90 @@ cairo_font_options_get_color_palette (const cairo_font_options_t *options)
 	return CAIRO_COLOR_PALETTE_DEFAULT;
 
     return options->palette_index;
+}
+
+/**
+ * cairo_font_options_set_custom_palette_color:
+ * @options: a #cairo_font_options_t
+ * @index: the index of the color to set
+ * @red: red component of color
+ * @green: green component of color
+ * @blue: blue component of color
+ * @alpha: alpha component of color
+ *
+ * Sets a custom palette color for the font options object.
+ *
+ * The custom colors will be used in preference to the selected
+ * color palette from the font (see cairo_font_options_set_color_palette()).
+ * It is possible to override only selected colors from the font palette.
+ *
+ * Since: 1.18
+ */
+void
+cairo_font_options_set_custom_palette_color (cairo_font_options_t *options,
+                                             unsigned int index,
+                                             double red, double green,
+                                             double blue, double alpha)
+{
+    unsigned int idx;
+
+    for (idx = 0; idx < options->custom_palette_size; idx++) {
+        if (options->custom_palette[idx].index == index) {
+            break;
+        }
+    }
+
+    if (idx == options->custom_palette_size) {
+        options->custom_palette_size++;
+        options->custom_palette = (cairo_palette_color_t *)
+            _cairo_realloc_ab (options->custom_palette,
+                               sizeof (cairo_palette_color_t),
+                               options->custom_palette_size);
+    }
+
+    /* beware of holes */
+    memset (&options->custom_palette[idx], 0, sizeof (cairo_palette_color_t));
+
+    options->custom_palette[idx].index = index;
+    options->custom_palette[idx].red = red;
+    options->custom_palette[idx].green = green;
+    options->custom_palette[idx].blue = blue;
+    options->custom_palette[idx].alpha = alpha;
+}
+
+/**
+ * cairo_font_options_get_custom_palette_color:
+ * @options: a #cairo_font_options_t
+ * @index: the index of the color to get
+ * @red: return location for red component of color
+ * @green: return location for green component of color
+ * @blue: return location for blue component of color
+ * @alpha: return location for alpha component of color
+ *
+ * Gets a custom palette color for the font options object.
+ *
+ * Returns: `CAIRO_STATUS_SUCCESS` if a custom palette color is returned,
+ *     `CAIRO_STATUS_INVALID_INDEX` otherwise.
+ *
+ * Since: 1.18
+ */
+cairo_status_t
+cairo_font_options_get_custom_palette_color (cairo_font_options_t *options,
+                                             unsigned int index,
+                                             double *red, double *green,
+                                             double *blue, double *alpha)
+{
+    unsigned int idx;
+
+    for (idx = 0; idx < options->custom_palette_size; idx++) {
+        if (options->custom_palette[idx].index == index) {
+            *red = options->custom_palette[idx].red;
+            *green = options->custom_palette[idx].green;
+            *blue = options->custom_palette[idx].blue;
+            *alpha = options->custom_palette[idx].alpha;
+            return CAIRO_STATUS_SUCCESS;
+        }
+    }
+
+    return CAIRO_STATUS_INVALID_INDEX;
 }

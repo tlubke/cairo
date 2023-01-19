@@ -187,6 +187,11 @@ typedef enum _cairo_round_glyph_positions {
     CAIRO_ROUND_GLYPH_POS_OFF
 } cairo_round_glyph_positions_t;
 
+typedef struct {
+    unsigned int index;
+    double red, green, blue, alpha;
+} cairo_palette_color_t;
+
 struct _cairo_font_options {
     cairo_antialias_t antialias;
     cairo_subpixel_order_t subpixel_order;
@@ -197,6 +202,8 @@ struct _cairo_font_options {
     char *variations;
     cairo_color_mode_t color_mode;
     unsigned int palette_index;
+    cairo_palette_color_t *custom_palette;
+    unsigned int custom_palette_size;
 };
 
 struct _cairo_glyph_text_info {

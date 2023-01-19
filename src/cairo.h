@@ -1485,6 +1485,18 @@ cairo_public void
 cairo_font_options_set_color_palette (cairo_font_options_t *options,
                                       unsigned int          palette_index);
 
+cairo_public void
+cairo_font_options_set_custom_palette_color (cairo_font_options_t *options,
+                                             unsigned int index,
+                                             double red, double green,
+                                             double blue, double alpha);
+
+cairo_public cairo_status_t
+cairo_font_options_get_custom_palette_color (cairo_font_options_t *options,
+                                             unsigned int index,
+                                             double *red, double *green,
+                                             double *blue, double *alpha);
+
 /* This interface is for dealing with text as text, not caring about the
    font object inside the the cairo_t. */
 
