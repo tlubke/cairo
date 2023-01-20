@@ -1269,7 +1269,7 @@ parse_svg (cairo_svg_glyph_render_t *svg_render,
         /* We should now be in a start or empty element tag */
 
         /* find end of tag name */
-        end = strpbrk(p, WHITE_SPACE_CHARS ">");
+        end = strpbrk(p, WHITE_SPACE_CHARS "/>");
         if (!end) {
             parse_error (svg_render, svg_document, p, "Could not find '>'");
             goto fail;
