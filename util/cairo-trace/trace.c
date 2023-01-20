@@ -1600,6 +1600,7 @@ _status_to_string (cairo_status_t status)
 	f(WIN32_GDI_ERROR);
 	f(TAG_ERROR);
 	f(DWRITE_ERROR);
+	f(SVG_FONT_ERROR);
     case CAIRO_STATUS_LAST_STATUS:
 	break;
     }

@@ -176,6 +176,8 @@ cairo_status_to_string (cairo_status_t status)
 	return "invalid tag name, attributes, or nesting";
     case CAIRO_STATUS_DWRITE_ERROR:
 	return "Window Direct Write error";
+    case CAIRO_STATUS_SVG_FONT_ERROR:
+	return "error occured while rendering an OpenType-SVG font";
     default:
     case CAIRO_STATUS_LAST_STATUS:
 	return "<unknown error status>";

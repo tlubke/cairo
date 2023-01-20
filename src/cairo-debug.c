@@ -405,6 +405,7 @@ _cairo_debug_status_to_string (cairo_int_status_t status)
 	case CAIRO_INT_STATUS_WIN32_GDI_ERROR: return "WIN32_GDI_ERROR";
 	case CAIRO_INT_STATUS_TAG_ERROR: return "TAG_ERROR";
 	case CAIRO_INT_STATUS_DWRITE_ERROR: return "DWRITE_ERROR";
+	case CAIRO_INT_STATUS_SVG_FONT_ERROR: return "SVG_FONT_ERROR";
 
 	case CAIRO_INT_STATUS_LAST_STATUS: return "LAST_STATUS";
 
