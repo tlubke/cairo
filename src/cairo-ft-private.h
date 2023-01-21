@@ -81,7 +81,8 @@ _cairo_render_svg_glyph (const char           *svg_document,
 cairo_private cairo_status_t
 _cairo_render_colr_v1_glyph (FT_Face                 face,
                              unsigned long           glyph,
-                             FT_UShort               palette_index,
+                             FT_Color               *palette,
+                             int                     num_palette_entries,
                              cairo_t                *cr);
 #endif
 
