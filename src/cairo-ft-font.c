@@ -2531,24 +2531,24 @@ _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
 
     num_entries = 0;
     entries = NULL;
+
     if (FT_Palette_Data_Get (face, &palette_data) == 0 && palette_data.num_palettes > 0) {
 	FT_UShort palette_index = CAIRO_COLOR_PALETTE_DEFAULT;
 	if (scaled_font->base.options.palette_index < palette_data.num_palettes)
 	    palette_index = scaled_font->base.options.palette_index;
 
-	num_entries = palette_data.num_palette_entries;
-	if (FT_Palette_Select (face, palette_index, &entries) != 0) {
-	    num_entries = 0;
-	    entries = NULL;
-    	}
+	if (FT_Palette_Select (face, palette_index, &entries) == 0) {
+	    num_entries = palette_data.num_palette_entries;
 
-        for (unsigned int i = 0; i < scaled_font->base.options.custom_palette_size; i++) {
-            cairo_palette_color_t *entry = &scaled_font->base.options.custom_palette[i];
-            if (entry->index < num_entries) {
-                entries[entry->index].red = 255 * entry->red;
-                entries[entry->index].green = 255 * entry->green;
-                entries[entry->index].blue = 255 * entry->blue;
-                entries[entry->index].alpha = 255 * entry->alpha;
+            /* Overlay custom colors */
+            for (unsigned int i = 0; i < scaled_font->base.options.custom_palette_size; i++) {
+                cairo_palette_color_t *entry = &scaled_font->base.options.custom_palette[i];
+                if (entry->index < num_entries) {
+                    entries[entry->index].red = 255 * entry->red;
+                    entries[entry->index].green = 255 * entry->green;
+                    entries[entry->index].blue = 255 * entry->blue;
+                    entries[entry->index].alpha = 255 * entry->alpha;
+                }
             }
         }
     }
