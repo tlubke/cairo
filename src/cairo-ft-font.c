@@ -2993,9 +2993,6 @@ _cairo_ft_scaled_glyph_init_record_svg_glyph (cairo_ft_scaled_font_t *scaled_fon
 					  palette,
 					  num_palette_entries,
 					  cr);
-	if (status == CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED)
-	    status = CAIRO_INT_STATUS_UNSUPPORTED;
-
 	if (status == CAIRO_STATUS_SUCCESS)
 	    status = cairo_status (cr);
     }

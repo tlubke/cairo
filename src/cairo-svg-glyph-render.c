@@ -1269,7 +1269,7 @@ parse_svg (cairo_svg_glyph_render_t *svg_render,
         /* We should now be in a start or empty element tag */
 
         /* find end of tag name */
-        end = strpbrk(p, WHITE_SPACE_CHARS ">");
+        end = strpbrk(p, WHITE_SPACE_CHARS "/>");
         if (!end) {
             parse_error (svg_render, svg_document, p, "Could not find '>'");
             goto fail;
@@ -3141,7 +3141,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
     /* First parse elements into a tree and populate ids hash table */
     if (!parse_svg (svg_render, svg_document)) {
         print_error (svg_render, "Parse SVG document failed");
-        status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
+        status = CAIRO_STATUS_SVG_FONT_ERROR;
         goto cleanup;
     }
 
