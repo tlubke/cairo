@@ -258,6 +258,13 @@ typedef struct _cairo_pdf_interchange {
 
 } cairo_pdf_interchange_t;
 
+typedef struct _cairo_pdf_color_glyph {
+    cairo_hash_entry_t   base;
+    cairo_scaled_font_t *scaled_font;
+    unsigned long        glyph_index;
+    cairo_bool_t         supported;
+} cairo_pdf_color_glyph_t;
+
 /* pdf surface data */
 
 typedef struct _cairo_pdf_surface cairo_pdf_surface_t;
@@ -288,6 +295,7 @@ struct _cairo_pdf_surface {
     cairo_array_t knockout_group;
     cairo_array_t jbig2_global;
     cairo_array_t page_heights;
+    cairo_hash_table_t *color_glyphs;
 
     cairo_scaled_font_subsets_t *font_subsets;
     cairo_array_t fonts;
@@ -335,11 +343,13 @@ struct _cairo_pdf_surface {
 
     cairo_pdf_operators_t pdf_operators;
     cairo_paginated_mode_t paginated_mode;
+    cairo_bool_t type3_replay;
     cairo_bool_t select_pattern_gstate_saved;
 
     cairo_bool_t force_fallbacks;
 
     cairo_operator_t current_operator;
+    cairo_bool_t reset_gs_required;
     cairo_bool_t current_pattern_is_solid_color;
     cairo_bool_t current_color_is_stroke;
     double current_color_red;

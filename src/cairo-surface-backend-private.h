@@ -124,14 +124,14 @@ struct _cairo_surface_backend {
     (*paint)			(void			*surface,
 				 cairo_operator_t	 op,
 				 const cairo_pattern_t	*source,
-				 const cairo_clip_t		*clip);
+				 const cairo_clip_t	*clip);
 
     cairo_warn cairo_int_status_t
     (*mask)			(void			*surface,
 				 cairo_operator_t	 op,
 				 const cairo_pattern_t	*source,
 				 const cairo_pattern_t	*mask,
-				 const cairo_clip_t		*clip);
+				 const cairo_clip_t	*clip);
 
     cairo_warn cairo_int_status_t
     (*stroke)			(void			*surface,
@@ -143,7 +143,7 @@ struct _cairo_surface_backend {
 				 const cairo_matrix_t	*ctm_inverse,
 				 double			 tolerance,
 				 cairo_antialias_t	 antialias,
-				 const cairo_clip_t		*clip);
+				 const cairo_clip_t	*clip);
 
     cairo_warn cairo_int_status_t
     (*fill)			(void			*surface,
@@ -153,7 +153,7 @@ struct _cairo_surface_backend {
 				 cairo_fill_rule_t	 fill_rule,
 				 double			 tolerance,
 				 cairo_antialias_t	 antialias,
-				 const cairo_clip_t           *clip);
+				 const cairo_clip_t     *clip);
 
     cairo_warn cairo_int_status_t
     (*fill_stroke)		(void			*surface,
@@ -196,7 +196,7 @@ struct _cairo_surface_backend {
 				 int			     num_clusters,
 				 cairo_text_cluster_flags_t  cluster_flags,
 				 cairo_scaled_font_t	    *scaled_font,
-				 const cairo_clip_t               *clip);
+				 const cairo_clip_t         *clip);
 
     const char **
     (*get_supported_mime_types)	(void			    *surface);
@@ -207,6 +207,10 @@ struct _cairo_surface_backend {
 				 const char             *tag_name,
 				 const char             *attributes);
 
+    cairo_bool_t
+    (*supports_color_glyph) (void                       *surface,
+                             cairo_scaled_font_t        *scaled_font,
+                             unsigned long               glyph_index);
 };
 
 cairo_private cairo_status_t
