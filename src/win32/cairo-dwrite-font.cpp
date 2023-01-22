@@ -1065,7 +1065,7 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
     _cairo_scaled_glyph_set_color_surface (scaled_glyph,
 					   &scaled_font->base,
 					   (cairo_image_surface_t *) image,
-					   uses_foreground_color);
+					   uses_foreground_color ? foreground_color : NULL);
     scaled_glyph->color_glyph = TRUE;
     scaled_glyph->color_glyph_set = TRUE;
 

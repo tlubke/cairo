@@ -2685,7 +2685,7 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 	    _cairo_scaled_glyph_set_color_surface (scaled_glyph,
 						   &scaled_font->base,
 						   surface,
-						   uses_foreground_color);
+						   uses_foreground_color ? foreground_color : NULL);
 
 	    scaled_glyph->color_glyph = TRUE;
 	} else {
@@ -2797,7 +2797,8 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 
     _cairo_scaled_glyph_set_recording_surface (scaled_glyph,
 					       &scaled_font->base,
-					       recording_surface);
+					       recording_surface,
+					       NULL);
     return status;
 }
 #endif
@@ -2862,7 +2863,8 @@ _cairo_ft_scaled_glyph_init_record_colr_v1_glyph (cairo_ft_scaled_font_t *scaled
 
     _cairo_scaled_glyph_set_recording_surface (scaled_glyph,
 					       &scaled_font->base,
-					       recording_surface);
+					       recording_surface,
+					       NULL);
 
     scaled_glyph->color_glyph = TRUE;
     scaled_glyph->color_glyph_set = TRUE;
@@ -3009,7 +3011,8 @@ _cairo_ft_scaled_glyph_init_record_svg_glyph (cairo_ft_scaled_font_t *scaled_fon
 
     _cairo_scaled_glyph_set_recording_surface (scaled_glyph,
 					       &scaled_font->base,
-					       recording_surface);
+					       recording_surface,
+					       NULL);
 
     scaled_glyph->color_glyph = TRUE;
     scaled_glyph->color_glyph_set = TRUE;
@@ -3118,7 +3121,7 @@ _cairo_ft_scaled_glyph_init_surface_for_recording_surface (cairo_ft_scaled_font_
     _cairo_scaled_glyph_set_color_surface (scaled_glyph,
 					   &scaled_font->base,
 					   (cairo_image_surface_t *)surface,
-					   foreground_used);
+					   foreground_used ? foreground_color : NULL);
     surface = NULL;
 
     if (surface)
