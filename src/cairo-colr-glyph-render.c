@@ -246,8 +246,8 @@ get_palette_color (cairo_colr_glyph_render_t *render,
     }
 
     color->alpha *= double_from_2_14 (ci->alpha);
-    if (foreground)
-        *is_foreground_color = TRUE;
+    if (is_foreground_color)
+        *is_foreground_color = foreground;
 }
 
 static cairo_status_t
