@@ -698,11 +698,15 @@ _cairo_dwrite_scaled_font_init_glyph_metrics(cairo_dwrite_scaled_font_t *scaled_
 	return CAIRO_INT_STATUS_UNSUPPORTED;
     }
 
+    // GetGdiCompatibleMetrics may return a glyph metrics that yields a small nagative glyph height.
+    INT32 glyph_width = metrics.advanceWidth - metrics.leftSideBearing - metrics.rightSideBearing;
+    INT32 glyph_height = metrics.advanceHeight - metrics.topSideBearing - metrics.bottomSideBearing;
+    glyph_width = MAX(glyph_width, 0);
+    glyph_height = MAX(glyph_height, 0);
+
     // TODO: Treat swap_xy.
-    extents.width = (FLOAT)(metrics.advanceWidth - metrics.leftSideBearing - metrics.rightSideBearing) /
-	fontMetrics.designUnitsPerEm;
-    extents.height = (FLOAT)(metrics.advanceHeight - metrics.topSideBearing - metrics.bottomSideBearing) /
-	fontMetrics.designUnitsPerEm;
+    extents.width = (FLOAT)glyph_width / fontMetrics.designUnitsPerEm;
+    extents.height = (FLOAT)glyph_height / fontMetrics.designUnitsPerEm;
     extents.x_advance = (FLOAT)metrics.advanceWidth / fontMetrics.designUnitsPerEm;
     extents.x_bearing = (FLOAT)metrics.leftSideBearing / fontMetrics.designUnitsPerEm;
     extents.y_advance = 0.0;
