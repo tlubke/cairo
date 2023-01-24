@@ -47,6 +47,18 @@ CAIRO_BEGIN_DECLS
 cairo_public cairo_font_face_t *
 cairo_dwrite_font_face_create_for_dwrite_fontface (IDWriteFontFace *dwrite_font_face);
 
+cairo_public IDWriteRenderingParams *
+cairo_dwrite_font_face_get_rendering_params (cairo_font_face_t *font_face);
+
+cairo_public void
+cairo_dwrite_font_face_set_rendering_params (cairo_font_face_t *font_face, IDWriteRenderingParams *param);
+
+cairo_public DWRITE_MEASURING_MODE
+cairo_dwrite_font_face_get_measuring_mode (cairo_font_face_t *font_face);
+
+cairo_public void
+cairo_dwrite_font_face_set_measuring_mode (cairo_font_face_t *font_face, DWRITE_MEASURING_MODE mode);
+
 CAIRO_END_DECLS
 
 #else  /* __cplusplus */
