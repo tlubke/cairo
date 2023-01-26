@@ -656,7 +656,7 @@ _cairo_quartz_init_glyph_surface (cairo_quartz_scaled_font_t *font,
     cairo_surface_mark_dirty (&surface->base);
 
     if (is_color)
-	_cairo_scaled_glyph_set_color_surface (scaled_glyph, &font->base, surface, fg_color != NULL);
+	_cairo_scaled_glyph_set_color_surface (scaled_glyph, &font->base, surface, fg_color);
     else
 	_cairo_scaled_glyph_set_surface (scaled_glyph, &font->base, surface);
 

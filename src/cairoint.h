@@ -1292,13 +1292,14 @@ _cairo_scaled_glyph_set_path (cairo_scaled_glyph_t *scaled_glyph,
 cairo_private void
 _cairo_scaled_glyph_set_recording_surface (cairo_scaled_glyph_t *scaled_glyph,
                                            cairo_scaled_font_t *scaled_font,
-                                           cairo_surface_t *recording_surface);
+                                           cairo_surface_t *recording_surface,
+					   const cairo_color_t *foreground_color);
 
 cairo_private void
 _cairo_scaled_glyph_set_color_surface (cairo_scaled_glyph_t *scaled_glyph,
 		                       cairo_scaled_font_t *scaled_font,
 		                       cairo_image_surface_t *surface,
-                                       cairo_bool_t uses_foreground_color);
+                                       const cairo_color_t *foreground_color);
 
 cairo_private cairo_int_status_t
 _cairo_scaled_glyph_lookup (cairo_scaled_font_t *scaled_font,

@@ -34,7 +34,7 @@
 
 #define BORDER 10
 #define TEXT_SIZE 64
-#define WIDTH  (TEXT_SIZE * 15 + 2*BORDER)
+#define WIDTH  (TEXT_SIZE * 16 + 2*BORDER)
 #ifndef ROTATED
  #define HEIGHT ((TEXT_SIZE + 2*BORDER)*3)
 #else
@@ -42,7 +42,7 @@
 #endif
 
 #define TEXT1   "cairo user-font."
-#define TEXT2   " zg."
+#define TEXT2   " zg"
 
 #define END_GLYPH 0
 #define STROKE 126
@@ -202,6 +202,24 @@ _user_font_face_create (cairo_font_face_t **out, cairo_bool_t color_render)
     return CAIRO_STATUS_SUCCESS;
 }
 
+static void
+draw_line (cairo_t *cr)
+{
+    /* TEXT1 in black */
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_show_text (cr, TEXT1);
+
+    /* Draw TEXT2 three times with three different foreground colors.
+     * This checks that cairo uses the foreground color and does not cache
+     * glyph images when the foreground color changes.
+     */
+    cairo_show_text (cr, TEXT2);
+    cairo_set_source_rgb (cr, 0, 0.5, 0);
+    cairo_show_text (cr, TEXT2);
+    cairo_set_source_rgb (cr, 0.2, 0.5, 0.5);
+    cairo_show_text (cr, TEXT2);
+}
+
 static cairo_test_status_t
 draw (cairo_t *cr, int width, int height)
 {
@@ -212,6 +230,7 @@ draw (cairo_t *cr, int width, int height)
     cairo_status_t status;
 
     strcpy(full_text, TEXT1);
+    strcat(full_text, TEXT2);
     strcat(full_text, TEXT2);
     strcat(full_text, TEXT2);
 
@@ -260,21 +279,14 @@ draw (cairo_t *cr, int width, int height)
     cairo_set_line_width (cr, 2);
     cairo_stroke (cr);
 
-    /* First line. Text in black, except first "zg." in green */
-    cairo_set_source_rgb (cr, 0, 0, 0);
+    /* First line. TEXT1 in black. TEXT2 in different colors. */
     cairo_move_to (cr, BORDER, BORDER + font_extents.ascent);
-    cairo_show_text (cr, TEXT1);
-    cairo_set_source_rgb (cr, 0, 1, 0);
-    cairo_show_text (cr, TEXT2);
-    cairo_set_source_rgb (cr, 0, 0, 0);
-    cairo_show_text (cr, TEXT2);
+    draw_line (cr);
 
-    /* Now draw the second line using the render_color_glyph callback. The
-     * output should be the same because same render function is used
-     * and the render function does not set a color. This exercises
-     * the paint color glyph with foreground color code path and
-     * ensures cairo updates the glyph image when the foreground color
-     * changes.
+    /* Now draw the second line using the render_color_glyph
+     * callback. The text should be all black because the default
+     * color of render function is used instead of the foreground
+     * color.
      */
     status = _user_font_face_create (&font_face, TRUE);
     if (status) {
@@ -287,13 +299,8 @@ draw (cairo_t *cr, int width, int height)
 
     cairo_set_font_size (cr, TEXT_SIZE);
 
-    /* text in black, except first "zg." in green */
     cairo_move_to (cr, BORDER, BORDER + font_extents.height + 2*BORDER + font_extents.ascent);
-    cairo_show_text (cr, TEXT1);
-    cairo_set_source_rgb (cr, 0, 1, 0);
-    cairo_show_text (cr, TEXT2);
-    cairo_set_source_rgb (cr, 0, 0, 0);
-    cairo_show_text (cr, TEXT2);
+    draw_line (cr);
 
     /* Third line. Filled version of text in blue */
     cairo_set_source_rgb (cr, 0, 0, 1);

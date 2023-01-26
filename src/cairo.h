@@ -1815,25 +1815,14 @@ typedef cairo_status_t (*cairo_user_scaled_font_init_func_t) (cairo_scaled_font_
  * cairo_user_font_face_set_render_glyph_func(), the result is
  * undefined if any source other than the default source on @cr is
  * used.  That means, glyph bitmaps should be rendered using
- * cairo_mask() instead of cairo_paint(). When this callback is set with
- * cairo_user_font_face_set_render_color_glyph_func(), setting the
- * source is a valid operation.
+ * cairo_mask() instead of cairo_paint().
  *
  * When this callback is set with
  * cairo_user_font_face_set_render_color_glyph_func(), the default
- * source is the current source color of the context that is rendering
- * the user font. That is, the same color a non-color user font will
- * be rendered in. In most cases the callback will want to set a
- * specific color. If the callback wishes to use the current context
- * color after using another source, it should retain a reference to
- * the source or use cairo_save()/cairo_restore() prior to changing
- * the source. Note that the default source contains an internal
- * marker to indicate that it is to be substituted with the current
- * context source color when rendered to a surface. Querying the
- * default source pattern will reveal a solid black color, however
- * this is not representative of the color that will actually be
- * used. Similarly, setting a solid black color will render black, not
- * the current context source when the glyph is painted to a surface.
+ * source is black. Setting the source is a valid
+ * operation. cairo_user_scaled_font_get_foreground_marker() or
+ * cairo_user_scaled_font_get_foreground_source() may be called to
+ * obtain the current source at the time the glyph is rendered.
  *
  * Other non-default settings on @cr include a font size of 1.0 (given that
  * it is set up to be in font space), and font options corresponding to
@@ -1856,10 +1845,13 @@ typedef cairo_status_t (*cairo_user_scaled_font_init_func_t) (cairo_scaled_font_
  * Where both color and non-color callbacks has been set using
  * cairo_user_font_face_set_render_color_glyph_func(), and
  * cairo_user_font_face_set_render_glyph_func(), the color glyph
- * callback may return %CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED if the
- * glyph is not a color glyph. This is the only case in which the
- * %CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED may be returned from a
- * render callback.
+ * callback will be called first. If the color glyph callback returns
+ * %CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED, any drawing operations are
+ * discarded and the non-color callback will be called. This is the
+ * only case in which the %CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED may
+ * be returned from a render callback. This fallback sequence allows a
+ * user font face to contain a combination of both color and non-color
+ * glyphs.
  *
  * Returns: %CAIRO_STATUS_SUCCESS upon success,
  * %CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED if fallback options should be tried,
@@ -2027,6 +2019,11 @@ cairo_user_font_face_get_text_to_glyphs_func (cairo_font_face_t *font_face);
 cairo_public cairo_user_scaled_font_unicode_to_glyph_func_t
 cairo_user_font_face_get_unicode_to_glyph_func (cairo_font_face_t *font_face);
 
+cairo_public cairo_pattern_t *
+cairo_user_scaled_font_get_foreground_marker (cairo_scaled_font_t *scaled_font);
+
+cairo_public cairo_pattern_t *
+cairo_user_scaled_font_get_foreground_source (cairo_scaled_font_t *scaled_font);
 
 /* Query functions */
 
