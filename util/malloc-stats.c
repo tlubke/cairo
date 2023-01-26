@@ -173,6 +173,7 @@ func_stats_add (const void *caller, int is_realloc, size_t size)
 #include <dlfcn.h>
 
 static void *(*old_malloc)(size_t);
+static void *(*old_calloc)(size_t, size_t);
 static void *(*old_realloc)(void *, size_t);
 static int enable_hook = 0;
 
@@ -192,6 +193,22 @@ malloc(size_t size)
     }
 
     return old_malloc (size);
+}
+
+void *
+calloc(size_t nmemb, size_t size)
+{
+    if (!old_calloc)
+      init ();
+
+    if (enable_hook) {
+	enable_hook = 0;
+	void *caller = __builtin_return_address(0);
+	func_stats_add (caller, 0, nmemb * size);
+	enable_hook = 1;
+    }
+
+    return old_calloc (nmemb, size);
 }
 
 void *
@@ -215,6 +232,11 @@ init(void)
 {
     old_malloc = dlsym(RTLD_NEXT, "malloc");
     if (!old_malloc) {
+	fprintf(stderr, "%s\n", dlerror());
+	exit(1);
+    }
+    old_calloc = dlsym(RTLD_NEXT, "calloc");
+    if (!old_calloc) {
 	fprintf(stderr, "%s\n", dlerror());
 	exit(1);
     }
