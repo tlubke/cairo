@@ -14,11 +14,12 @@ def_file="$1"
 cairo_features_h="$2"
 shift 2
 
-echo Generating $def_file
+#echo Generating $def_file
+
 (echo EXPORTS; \
  (cat $* || echo 'cairo_ERROR ()' ) | \
      egrep -v '^# *include' | \
-     ( cat "$cairo_features_h" - | cpp -D__cplusplus - || echo 'cairo_ERROR ()' ) | \
+     ( cat "$cairo_features_h" - | egrep -v '^#pragma' | cpp -D__cplusplus - || echo 'cairo_ERROR ()' ) | \
      egrep '^cairo_.* \(' | \
      sed -e 's/[ 	].*//' | \
      sort; \

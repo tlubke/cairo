@@ -795,7 +795,7 @@ get_color (cairo_svg_glyph_render_t *svg_render,
         if (end == s)
             return FALSE;
 
-        if (svg_render->palette && entry > 0 && entry < svg_render->num_palette_entries) {
+        if (svg_render->palette && entry >= 0 && entry < svg_render->num_palette_entries) {
             FT_Color *palette_color = &svg_render->palette[entry];
             color->type = RGB;
             color->red = palette_color->red / 255.0;
