@@ -830,3 +830,4 @@ cairo_font_options_get_custom_palette_color (cairo_font_options_t *options,
 
     return CAIRO_STATUS_INVALID_INDEX;
 }
+slim_hidden_def (cairo_font_options_get_custom_palette_color);

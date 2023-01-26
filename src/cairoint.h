@@ -1971,6 +1971,7 @@ slim_hidden_proto (cairo_font_face_get_user_data);
 slim_hidden_proto_no_warn (cairo_font_face_reference);
 slim_hidden_proto (cairo_font_face_set_user_data);
 slim_hidden_proto (cairo_font_options_equal);
+slim_hidden_proto (cairo_font_options_get_custom_palette_color);
 slim_hidden_proto (cairo_font_options_hash);
 slim_hidden_proto (cairo_font_options_merge);
 slim_hidden_proto (cairo_font_options_set_antialias);
