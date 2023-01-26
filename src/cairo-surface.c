@@ -2933,8 +2933,12 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
     if (unlikely (status))
 	return status;
 
-    if (nothing_to_do (surface, op, source))
-	return CAIRO_STATUS_SUCCESS;
+    if (!(_cairo_scaled_font_has_color_glyphs (scaled_font) &&
+	  scaled_font->options.color_mode != CAIRO_COLOR_MODE_NO_COLOR))
+    {
+        if (nothing_to_do (surface, op, source))
+	    return CAIRO_STATUS_SUCCESS;
+    }
 
     status = _cairo_surface_begin_modification (surface);
     if (unlikely (status))
