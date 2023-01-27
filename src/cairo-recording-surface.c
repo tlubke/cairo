@@ -2706,7 +2706,7 @@ print_pattern (FILE                  *file,
     switch (pattern->type) {
 	case CAIRO_PATTERN_TYPE_SOLID: {
 	    cairo_solid_pattern_t *p = (cairo_solid_pattern_t *) pattern;
-	    if (pattern->is_userfont_foreground) {
+	    if (pattern->is_foreground_marker) {
 		fprintf (file, "solid foreground\n");
 	    } else {
 		fprintf (file, "solid rgba: %f %f %f %f\n",

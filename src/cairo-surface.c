@@ -2204,7 +2204,7 @@ _cairo_surface_paint (cairo_surface_t		*surface,
     if (unlikely (status))
 	return status;
 
-    if (source->is_userfont_foreground && surface->foreground_source) {
+    if (source->is_foreground_marker && surface->foreground_source) {
 	source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
@@ -2259,7 +2259,7 @@ _cairo_surface_mask (cairo_surface_t		*surface,
     if (unlikely (status))
 	return status;
 
-    if (source->is_userfont_foreground && surface->foreground_source) {
+    if (source->is_foreground_marker && surface->foreground_source) {
 	source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
@@ -2320,12 +2320,12 @@ _cairo_surface_fill_stroke (cairo_surface_t	    *surface,
     if (unlikely (status))
 	return status;
 
-    if (fill_source->is_userfont_foreground && surface->foreground_source) {
+    if (fill_source->is_foreground_marker && surface->foreground_source) {
 	fill_source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
 
-    if (stroke_source->is_userfont_foreground && surface->foreground_source) {
+    if (stroke_source->is_foreground_marker && surface->foreground_source) {
 	stroke_source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
@@ -2404,7 +2404,7 @@ _cairo_surface_stroke (cairo_surface_t			*surface,
     if (unlikely (status))
 	return status;
 
-    if (source->is_userfont_foreground && surface->foreground_source) {
+    if (source->is_foreground_marker && surface->foreground_source) {
 	source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
@@ -2454,7 +2454,7 @@ _cairo_surface_fill (cairo_surface_t		*surface,
     if (unlikely (status))
 	return status;
 
-    if (source->is_userfont_foreground && surface->foreground_source) {
+    if (source->is_foreground_marker && surface->foreground_source) {
 	source = surface->foreground_source;
 	surface->foreground_used = TRUE;
     }
@@ -2944,7 +2944,7 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
     if (unlikely (status))
 	return status;
 
-    if (source->is_userfont_foreground && surface->foreground_source)
+    if (source->is_foreground_marker && surface->foreground_source)
 	source = surface->foreground_source;
 
     if (_cairo_scaled_font_has_color_glyphs (scaled_font) &&
