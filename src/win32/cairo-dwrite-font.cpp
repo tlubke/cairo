@@ -49,6 +49,25 @@
 
 #include <wincodec.h>
 
+/**
+ * SECTION:cairo-dwrite-fonts
+ * @Title: DWrite Fonts
+ * @Short_Description: Font support for Microsoft DirectWrite
+ * @See_Also: #cairo_font_face_t
+ *
+ * The Microsoft DirectWrite font backend is primarily used to render text on
+ * Microsoft Windows systems.
+ **/
+
+/**
+ * CAIRO_HAS_DWRITE_FONT:
+ *
+ * Defined if the Microsoft DWrite font backend is available.
+ * This macro can be used to conditionally compile backend-specific code.
+ *
+ * Since: 1.18
+ **/
+
 typedef HRESULT (WINAPI*D2D1CreateFactoryFunc)(
     D2D1_FACTORY_TYPE factoryType,
     REFIID iid,
@@ -1322,8 +1341,70 @@ _cairo_dwrite_has_color_glyphs(void *scaled_font)
     return ((cairo_dwrite_font_face_t *)dwritesf->base.font_face)->have_color;
 }
 
+/**
+ * cairo_dwrite_font_face_create_for_dwrite_fontface:
+ * @dwrite_font_face: A pointer to an #IDWriteFontFace specifying the
+ * DWrite font to use.
+ *
+ * Creates a new font for the DWrite font backend based on a
+ * DWrite font face. This font can then be used with
+ * cairo_set_font_face() or cairo_scaled_font_create().
+ *
+ * Here is an example of how this function might be used:
+ * <informalexample><programlisting><![CDATA[
+ * #include <cairo-win32.h>
+ * #include <dwrite.h>
+ *
+ * IDWriteFactory* dWriteFactory = NULL;
+ * HRESULT hr = DWriteCreateFactory(
+ *     DWRITE_FACTORY_TYPE_SHARED,
+ *     __uuidof(IDWriteFactory),
+ *    reinterpret_cast<IUnknown**>(&dWriteFactory));
+ *
+ * IDWriteFontCollection *systemCollection;
+ * hr = dWriteFactory->GetSystemFontCollection(&systemCollection);
+ *
+ * UINT32 idx;
+ * BOOL found;
+ * systemCollection->FindFamilyName(L"Segoe UI Emoji", &idx, &found);
+ *
+ * IDWriteFontFamily *family;
+ * systemCollection->GetFontFamily(idx, &family);
+ *
+ * IDWriteFont *dwritefont;
+ * DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;
+ * DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
+ * hr = family->GetFirstMatchingFont(weight, DWRITE_FONT_STRETCH_NORMAL, style, &dwritefont);
+ *
+ * IDWriteFontFace *dwriteface;
+ * hr = dwritefont->CreateFontFace(&dwriteface);
+ *
+ * cairo_font_face_t *face;
+ * face = cairo_dwrite_font_face_create_for_dwrite_fontface(dwriteface);
+ * cairo_set_font_face(cr, face);
+ * cairo_set_font_size(cr, 70);
+ * cairo_move_to(cr, 100, 100);
+ * cairo_show_text(cr, "😃");
+ * ]]></programlisting></informalexample>
+ *
+ * Note: When printing a DWrite font to a
+ * #CAIRO_SURFACE_TYPE_WIN32_PRINTING surface, the printing surface
+ * will substitute each DWrite font with a Win32 font created from the same
+ * underlying font file. If the matching font file can not be found,
+ * the #CAIRO_SURFACE_TYPE_WIN32_PRINTING surface will convert each
+ * glyph to a filled path. If a DWrite font was not created from a system
+ * font, it is recommended that the font used to create the DWrite
+ * font be made available to GDI to avoid the undesirable fallback
+ * to emitting paths. This can be achieved using the GDI font loading functions
+ * such as AddFontMemResourceEx().
+ *
+ * Return value: a newly created #cairo_font_face_t. Free with
+ *  cairo_font_face_destroy() when you are done using it.
+ *
+ * Since: 1.18
+ **/
 cairo_font_face_t*
-cairo_dwrite_font_face_create_for_dwrite_fontface_internal(void* dwrite_font_face)
+cairo_dwrite_font_face_create_for_dwrite_fontface(void* dwrite_font_face)
 {
     IDWriteFontFace *dwriteface = static_cast<IDWriteFontFace*>(dwrite_font_face);
     // Must do malloc and not C++ new, since Cairo frees this.

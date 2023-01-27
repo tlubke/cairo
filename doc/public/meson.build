@@ -140,6 +140,7 @@ gnome.gtkdoc('cairo',
     '--ignore-decorators=' + '|'.join(ignore_decorators),
     '--ignore-headers=' + ' '.join(ignore_headers),
   ],
+  mkdb_args: ['--source-suffixes=h,c,cpp'],
   content_files: [
     'language-bindings.xml',
   ],
