@@ -6,18 +6,24 @@
     <GlyphID id="0" name=".notdef"/>
     <GlyphID id="1" name="zero"/>
     <GlyphID id="2" name="one"/>
+    <GlyphID id="3" name="two"/>
+    <GlyphID id="4" name="three"/>
+    <GlyphID id="5" name="four"/>
+    <GlyphID id="6" name="five"/>
+    <GlyphID id="7" name="six"/>
+    <GlyphID id="8" name="seven"/>
   </GlyphOrder>
 
   <head>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.0"/>
-    <checkSumAdjustment value="0xcb6df82"/>
+    <checkSumAdjustment value="0x1b8ac35c"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
     <created value="Wed Jun 15 00:00:00 2022"/>
-    <modified value="Sat Jan 21 05:46:29 2023"/>
+    <modified value="Fri Jan 27 07:13:15 2023"/>
     <xMin value="0"/>
     <yMin value="0"/>
     <xMax value="1000"/>
@@ -52,7 +58,7 @@
   <maxp>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="0x10000"/>
-    <numGlyphs value="3"/>
+    <numGlyphs value="9"/>
     <maxPoints value="4"/>
     <maxContours value="1"/>
     <maxCompositePoints value="0"/>
@@ -106,7 +112,7 @@
     <achVendID value="djr "/>
     <fsSelection value="00000000 01000000"/>
     <usFirstCharIndex value="48"/>
-    <usLastCharIndex value="49"/>
+    <usLastCharIndex value="55"/>
     <sTypoAscender value="1000"/>
     <sTypoDescender value="0"/>
     <sTypoLineGap value="200"/>
@@ -123,7 +129,13 @@
 
   <hmtx>
     <mtx name=".notdef" width="1100" lsb="0"/>
+    <mtx name="five" width="1100" lsb="0"/>
+    <mtx name="four" width="1100" lsb="0"/>
     <mtx name="one" width="1100" lsb="0"/>
+    <mtx name="seven" width="1100" lsb="0"/>
+    <mtx name="six" width="1100" lsb="0"/>
+    <mtx name="three" width="1100" lsb="0"/>
+    <mtx name="two" width="1100" lsb="0"/>
     <mtx name="zero" width="1100" lsb="0"/>
   </hmtx>
 
@@ -132,6 +144,12 @@
     <cmap_format_4 platformID="0" platEncID="3" language="0">
       <map code="0x30" name="zero"/><!-- DIGIT ZERO -->
       <map code="0x31" name="one"/><!-- DIGIT ONE -->
+      <map code="0x32" name="two"/><!-- DIGIT TWO -->
+      <map code="0x33" name="three"/><!-- DIGIT THREE -->
+      <map code="0x34" name="four"/><!-- DIGIT FOUR -->
+      <map code="0x35" name="five"/><!-- DIGIT FIVE -->
+      <map code="0x36" name="six"/><!-- DIGIT SIX -->
+      <map code="0x37" name="seven"/><!-- DIGIT SEVEN -->
     </cmap_format_4>
   </cmap>
 
@@ -146,7 +164,67 @@
 
     <TTGlyph name=".notdef"/><!-- contains no outline data -->
 
+    <TTGlyph name="five" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="four" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
     <TTGlyph name="one" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="seven" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="six" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="three" xMin="0" yMin="0" xMax="1000" yMax="1000">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="0" y="1000" on="1"/>
+        <pt x="1000" y="1000" on="1"/>
+        <pt x="1000" y="0" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="two" xMin="0" yMin="0" xMax="1000" yMax="1000">
       <contour>
         <pt x="0" y="0" on="1"/>
         <pt x="0" y="1000" on="1"/>
@@ -219,6 +297,64 @@
       <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
   <rect x="100" y="-750" width="800" height="500"
         fill="var(--color1, blue)" />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="3" startGlyphID="3">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <rect x="100" y="-750" width="800" height="500"
+        fill="currentColor" />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="4" startGlyphID="4">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <rect x="100" y="-750" width="800" height="500"
+        fill="currentColor" fill-opacity="0.5"  />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="5" startGlyphID="5">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="33%" x21="66%">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="1" />
+      <stop offset="100%" stop-color="red" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+  <rect x="100" y="-900" width="800" height="800" fill="url(#grad)" />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="6" startGlyphID="6">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="33%" x21="66%">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="red" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+  <rect x="100" y="-900" width="800" height="800" fill="url(#grad)" />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="7" startGlyphID="7">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grad" cx="50%" cy="50%"
+                    fx="0.75" fy="0.35" r="0.5">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="1" />
+      <stop offset="100%" stop-color="blue" stop-opacity="1" />
+    </radialGradient>
+  </defs>
+  <rect x="100" y="-900" width="800" height="800" fill="url(#grad)" />
+</svg>]]>
+    </svgDoc>
+    <svgDoc endGlyphID="8" startGlyphID="8">
+      <![CDATA[<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grad" cx="50%" cy="50%"
+                    fx="0.75" fy="0.35" r="0.5">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="blue" stop-opacity="0.5" />
+    </radialGradient>
+  </defs>
+  <rect x="100" y="-900" width="800" height="800" fill="url(#grad)" />
 </svg>]]>
     </svgDoc>
   </SVG>

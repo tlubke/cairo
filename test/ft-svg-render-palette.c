@@ -30,11 +30,12 @@
 #define FONT_SIZE 50
 #define MARGIN 5
 #define WIDTH  (FONT_SIZE*8 + MARGIN*9)
-#define HEIGHT (FONT_SIZE + MARGIN*2)
+#define HEIGHT (FONT_SIZE*2 + MARGIN*3)
 
 #define FONT_FILE "cairo-svg-test-palette.ttf"
 
-#define TEXT "01"
+#define PALETTE_TEXT     "01"
+#define FOREGROUND_TEXT  "234567"
 
 
 static cairo_test_status_t
@@ -52,32 +53,40 @@ draw (cairo_t *cr, int width, int height)
         return result;
 
     cairo_set_font_size (cr, FONT_SIZE);
+    
+    cairo_save (cr);
     cairo_move_to (cr, MARGIN, FONT_SIZE + MARGIN);
-
     font_options = cairo_font_options_create ();
 
     /* Default palette */
-    cairo_show_text (cr, TEXT);
+    cairo_show_text (cr, PALETTE_TEXT);
 
     /* Palette 1 */
     cairo_font_options_set_color_palette (font_options, 1);
     cairo_set_font_options (cr, font_options);
-    cairo_show_text (cr, TEXT);
+    cairo_show_text (cr, PALETTE_TEXT);
 
     /* Palette 0, override color 0 */
     cairo_font_options_set_color_palette (font_options, 0);
     cairo_font_options_set_custom_palette_color (font_options, 0, 1, 0, 1, 0.5);
     cairo_set_font_options (cr, font_options);
-    cairo_show_text (cr, TEXT);
+    cairo_show_text (cr, PALETTE_TEXT);
 
     /* Palette 1, override color 1 */
     cairo_font_options_set_color_palette (font_options, 1);
     cairo_font_options_set_custom_palette_color (font_options, 1, 0, 1, 1, 0.5);
     cairo_set_font_options (cr, font_options);
-    cairo_show_text (cr, TEXT);
+    cairo_show_text (cr, PALETTE_TEXT);
 
     cairo_font_options_destroy (font_options);
+    cairo_restore (cr);
 
+    cairo_move_to (cr, MARGIN, FONT_SIZE*2 + MARGIN*2);
+
+    cairo_set_source_rgb (cr, 0, 1, 0);
+    cairo_show_text (cr, FOREGROUND_TEXT);
+
+    
     return CAIRO_TEST_SUCCESS;
 }
 

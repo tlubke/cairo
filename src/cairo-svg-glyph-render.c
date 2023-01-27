@@ -35,8 +35,9 @@
  */
 
 #include "cairoint.h"
-#include "cairo-ft-private.h"
 #include "cairo-array-private.h"
+#include "cairo-ft-private.h"
+#include "cairo-pattern-private.h"
 #include "cairo-scaled-font-subsets-private.h"
 
 #include <stdarg.h>
@@ -239,7 +240,7 @@ typedef struct _cairo_svg_element {
 } cairo_svg_element_t;
 
 typedef struct _cairo_svg_color {
-    enum { RGB, CURRENT_COLOR } type;
+    enum { RGB, FOREGROUND } type;
     double red;
     double green;
     double blue;
@@ -291,7 +292,6 @@ typedef struct _cairo_svg_glyph_render {
     cairo_hash_table_t *ids;
     cairo_svg_graphics_state_t *graphics_state;
     cairo_t *cr;
-    cairo_pattern_t *foreground_color;
     double units_per_em;
     struct {
         cairo_svg_element_t *paint_server;
@@ -306,6 +306,10 @@ typedef struct _cairo_svg_glyph_render {
     double width;
     double height;
     cairo_bool_t view_port_set;
+
+    cairo_pattern_t *foreground_marker;
+    cairo_pattern_t *foreground_source;
+    cairo_bool_t foreground_source_used;
 
     int debug; /* 0 = quiet, 1 = errors, 2 = warnings, 3 = info */
 } cairo_svg_glyph_render_t;
@@ -745,13 +749,13 @@ get_color (cairo_svg_glyph_render_t *svg_render,
 
     len = strlen(s);
 
-    if (string_equal (s, "inherit") ||
-        string_equal (s, "currentColor") ||
-        string_equal (s, "context-fill") ||
-        string_equal (s, "context-stroke"))
+    if (string_equal (s, "inherit")) {
+	return FALSE;
+    } else if (string_equal (s, "currentColor") ||
+	       string_equal (s, "context-fill") ||
+	       string_equal (s, "context-stroke"))
     {
-        color->type = CURRENT_COLOR;
-        color->red = color->green = color->blue = 0;
+	*color = svg_render->graphics_state->color;
         return TRUE;
     } else if (len > 0 && s[0] == '#') {
         if (len == 4) {
@@ -810,7 +814,7 @@ get_color (cairo_svg_glyph_render_t *svg_render,
 
             end = strpbrk(s, WHITE_SPACE_CHARS ")");
             if (!end || end == s)
-            return FALSE;
+		return FALSE;
 
             char *fallback = _cairo_strndup (s, end - s);
             cairo_bool_t success = get_color (svg_render, fallback, color);
@@ -1710,6 +1714,15 @@ render_element_stop (cairo_svg_glyph_render_t *svg_render,
                                            color.green,
                                            color.blue,
                                            opacity);
+    } else { /* color.type == FOREGROUND */
+        double red, green, blue, alpha;
+        if (cairo_pattern_get_rgba (svg_render->foreground_source, &red, &green, &blue, &alpha) == CAIRO_STATUS_SUCCESS) {
+	    svg_render->foreground_source_used = TRUE;
+	} else {
+            red = green = blue = 0;
+            alpha = 1;
+        }
+        cairo_pattern_add_color_stop_rgba (pattern, offset, red, green, blue, alpha);
     }
     return TRUE;
 }
@@ -1906,12 +1919,10 @@ draw_path (cairo_svg_glyph_render_t *svg_render)
                                        gs->fill.color.green,
                                        gs->fill.color.blue,
                                        gs->fill_opacity);
-            } else if (gs->fill.color.type == CURRENT_COLOR) {
-                cairo_set_source_rgba (svg_render->cr,
-                                       gs->color.red,
-                                       gs->color.green,
-                                       gs->color.blue,
-                                       gs->fill_opacity);
+            } else if (gs->fill.color.type == FOREGROUND) {
+		cairo_set_source (svg_render->cr, svg_render->foreground_marker);
+		if (gs->fill_opacity < 1.0)
+		    group = TRUE;
             }
         } else if (gs->fill.type == PAINT_SERVER) {
             pattern = create_pattern (svg_render, gs->fill.paint_server);
@@ -1942,12 +1953,10 @@ draw_path (cairo_svg_glyph_render_t *svg_render)
                                        gs->stroke.color.green,
                                        gs->stroke.color.blue,
                                        gs->stroke_opacity);
-            } else if (gs->stroke.color.type == CURRENT_COLOR) {
-                cairo_set_source_rgba (svg_render->cr,
-                                       gs->color.red,
-                                       gs->color.green,
-                                       gs->color.blue,
-                                       gs->stroke_opacity);
+            } else if (gs->fill.color.type == FOREGROUND) {
+		cairo_set_source (svg_render->cr, svg_render->foreground_marker);
+		if (gs->fill_opacity < 1.0)
+		    group = TRUE;
             }
         } else if (gs->stroke.type == PAINT_SERVER) {
             pattern = create_pattern (svg_render, gs->stroke.paint_server);
@@ -2579,20 +2588,11 @@ static void
 init_graphics_state (cairo_svg_glyph_render_t *svg_render)
 {
     cairo_svg_graphics_state_t *gs;
-    double alpha;
 
     gs = _cairo_malloc (sizeof (cairo_svg_graphics_state_t));
     get_paint (svg_render, "black", &gs->fill);
     get_paint (svg_render, "none", &gs->stroke);
-    gs->color.type = RGB;
-    if (cairo_pattern_get_rgba (svg_render->foreground_color,
-                                &gs->color.red,
-                                &gs->color.green,
-                                &gs->color.blue,
-                                &alpha) != CAIRO_STATUS_SUCCESS)
-    {
-        get_color (svg_render, "black", &gs->color);
-    }
+    gs->color.type = FOREGROUND;
     gs->fill_opacity = 1.0;
     gs->stroke_opacity = 1.0;
     gs->opacity = 1.0;
@@ -3096,7 +3096,9 @@ _cairo_render_svg_glyph (const char           *svg_document,
                          double                units_per_em,
                          FT_Color             *palette,
                          int                   num_palette_entries,
-                         cairo_t              *cr)
+                         cairo_t              *cr,
+                         cairo_pattern_t      *foreground_source,
+			 cairo_bool_t         *foreground_source_used)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
@@ -3122,7 +3124,6 @@ _cairo_render_svg_glyph (const char           *svg_document,
 
     svg_render->cr = cr;
     svg_render->units_per_em = units_per_em;
-    svg_render->foreground_color = cairo_pattern_reference (cairo_get_source (cr));
     svg_render->build_pattern.paint_server = NULL;
     svg_render->build_pattern.pattern = NULL;
     svg_render->build_pattern.type = BUILD_PATTERN_NONE;
@@ -3130,6 +3131,10 @@ _cairo_render_svg_glyph (const char           *svg_document,
     svg_render->view_port_set = FALSE;
     svg_render->num_palette_entries = num_palette_entries;
     svg_render->palette = palette;
+
+    svg_render->foreground_marker = _cairo_pattern_create_foreground_marker ();
+    svg_render->foreground_source = cairo_pattern_reference (foreground_source);;
+    svg_render->foreground_source_used = FALSE;
 
     init_graphics_state (svg_render);
 
@@ -3175,7 +3180,9 @@ _cairo_render_svg_glyph (const char           *svg_document,
     while (svg_render->graphics_state)
         restore_graphics_state (svg_render);
 
-    cairo_pattern_destroy (svg_render->foreground_color);
+    cairo_pattern_destroy (svg_render->foreground_marker);
+    cairo_pattern_destroy (svg_render->foreground_source);
+    *foreground_source_used = svg_render->foreground_source_used;
 
     /* The hash entry for each element with an id is removed by
      * free_elements() */

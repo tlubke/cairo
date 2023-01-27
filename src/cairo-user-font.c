@@ -381,20 +381,8 @@ _cairo_user_scaled_glyph_init (void			 *abstract_font,
 {
     cairo_int_status_t status = CAIRO_STATUS_SUCCESS;
     cairo_user_scaled_font_t *scaled_font = abstract_font;
-    cairo_bool_t need_recording = FALSE;
 
-    if (!scaled_glyph->recording_surface) {
-	need_recording = TRUE;
-    } else {
-	if ((info & (CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE|CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE)) &&
-	    scaled_glyph->recording_uses_foreground_color &&
-	    !_cairo_color_equal (foreground_color, &scaled_glyph->foreground_color))
-	{
-	    need_recording = TRUE;
-	}
-    }
-
-    if (need_recording) {
+    if (!scaled_glyph->recording_surface || (info & CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE)) {
 	status = _cairo_user_scaled_glyph_init_record_glyph (scaled_font, scaled_glyph, foreground_color);
 	if (status)
 	    return status;
@@ -598,8 +586,7 @@ _cairo_user_font_face_scaled_font_create (void                        *abstract_
     }
 
     user_scaled_font->foreground_pattern = NULL;
-    user_scaled_font->foreground_marker = cairo_pattern_create_rgb (0, 0, 0);
-    user_scaled_font->foreground_marker->is_userfont_foreground = TRUE;
+    user_scaled_font->foreground_marker = _cairo_pattern_create_foreground_marker ();
 
     /* XXX metrics hinting? */
 

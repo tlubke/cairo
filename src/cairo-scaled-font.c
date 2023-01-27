@@ -2688,14 +2688,15 @@ _cairo_scaled_glyph_set_recording_surface (cairo_scaled_glyph_t *scaled_glyph,
  * @scaled_glyph: a #cairo_scaled_glyph_t
  * @scaled_font: a #cairo_scaled_font_t
  * @surface: The image surface
- * @foreground_color: The foreground color that was used to render the
- * glyph, or NULL if foreground color not required.
+ * @foreground_marker_color: The foreground color that was used to
+ * substitute the foreground_marker, or NULL if foreground_marker not
+ * used when rendering the surface color.
  */
 void
 _cairo_scaled_glyph_set_color_surface (cairo_scaled_glyph_t  *scaled_glyph,
 	                               cairo_scaled_font_t   *scaled_font,
 	                               cairo_image_surface_t *surface,
-				       const cairo_color_t   *foreground_color)
+				       const cairo_color_t   *foreground_marker_color)
 {
     if (scaled_glyph->color_surface != NULL)
 	cairo_surface_destroy (&scaled_glyph->color_surface->base);
@@ -2703,9 +2704,9 @@ _cairo_scaled_glyph_set_color_surface (cairo_scaled_glyph_t  *scaled_glyph,
     /* sanity check the backend glyph contents */
     _cairo_debug_check_image_surface_is_defined (&surface->base);
     scaled_glyph->color_surface = surface;
-    scaled_glyph->image_uses_foreground_color = foreground_color != NULL;
-    if (foreground_color)
-	scaled_glyph->foreground_color = *foreground_color;
+    scaled_glyph->recording_uses_foreground_marker = foreground_marker_color != NULL;
+    if (foreground_marker_color)
+	scaled_glyph->foreground_color = *foreground_marker_color;
 
     if (surface != NULL)
 	scaled_glyph->has_info |= CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE;
@@ -2935,19 +2936,20 @@ _cairo_scaled_glyph_lookup (cairo_scaled_font_t *scaled_font,
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     /* If requesting a color surface or recording for a glyph that has
-     * used the foreground color to render the color_surface, and the
-     * foreground color has changed, request a new image and/or
-     * recording. */
-
-    if (info & CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE &&
+     * used the foreground color to render the recording, and the
+     * foreground color has changed, request a new  recording. */
+    if ((info & (CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE | CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE)) &&
 	scaled_glyph->recording_uses_foreground_color &&
 	!_cairo_color_equal (foreground_color, &scaled_glyph->foreground_color))
     {
 	need_info |= CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE;
     }
 
+    /* If requesting a color surface for a glyph that has
+     * used the foreground color to render the color_surface, and the
+     * foreground color has changed, request a new image. */
     if (info & CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE &&
-	scaled_glyph->image_uses_foreground_color &&
+	(scaled_glyph->recording_uses_foreground_marker || scaled_glyph->recording_uses_foreground_color) &&
 	!_cairo_color_equal (foreground_color, &scaled_glyph->foreground_color))
     {
 	    need_info |= CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE;

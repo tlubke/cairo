@@ -625,6 +625,14 @@ _cairo_pattern_create_solid (const cairo_color_t *color)
 }
 
 cairo_pattern_t *
+_cairo_pattern_create_foreground_marker (void)
+{
+    cairo_pattern_t *pattern = _cairo_pattern_create_solid (CAIRO_COLOR_BLACK);
+    pattern->is_userfont_foreground = TRUE;
+    return pattern;
+}
+
+cairo_pattern_t *
 _cairo_pattern_create_in_error (cairo_status_t status)
 {
     cairo_pattern_t *pattern;
