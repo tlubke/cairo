@@ -1055,7 +1055,16 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 		    color_brush->SetColor(&color);
 		    uses_foreground_color = TRUE;
 		} else {
-		    color_brush->SetColor(color_run->runColor);
+		    double red, green, blue, alpha;
+		    cairo_status_t status;
+		    status = cairo_font_options_get_custom_palette_color (&scaled_font->base.options,
+									  color_run->paletteIndex,
+									  &red, &blue, &green, &alpha);
+		    if (status == CAIRO_STATUS_SUCCESS) {
+			color_brush->SetColor(D2D1::ColorF(red, blue, green, alpha));
+		    } else {
+			color_brush->SetColor(color_run->runColor);
+		    }
 		}
 
 		dc4->DrawGlyphRun(origin,
