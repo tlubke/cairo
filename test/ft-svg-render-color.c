@@ -32,7 +32,7 @@
 #define WIDTH  (FONT_SIZE*8 + MARGIN*9)
 #define HEIGHT (FONT_SIZE*2 + MARGIN*3)
 
-#define FONT_FILE "cairo-svg-test-palette.ttf"
+#define FONT_FILE "cairo-svg-test-color.ttf"
 
 #define PALETTE_TEXT     "01"
 #define FOREGROUND_TEXT  "234567"
@@ -90,8 +90,8 @@ draw (cairo_t *cr, int width, int height)
     return CAIRO_TEST_SUCCESS;
 }
 
-CAIRO_TEST (ft_svg_render_palette,
-	    "Test cairo SVG font palettes",
+CAIRO_TEST (ft_svg_render_color,
+	    "Test cairo SVG font colors",
 	    "svgrender", /* keywords */
 	    NULL, /* requirements */
 	    WIDTH, HEIGHT,

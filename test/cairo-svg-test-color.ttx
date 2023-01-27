@@ -18,12 +18,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.0"/>
-    <checkSumAdjustment value="0x1b8ac35c"/>
+    <checkSumAdjustment value="0x1d3a9a74"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
     <created value="Wed Jun 15 00:00:00 2022"/>
-    <modified value="Fri Jan 27 07:13:15 2023"/>
+    <modified value="Fri Jan 27 08:44:23 2023"/>
     <xMin value="0"/>
     <yMin value="0"/>
     <xMax value="1000"/>
@@ -248,13 +248,13 @@
 
   <name>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
-      Cairo Svg Test Palette
+      Cairo Svg Test Color
     </namerecord>
     <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
       Regular
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
-      Cairo Svg Test Palette Regular
+      Cairo Svg Test Color Regular
     </namerecord>
   </name>
 
