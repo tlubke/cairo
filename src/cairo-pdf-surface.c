@@ -133,10 +133,10 @@
  * The PDF surface is used to render cairo graphics to Adobe
  * PDF files and is a multi-page vector surface backend.
  *
- * The following mime types are supported: %CAIRO_MIME_TYPE_JPEG,
- * %CAIRO_MIME_TYPE_JP2, %CAIRO_MIME_TYPE_UNIQUE_ID,
- * %CAIRO_MIME_TYPE_JBIG2, %CAIRO_MIME_TYPE_JBIG2_GLOBAL,
- * %CAIRO_MIME_TYPE_JBIG2_GLOBAL_ID,
+ * The following mime types are supported on source patterns:
+ * %CAIRO_MIME_TYPE_JPEG, %CAIRO_MIME_TYPE_JP2,
+ * %CAIRO_MIME_TYPE_UNIQUE_ID, %CAIRO_MIME_TYPE_JBIG2,
+ * %CAIRO_MIME_TYPE_JBIG2_GLOBAL, %CAIRO_MIME_TYPE_JBIG2_GLOBAL_ID,
  * %CAIRO_MIME_TYPE_CCITT_FAX, %CAIRO_MIME_TYPE_CCITT_FAX_PARAMS.
  *
  * # JBIG2 Images #

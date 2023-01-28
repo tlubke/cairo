@@ -119,9 +119,8 @@ static char *ctime_r(const time_t *timep, char *buf)
  * The PostScript surface is used to render cairo graphics to Adobe
  * PostScript files and is a multi-page vector surface backend.
  *
- * The following mime types are supported: %CAIRO_MIME_TYPE_JPEG,
- * %CAIRO_MIME_TYPE_UNIQUE_ID,
- * %CAIRO_MIME_TYPE_CCITT_FAX, %CAIRO_MIME_TYPE_CCITT_FAX_PARAMS,
+ * The following mime types are supported on source patterns:
+ * %CAIRO_MIME_TYPE_JPEG, %CAIRO_MIME_TYPE_UNIQUE_ID,
  * %CAIRO_MIME_TYPE_CCITT_FAX, %CAIRO_MIME_TYPE_CCITT_FAX_PARAMS,
  * %CAIRO_MIME_TYPE_EPS, %CAIRO_MIME_TYPE_EPS_PARAMS.
  *
@@ -219,8 +218,11 @@ static const char * _cairo_ps_level_strings[CAIRO_PS_LEVEL_LAST] =
 static const char *_cairo_ps_supported_mime_types[] =
 {
     CAIRO_MIME_TYPE_JPEG,
+    CAIRO_MIME_TYPE_UNIQUE_ID,
     CAIRO_MIME_TYPE_CCITT_FAX,
     CAIRO_MIME_TYPE_CCITT_FAX_PARAMS,
+    CAIRO_MIME_TYPE_EPS,
+    CAIRO_MIME_TYPE_EPS_PARAMS,
     NULL
 };
 

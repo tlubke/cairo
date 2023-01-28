@@ -2154,6 +2154,9 @@ _cairo_win32_printing_surface_supports_fine_grained_fallbacks (void *abstract_su
  * provide correct complex rendering behaviour; cairo_surface_show_page() and
  * associated methods must be used for correct output.
  *
+ * The following mime types are supported on source patterns:
+ * %CAIRO_MIME_TYPE_JPEG, %CAIRO_MIME_TYPE_PNG.
+ *
  * Return value: the newly created surface
  *
  * Since: 1.6
