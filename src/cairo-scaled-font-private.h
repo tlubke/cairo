@@ -150,11 +150,11 @@ struct _cairo_scaled_glyph {
 
     cairo_color_t           foreground_color;   /* only used for color glyphs */
 
-    /* TRUE if the recording_surface required the foreground_color to render. */
+    /* TRUE if the recording_surface used the foreground_source to render. */
     unsigned                recording_uses_foreground_color : 1;
 
-    /* TRUE if the color_surface required the foreground_color to render. */
-    unsigned                image_uses_foreground_color : 1;
+    /* TRUE if the recording surface uses the foreground marker. */
+    unsigned                recording_uses_foreground_marker : 1;
 
     /* TRUE if color_glyph specifies if glyph is color or non color, FALSE if glyph color type unknown. */
     unsigned                color_glyph_set : 1;

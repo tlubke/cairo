@@ -36,6 +36,7 @@
 #include "cairo-array-private.h"
 #include "cairo-ft-private.h"
 #include "cairo-path-private.h"
+#include "cairo-pattern-private.h"
 
 #include <assert.h>
 #include <math.h>
@@ -55,9 +56,11 @@
 
 typedef struct _cairo_colr_glyph_render {
     FT_Face face;
-    cairo_pattern_t *foreground_color;
     FT_Color *palette;
     unsigned int num_palette_entries;
+    cairo_pattern_t *foreground_marker;
+    cairo_pattern_t *foreground_source;
+    cairo_bool_t foreground_source_used;
     int level;
 } cairo_colr_glyph_render_t;
 
@@ -225,29 +228,29 @@ draw_paint_colr_layers (cairo_colr_glyph_render_t *render,
 
 static void
 get_palette_color (cairo_colr_glyph_render_t *render,
-                   FT_ColorIndex             *ci,
-                   cairo_color_t             *color,
-                   cairo_bool_t              *is_foreground_color)
+		   FT_ColorIndex             *ci,
+		   cairo_color_t             *color,
+		   double                    *colr_alpha,
+		   cairo_bool_t              *is_foreground_color)
 {
     cairo_bool_t foreground = FALSE;
 
     if (ci->palette_index == 0xffff || ci->palette_index >= render->num_palette_entries) {
-        color->red = 0;
-        color->green = 0;
-        color->blue = 0;
+	color->red = 0;
+	color->green = 0;
+	color->blue = 0;
 	color->alpha = 1;
-        foreground = TRUE;
+	foreground = TRUE;
     } else {
-        FT_Color c = render->palette[ci->palette_index];
-        color->red = c.red / 255.0;
-        color->green = c.green / 255.0;
-        color->blue = c.blue / 255.0;
+	FT_Color c = render->palette[ci->palette_index];
+	color->red = c.red / 255.0;
+	color->green = c.green / 255.0;
+	color->blue = c.blue / 255.0;
 	color->alpha = c.alpha / 255.0;
     }
 
-    color->alpha *= double_from_2_14 (ci->alpha);
-    if (is_foreground_color)
-        *is_foreground_color = foreground;
+    *colr_alpha = double_from_2_14 (ci->alpha);
+    *is_foreground_color = foreground;
 }
 
 static cairo_status_t
@@ -256,21 +259,19 @@ draw_paint_solid (cairo_colr_glyph_render_t *render,
                   cairo_t                   *cr)
 {
     cairo_color_t color;
+    double colr_alpha;
     cairo_bool_t is_foreground_color;
 
 #if DEBUG_COLR
     printf ("%*sDraw PaintSolid\n", 2 * render->level, "");
 #endif
 
-    get_palette_color (render, &solid->color, &color, &is_foreground_color);
-    if (is_foreground_color)
-    {
-	cairo_set_source (cr, render->foreground_color);
-	cairo_paint_with_alpha (cr, color.alpha);
-    }
-    else
-    {
-	cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha);
+    get_palette_color (render, &solid->color, &color, &colr_alpha, &is_foreground_color);
+    if (is_foreground_color) {
+	cairo_set_source (cr, render->foreground_marker);
+	cairo_paint_with_alpha (cr, colr_alpha);
+    } else {
+	cairo_set_source_rgba (cr, color.red, color.green, color.blue, color.alpha * colr_alpha);
 	cairo_paint (cr);
     }
 
@@ -315,6 +316,8 @@ read_colorline (cairo_colr_glyph_render_t *render,
     cairo_colr_color_line_t *cl;
     FT_ColorStop stop;
     int i;
+    double colr_alpha;
+    cairo_bool_t is_foreground_color;
 
     cl = calloc (1, sizeof (cairo_colr_color_line_t));
     if (unlikely (cl == NULL))
@@ -330,7 +333,28 @@ read_colorline (cairo_colr_glyph_render_t *render,
     i = 0;
     while (FT_Get_Colorline_Stops (render->face, &stop, &colorline->color_stop_iterator)) {
 	cl->stops[i].position = double_from_16_16 (stop.stop_offset);
-	get_palette_color (render, &stop.color, &cl->stops[i].color, NULL);
+	get_palette_color (render, &stop.color, &cl->stops[i].color, &colr_alpha, &is_foreground_color);
+	if (is_foreground_color) {
+	    double red, green, blue, alpha;
+	    if (cairo_pattern_get_rgba (render->foreground_source,
+					&red, &green, &blue, &alpha) == CAIRO_STATUS_SUCCESS)
+	    {
+		cl->stops[i].color.red = red;
+		cl->stops[i].color.green = green;
+		cl->stops[i].color.blue = blue;
+		cl->stops[i].color.alpha = alpha * colr_alpha;
+		render->foreground_source_used = TRUE;
+	    }
+	    else
+	    {
+		cl->stops[i].color.red = 0;
+		cl->stops[i].color.green = 0;
+		cl->stops[i].color.blue = 0;
+		cl->stops[i].color.alpha = colr_alpha;
+	    }
+	} else {
+	    cl->stops[i].color.alpha *= colr_alpha;
+	}
 	i++;
     }
 
@@ -1190,7 +1214,9 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
                              unsigned long         glyph,
                              FT_Color             *palette,
                              int                   num_palette_entries,
-                             cairo_t              *cr)
+                             cairo_t              *cr,
+                             cairo_pattern_t      *foreground_source,
+                             cairo_bool_t         *foreground_source_used)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
     cairo_colr_glyph_render_t colr_render;
@@ -1202,7 +1228,9 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
     colr_render.face = face;
     colr_render.palette = palette;
     colr_render.num_palette_entries = num_palette_entries;
-    colr_render.foreground_color = cairo_pattern_reference (cairo_get_source (cr));
+    colr_render.foreground_marker = _cairo_pattern_create_foreground_marker ();
+    colr_render.foreground_source = cairo_pattern_reference (foreground_source);;
+    colr_render.foreground_source_used = FALSE;
     colr_render.level = 0;
 
     status = draw_colr_glyph (&colr_render,
@@ -1210,7 +1238,9 @@ _cairo_render_colr_v1_glyph (FT_Face               face,
 			      FT_COLOR_INCLUDE_ROOT_TRANSFORM,
 			      cr);
   
-    cairo_pattern_destroy (colr_render.foreground_color);
+    cairo_pattern_destroy (colr_render.foreground_marker);
+    cairo_pattern_destroy (colr_render.foreground_source);
+    *foreground_source_used = colr_render.foreground_source_used;
 
     return status;
 }

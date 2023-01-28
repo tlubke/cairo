@@ -436,7 +436,7 @@ test_ft_svg_font_sources = [
 test_ft_svg_ttx_font_sources = [
   'ft-svg-cairo-logo.c',
   'ft-svg-render.c',
-  'ft-svg-render-palette.c'
+  'ft-svg-render-color.c'
 ]
 
 test_gl_sources = [
@@ -532,10 +532,10 @@ ps2png_sources = [
 
 test_ttx_fonts = [
   'cairo-logo-font.ttx',
+  'cairo-svg-test-color.ttx',
   'cairo-svg-test-doc.ttx',
   'cairo-svg-test-fill.ttx',
   'cairo-svg-test-gradient.ttx',
-  'cairo-svg-test-palette.ttx',
   'cairo-svg-test-path.ttx',
   'cairo-svg-test-shapes.ttx',
   'cairo-svg-test-stroke.ttx',

@@ -72,7 +72,7 @@ struct _cairo_pattern {
     cairo_filter_t		filter;
     cairo_extend_t		extend;
     cairo_bool_t		has_component_alpha;
-    cairo_bool_t		is_userfont_foreground;
+    cairo_bool_t		is_foreground_marker;
 
     cairo_matrix_t		matrix;
     double			opacity;
@@ -239,6 +239,9 @@ _cairo_pattern_fini (cairo_pattern_t *pattern);
 
 cairo_private cairo_pattern_t *
 _cairo_pattern_create_solid (const cairo_color_t	*color);
+
+cairo_private cairo_pattern_t *
+_cairo_pattern_create_foreground_marker (void);
 
 cairo_private void
 _cairo_pattern_transform (cairo_pattern_t      *pattern,
