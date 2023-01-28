@@ -701,6 +701,14 @@ cairo_font_options_get_color_mode (const cairo_font_options_t *options)
 }
 
 /**
+ * CAIRO_COLOR_PALETTE_DEFAULT:
+ *
+ * The default color palette index.
+ *
+ * Since: 1.18
+ **/
+
+/**
  * cairo_font_options_set_color_palette:
  * @options: a #cairo_font_options_t
  * @palette_index: the palette index in the CPAL table
@@ -709,10 +717,10 @@ cairo_font_options_get_color_mode (const cairo_font_options_t *options)
  * object. OpenType color fonts with a CPAL table may contain multiple
  * palettes. The default color palette index is %CAIRO_COLOR_PALETTE_DEFAULT.
  *
- * #cairo_font_options_t can also contain a custom palette, which will
- * be used if @palette_index is %CAIRO_COLOR_PALETTE_CUSTOM.
- *
  * If @palette_index is invalid, the default palette is used.
+ *
+ * Individual colors within the palette may be overriden with
+ * cairo_font_options_set_custom_palette_color().
  *
  * Since: 1.18
  **/
@@ -730,7 +738,7 @@ cairo_font_options_set_color_palette (cairo_font_options_t *options,
  * cairo_font_options_get_color_palette:
  * @options: a #cairo_font_options_t
  *
- * Gets the OpenType color font palette for the font options object.
+ * Gets the current OpenType color font palette for the font options object.
  *
  * Return value: the palette index
  *
@@ -754,11 +762,14 @@ cairo_font_options_get_color_palette (const cairo_font_options_t *options)
  * @blue: blue component of color
  * @alpha: alpha component of color
  *
- * Sets a custom palette color for the font options object.
+ * Sets a custom palette color for the font options object. This
+ * overrides the palette color at the specified color index. This override is
+ * independent of the selected palette index and will remain in place
+ * even if cairo_font_options_set_color_palette() is called to change
+ * the palette index.
  *
- * The custom colors will be used in preference to the selected
- * color palette from the font (see cairo_font_options_set_color_palette()).
- * It is possible to override only selected colors from the font palette.
+ * It is only possible to override color indexes already in the font
+ * palette.
  *
  * Since: 1.18
  */
@@ -803,10 +814,11 @@ cairo_font_options_set_custom_palette_color (cairo_font_options_t *options,
  * @blue: return location for blue component of color
  * @alpha: return location for alpha component of color
  *
- * Gets a custom palette color for the font options object.
+ * Gets the custom palette color for the color index for the font options object.
  *
- * Returns: `CAIRO_STATUS_SUCCESS` if a custom palette color is returned,
- *     `CAIRO_STATUS_INVALID_INDEX` otherwise.
+ * Returns: `CAIRO_STATUS_SUCCESS` if a custom palette color is
+ * returned, `CAIRO_STATUS_INVALID_INDEX` if no custom color exists
+ * for the color index.
  *
  * Since: 1.18
  */
