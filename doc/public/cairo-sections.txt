@@ -680,6 +680,8 @@ cairo_show_page
 cairo_get_reference_count
 cairo_set_user_data
 cairo_get_user_data
+cairo_set_hairline
+cairo_get_hairline
 <SUBSECTION Private>
 cairo_public
 CAIRO_BEGIN_DECLS
