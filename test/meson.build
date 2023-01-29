@@ -439,17 +439,6 @@ test_ft_svg_ttx_font_sources = [
   'ft-svg-render-color.c'
 ]
 
-test_gl_sources = [
-  'gl-device-release.c',
-  'gl-oversized-surface.c',
-  'gl-surface-source.c',
-]
-
-test_egl_sources = [
-  'egl-oversized-surface.c',
-  'egl-surface-source.c',
-]
-
 test_quartz_sources = [
   'quartz-surface-source.c',
   'quartz-color-font.c',
@@ -594,10 +583,6 @@ endif
 
 if feature_conf.get('CAIRO_HAS_XLIB_XRENDER_SURFACE', 0) == 1
   test_sources += test_xlib_xrender_sources
-endif
-
-if feature_conf.get('CAIRO_HAS_EGL_FUNCTIONS', 0) == 1
-  test_sources += test_egl_sources
 endif
 
 if has_multipage_surfaces

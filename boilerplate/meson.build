@@ -13,10 +13,6 @@ cairo_boilerplate_feature_sources = {
   'cairo-ps': ['cairo-boilerplate-ps.c'],
   'cairo-svg': ['cairo-boilerplate-svg.c'],
   'cairo-script': ['cairo-boilerplate-script.c'],
-  # All tests crash with FPE
-  # 'cairo-egl': ['cairo-boilerplate-egl.c'],
-  # cairo-glx: ['cairo-boilerplate-glx.c'],
-  'cairo-wgl': ['cairo-boilerplate-wgl.c'],
 }
 
 foreach feature: built_features

@@ -1243,12 +1243,6 @@ _cairo_xcb_surface_picture (cairo_xcb_surface_t *target,
 	}
     }
 #endif
-#if CAIRO_HAS_GL_FUNCTIONS
-    else if (source->type == CAIRO_SURFACE_TYPE_GL)
-    {
-	/* pixmap from texture */
-    }
-#endif
     else if (source->type == CAIRO_SURFACE_TYPE_RECORDING)
     {
 	/* We have to skip the call to attach_snapshot() because we possibly

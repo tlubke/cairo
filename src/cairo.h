@@ -157,9 +157,7 @@ typedef struct _cairo_surface cairo_surface_t;
  *
  * A #cairo_device_t represents the driver interface for drawing
  * operations to a #cairo_surface_t.  There are different subtypes of
- * #cairo_device_t for different drawing backends; for example,
- * cairo_egl_device_create() creates a device that wraps an EGL display and
- * context.
+ * #cairo_device_t for different drawing backends.
  *
  * The type of a device can be queried with cairo_device_get_type().
  *
