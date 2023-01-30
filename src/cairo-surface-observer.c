@@ -54,6 +54,15 @@
 #include "cairo-script-private.h"
 #endif
 
+/**
+ * SECTION:cairo-surface-observer
+ * @Title: Surface Observer
+ * @Short_Description: Observing other surfaces
+ * @See_Also: #cairo_surface_t
+ *
+ * A surface that exists solely to watch another is doing.
+ */
+
 static const cairo_surface_backend_t _cairo_surface_observer_backend;
 
 /* observation/stats */
