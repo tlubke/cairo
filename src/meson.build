@@ -179,7 +179,7 @@ cairo_feature_sources = {
   'cairo-win32-font': [
     'win32/cairo-win32-font.c',
   ],
-  'cairo-win32-dwrite-font': [
+  'cairo-dwrite-font': [
     'win32/cairo-dwrite-font.cpp',
   ],
   'cairo-script': [
@@ -214,6 +214,7 @@ cairo_feature_headers = {
   'cairo-quartz': ['cairo-quartz.h'],
   'cairo-quartz-image': ['cairo-quartz-image.h'],
   'cairo-win32': ['cairo-win32.h'],
+  'cairo-dwrite-font': ['cairo-dwrite.h'],
   'cairo-gl': ['cairo-gl.h'],
   'cairo-script': ['cairo-script.h'],
   'cairo-tee': ['cairo-tee.h'],

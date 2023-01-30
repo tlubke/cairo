@@ -45,6 +45,8 @@
 #include "cairo-dwrite-private.hpp"
 #include "cairo-truetype-subset-private.h"
 #include "cairo-scaled-font-subsets-private.h"
+#include "cairo-dwrite.h"
+
 #include <float.h>
 
 #include <wincodec.h>
@@ -1361,7 +1363,7 @@ _cairo_dwrite_has_color_glyphs(void *scaled_font)
  *
  * Here is an example of how this function might be used:
  * <informalexample><programlisting><![CDATA[
- * #include <cairo-win32.h>
+ * #include <cairo-dwrite.h>
  * #include <dwrite.h>
  *
  * IDWriteFactory* dWriteFactory = NULL;
@@ -1412,8 +1414,8 @@ _cairo_dwrite_has_color_glyphs(void *scaled_font)
  *
  * Since: 1.18
  **/
-cairo_font_face_t*
-cairo_dwrite_font_face_create_for_dwrite_fontface(void* dwrite_font_face)
+cairo_font_face_t *
+cairo_dwrite_font_face_create_for_dwrite_fontface (IDWriteFontFace *dwrite_font_face)
 {
     IDWriteFontFace *dwriteface = static_cast<IDWriteFontFace*>(dwrite_font_face);
     // Must do malloc and not C++ new, since Cairo frees this.
