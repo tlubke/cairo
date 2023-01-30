@@ -143,7 +143,6 @@ _cairo_array_truncate (cairo_array_t *array, unsigned int num_elements)
 /**
  * _cairo_array_index:
  * @array: a #cairo_array_t
- * Returns: A pointer to the object stored at @index.
  *
  * If the resulting value is assigned to a pointer to an object of the same
  * element_size as initially passed to _cairo_array_init() then that
@@ -161,6 +160,8 @@ _cairo_array_truncate (cairo_array_t *array, unsigned int num_elements)
  *      for (i = 0; i < _cairo_array_num_elements (&array); i++)
  *	    ... use values[i] here ...
  * </programlisting></informalexample>
+ *
+ * Returns: A pointer to the object stored at @index.
  **/
 void *
 _cairo_array_index (cairo_array_t *array, unsigned int index)
@@ -187,7 +188,6 @@ _cairo_array_index (cairo_array_t *array, unsigned int index)
 /**
  * _cairo_array_index_const:
  * @array: a #cairo_array_t
- * Returns: A pointer to the object stored at @index.
  *
  * If the resulting value is assigned to a pointer to an object of the same
  * element_size as initially passed to _cairo_array_init() then that
@@ -205,6 +205,8 @@ _cairo_array_index (cairo_array_t *array, unsigned int index)
  *      for (i = 0; i < _cairo_array_num_elements (&array); i++)
  *	    ... read values[i] here ...
  * </programlisting></informalexample>
+ *
+ * Returns: A pointer to the object stored at @index.
  **/
 const void *
 _cairo_array_index_const (const cairo_array_t *array, unsigned int index)
@@ -330,9 +332,10 @@ _cairo_array_allocate (cairo_array_t	 *array,
 /**
  * _cairo_array_num_elements:
  * @array: a #cairo_array_t
- * Returns: The number of elements stored in @array.
  *
  * This space was left intentionally blank, but gtk-doc filled it.
+ *
+ * Returns: The number of elements stored in @array.
  **/
 unsigned int
 _cairo_array_num_elements (const cairo_array_t *array)
@@ -343,10 +346,11 @@ _cairo_array_num_elements (const cairo_array_t *array)
 /**
  * _cairo_array_size:
  * @array: a #cairo_array_t
- * Returns: The number of elements for which there is currently space
- * allocated in @array.
  *
  * This space was left intentionally blank, but gtk-doc filled it.
+ *
+ * Returns: The number of elements for which there is currently space
+ * allocated in @array.
  **/
 unsigned int
 _cairo_array_size (const cairo_array_t *array)
