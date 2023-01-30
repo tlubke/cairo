@@ -2937,7 +2937,7 @@ cairo_copy_clip_rectangle_list (cairo_t *cr)
  * CAIRO_TAG_DEST:
  *
  * Create a destination for a hyperlink. Destination tag attributes
- * are detailed at [Destinations][dests].
+ * are detailed at [Destinations][dest].
  *
  * Since: 1.16
  **/
@@ -2946,7 +2946,7 @@ cairo_copy_clip_rectangle_list (cairo_t *cr)
  * CAIRO_TAG_LINK:
  *
  * Create hyperlink. Link tag attributes are detailed at
- * [Links][links].
+ * [Links][link].
  *
  * Since: 1.16
  **/
