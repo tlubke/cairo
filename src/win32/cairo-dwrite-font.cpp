@@ -1942,6 +1942,16 @@ _cairo_dwrite_scaled_font_create_win32_scaled_font (cairo_scaled_font_t *scaled_
     }
 
     cairo_font_face_t *face = cairo_scaled_font_get_font_face (scaled_font);
+    if (cairo_font_face_status (face) == CAIRO_STATUS_SUCCESS &&
+	cairo_font_face_get_type (face) == CAIRO_FONT_TYPE_TOY)
+    {
+	face = ((cairo_toy_font_face_t *)face)->impl_face;
+    }
+
+    if (face == NULL || cairo_font_face_get_type (face) != CAIRO_FONT_TYPE_DWRITE) {
+        return CAIRO_INT_STATUS_UNSUPPORTED;
+    }
+
     cairo_dwrite_font_face_t *dwface = reinterpret_cast<cairo_dwrite_font_face_t*>(face);
 
     RefPtr<IDWriteGdiInterop> gdiInterop;
