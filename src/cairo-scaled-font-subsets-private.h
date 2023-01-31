@@ -204,7 +204,7 @@ _cairo_scaled_font_subsets_enable_latin_subset (cairo_scaled_font_subsets_t *fon
  * @x_advance, @y_advance: When @is_scaled is true, @x_advance and @y_advance contain
  * the x and y advance for the mapped glyph in device space.
  * When @is_scaled is false, @x_advance and @y_advance contain the x and y advance for
- * the the mapped glyph from an unhinted 1 point font.
+ * the mapped glyph from an unhinted 1 point font.
  * @utf8_is_mapped: If true the utf8 string provided to _cairo_scaled_font_subsets_map_glyph()
  * is (or already was) the utf8 string mapped to this glyph. If false the glyph is already
  * mapped to a different utf8 string.

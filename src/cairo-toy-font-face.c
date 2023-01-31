@@ -235,7 +235,7 @@ _cairo_toy_font_face_keys_equal (const void *key_a,
  * @weight: the weight for the font
  *
  * Creates a font face from a triplet of family, slant, and weight.
- * These font faces are used in implementation of the the #cairo_t "toy"
+ * These font faces are used in implementation of the #cairo_t "toy"
  * font API.
  *
  * If @family is the zero-length string "", the platform-specific default
