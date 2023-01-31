@@ -476,7 +476,7 @@ typedef cairo_status_t (*cairo_read_func_t) (void		*closure,
 /**
  * cairo_rectangle_int_t:
  * @x: X coordinate of the left side of the rectangle
- * @y: Y coordinate of the the top side of the rectangle
+ * @y: Y coordinate of the top side of the rectangle
  * @width: width of the rectangle
  * @height: height of the rectangle
  *
@@ -999,7 +999,7 @@ cairo_clip_extents (cairo_t *cr,
 /**
  * cairo_rectangle_t:
  * @x: X coordinate of the left side of the rectangle
- * @y: Y coordinate of the the top side of the rectangle
+ * @y: Y coordinate of the top side of the rectangle
  * @width: width of the rectangle
  * @height: height of the rectangle
  *
@@ -1378,7 +1378,7 @@ typedef enum _cairo_hint_metrics {
  * contains a color presentation for a glyph, and when supported by
  * the font backend, the glyph will be rendered in color, since 1.18.
  *
- * Specifies if color fonts are to be rendered using the the color
+ * Specifies if color fonts are to be rendered using the color
  * glyphs or outline glyphs. Glyphs that do not have a color
  * presentation, and non-color fonts are not affected by this font
  * option.
@@ -1497,7 +1497,7 @@ cairo_font_options_get_custom_palette_color (cairo_font_options_t *options,
                                              double *blue, double *alpha);
 
 /* This interface is for dealing with text as text, not caring about the
-   font object inside the the cairo_t. */
+   font object inside the cairo_t. */
 
 cairo_public void
 cairo_select_font_face (cairo_t              *cr,
