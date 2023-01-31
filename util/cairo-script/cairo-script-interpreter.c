@@ -34,8 +34,9 @@
 
 #include "config.h"
 
-#include "cairo-script-private.h"
 #include "cairo.h"
+
+#include "cairo-script-private.h"
 
 #include <stdio.h>
 #include <stdlib.h>

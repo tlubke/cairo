@@ -49,10 +49,6 @@
 
 #include "config.h"
 
-#ifdef _MSC_VER
-#define cairo_public __declspec(dllexport)
-#endif
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

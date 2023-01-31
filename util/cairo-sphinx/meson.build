@@ -10,7 +10,7 @@ libcairosphinx = library('cairo-sphinx', libcairo_sphinx_sources,
   include_directories: [incbase, incsrc],
   dependencies: deps,
   install: true,
-  install_dir: join_paths(get_option('prefix'), get_option('libdir'), 'cairo'),
+  install_dir: get_option('libdir') / 'cairo',
 )
 
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
@@ -21,5 +21,6 @@ cairosphinx_exe = executable('cairo-sphinx', cairo_sphinx_sources,
   dependencies: deps + [glib_dep, rt_dep, libcairo_dep, cairoboilerplate_dep, libcairoscript_dep],
   link_with: [libcairosphinx],
   link_args: extra_link_args,
+  gnu_symbol_visibility: 'hidden',
   install: true,
 )

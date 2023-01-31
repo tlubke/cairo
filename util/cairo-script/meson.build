@@ -30,6 +30,8 @@ libcairoscript = library('cairo-script-interpreter',
   dependencies: deps + [libcairo_dep, lzo_dep],
   soversion: cairo_version_sonum,
   version: cairo_libversion,
+  c_args: ['-DCAIRO_COMPILATION'],
+  link_args: extra_link_args,
   install: true,
 )
 
