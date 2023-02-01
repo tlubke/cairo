@@ -217,13 +217,6 @@ RefPtr<IDWriteFactory4> DWriteFactory::mFactoryInstance4;
 RefPtr<IWICImagingFactory> WICImagingFactory::mFactoryInstance;
 RefPtr<IDWriteFontCollection> DWriteFactory::mSystemCollection;
 RefPtr<IDWriteRenderingParams> DWriteFactory::mDefaultRenderingParams;
-RefPtr<IDWriteRenderingParams> DWriteFactory::mCustomClearTypeRenderingParams;
-RefPtr<IDWriteRenderingParams> DWriteFactory::mForceGDIClassicRenderingParams;
-FLOAT DWriteFactory::mGamma = -1.0;
-FLOAT DWriteFactory::mEnhancedContrast = -1.0;
-FLOAT DWriteFactory::mClearTypeLevel = -1.0;
-int DWriteFactory::mPixelGeometry = -1;
-int DWriteFactory::mRenderingMode = -1;
 
 RefPtr<ID2D1Factory> D2DFactory::mFactoryInstance;
 RefPtr<ID2D1DCRenderTarget> D2DFactory::mRenderTarget;
@@ -411,6 +404,8 @@ _cairo_dwrite_font_face_destroy (void *font_face)
     cairo_dwrite_font_face_t *dwrite_font_face = static_cast<cairo_dwrite_font_face_t*>(font_face);
     if (dwrite_font_face->dwriteface)
 	dwrite_font_face->dwriteface->Release();
+    if (dwrite_font_face->rendering_params)
+	dwrite_font_face->rendering_params->Release();
     return TRUE;
 }
 
@@ -557,10 +552,28 @@ _cairo_dwrite_font_face_scaled_font_create (void			*abstract_face,
 	return status;
     }
 
+    dwrite_font->mat = dwrite_font->base.ctm;
+    cairo_matrix_multiply(&dwrite_font->mat, &dwrite_font->mat, font_matrix);
+    dwrite_font->mat_inverse = dwrite_font->mat;
+    cairo_matrix_invert (&dwrite_font->mat_inverse);
+
+    dwrite_font->rendering_params = NULL;
+    if (font_face->rendering_params) {
+	dwrite_font->rendering_params = font_face->rendering_params;
+	dwrite_font->rendering_params->AddRef();
+    }
+    dwrite_font->measuring_mode = font_face->measuring_mode;
+
     cairo_font_extents_t extents;
 
     DWRITE_FONT_METRICS metrics;
-    font_face->dwriteface->GetMetrics(&metrics);
+    if (dwrite_font->measuring_mode == DWRITE_MEASURING_MODE_GDI_CLASSIC ||
+	dwrite_font->measuring_mode == DWRITE_MEASURING_MODE_GDI_NATURAL) {
+	DWRITE_MATRIX transform = _cairo_dwrite_matrix_from_matrix (&dwrite_font->mat);
+	font_face->dwriteface->GetGdiCompatibleMetrics(1, 1, &transform, &metrics);
+    } else {
+	font_face->dwriteface->GetMetrics(&metrics);
+    }
 
     extents.ascent = (FLOAT)metrics.ascent / metrics.designUnitsPerEm;
     extents.descent = (FLOAT)metrics.descent / metrics.designUnitsPerEm;
@@ -568,14 +581,7 @@ _cairo_dwrite_font_face_scaled_font_create (void			*abstract_face,
     extents.max_x_advance = 14.0;
     extents.max_y_advance = 0.0;
 
-    dwrite_font->mat = dwrite_font->base.ctm;
-    cairo_matrix_multiply(&dwrite_font->mat, &dwrite_font->mat, font_matrix);
-    dwrite_font->mat_inverse = dwrite_font->mat;
-    cairo_matrix_invert (&dwrite_font->mat_inverse);
-
     cairo_antialias_t default_quality = CAIRO_ANTIALIAS_SUBPIXEL;
-
-    dwrite_font->measuring_mode = DWRITE_MEASURING_MODE_NATURAL;
 
     // The following code detects the system quality at scaled_font creation time,
     // this means that if cleartype settings are changed but the scaled_fonts
@@ -587,12 +593,10 @@ _cairo_dwrite_font_face_scaled_font_create (void			*abstract_face,
 	    break;
 	case ANTIALIASED_QUALITY:
 	    default_quality = CAIRO_ANTIALIAS_GRAY;
-	    dwrite_font->measuring_mode = DWRITE_MEASURING_MODE_GDI_CLASSIC;
 	    break;
 	case DEFAULT_QUALITY:
 	    // _get_system_quality() seems to think aliased is default!
 	    default_quality = CAIRO_ANTIALIAS_NONE;
-	    dwrite_font->measuring_mode = DWRITE_MEASURING_MODE_GDI_CLASSIC;
 	    break;
     }
 
@@ -608,10 +612,6 @@ _cairo_dwrite_font_face_scaled_font_create (void			*abstract_face,
 	dwrite_font->antialias_mode = options->antialias;
     }
 
-    dwrite_font->rendering_mode =
-        default_quality == CAIRO_ANTIALIAS_SUBPIXEL ?
-            cairo_dwrite_scaled_font_t::TEXT_RENDERING_NORMAL : cairo_dwrite_scaled_font_t::TEXT_RENDERING_NO_CLEARTYPE;
-
     return _cairo_scaled_font_set_metrics (*font, &extents);
 }
 
@@ -619,6 +619,9 @@ _cairo_dwrite_font_face_scaled_font_create (void			*abstract_face,
 static void
 _cairo_dwrite_scaled_font_fini(void *scaled_font)
 {
+    cairo_dwrite_scaled_font_t *dwrite_font = static_cast<cairo_dwrite_scaled_font_t*>(scaled_font);
+    if (dwrite_font->rendering_params)
+	dwrite_font->rendering_params->Release();
 }
 
 static cairo_int_status_t
@@ -680,17 +683,30 @@ _cairo_dwrite_scaled_font_init_glyph_metrics(cairo_dwrite_scaled_font_t *scaled_
 
     DWRITE_GLYPH_METRICS metrics;
     DWRITE_FONT_METRICS fontMetrics;
-    font_face->dwriteface->GetMetrics(&fontMetrics);
-    HRESULT hr = font_face->dwriteface->GetDesignGlyphMetrics(&charIndex, 1, &metrics);
+    HRESULT hr;
+    if (font_face->measuring_mode == DWRITE_MEASURING_MODE_GDI_CLASSIC ||
+	font_face->measuring_mode == DWRITE_MEASURING_MODE_GDI_NATURAL) {
+	DWRITE_MATRIX transform = _cairo_dwrite_matrix_from_matrix (&scaled_font->mat);
+	font_face->dwriteface->GetGdiCompatibleMetrics(1, 1, &transform, &fontMetrics);
+	BOOL natural = font_face->measuring_mode == DWRITE_MEASURING_MODE_GDI_NATURAL;
+	hr = font_face->dwriteface->GetGdiCompatibleGlyphMetrics (1, 1, &transform, natural, &charIndex, 1, &metrics, FALSE);
+    } else {
+	font_face->dwriteface->GetMetrics(&fontMetrics);
+	hr = font_face->dwriteface->GetDesignGlyphMetrics(&charIndex, 1, &metrics);
+    }
     if (FAILED(hr)) {
 	return CAIRO_INT_STATUS_UNSUPPORTED;
     }
 
+    // GetGdiCompatibleMetrics may return a glyph metrics that yields a small nagative glyph height.
+    INT32 glyph_width = metrics.advanceWidth - metrics.leftSideBearing - metrics.rightSideBearing;
+    INT32 glyph_height = metrics.advanceHeight - metrics.topSideBearing - metrics.bottomSideBearing;
+    glyph_width = MAX(glyph_width, 0);
+    glyph_height = MAX(glyph_height, 0);
+
     // TODO: Treat swap_xy.
-    extents.width = (FLOAT)(metrics.advanceWidth - metrics.leftSideBearing - metrics.rightSideBearing) /
-	fontMetrics.designUnitsPerEm;
-    extents.height = (FLOAT)(metrics.advanceHeight - metrics.topSideBearing - metrics.bottomSideBearing) /
-	fontMetrics.designUnitsPerEm;
+    extents.width = (FLOAT)glyph_width / fontMetrics.designUnitsPerEm;
+    extents.height = (FLOAT)glyph_height / fontMetrics.designUnitsPerEm;
     extents.x_advance = (FLOAT)metrics.advanceWidth / fontMetrics.designUnitsPerEm;
     extents.x_bearing = (FLOAT)metrics.leftSideBearing / fontMetrics.designUnitsPerEm;
     extents.y_advance = 0.0;
@@ -945,7 +961,7 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 	&run,
 	NULL, /* glyphRunDescription */
 	supported_formats,
-	DWRITE_MEASURING_MODE_NATURAL,
+	dwrite_font_face->measuring_mode,
 	&matrix,
 	palette_index,
 	&run_enumerator);
@@ -1034,7 +1050,7 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 		dc4->DrawColorBitmapGlyphRun(color_run->glyphImageFormat,
 					     origin,
 					     &color_run->glyphRun,
-					     DWRITE_MEASURING_MODE_NATURAL,
+					     dwrite_font_face->measuring_mode,
 					     D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT);
 		break;
 
@@ -1045,7 +1061,7 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 				     foreground_color_brush,
 				     nullptr,
 				     palette_index,
-				     DWRITE_MEASURING_MODE_NATURAL);
+				     dwrite_font_face->measuring_mode);
 		uses_foreground_color = TRUE;
 		break;
 	    case DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE:
@@ -1073,7 +1089,7 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 				  &color_run->glyphRun,
 				  color_run->glyphRunDescription,
 				  color_brush,
-				  DWRITE_MEASURING_MODE_NATURAL);
+				  dwrite_font_face->measuring_mode);
 	    case DWRITE_GLYPH_IMAGE_FORMATS_NONE:
 		break;
 	}
@@ -1428,6 +1444,8 @@ cairo_dwrite_font_face_create_for_dwrite_fontface (IDWriteFontFace *dwrite_font_
     dwriteface->AddRef();
     face->dwriteface = dwriteface;
     face->have_color = false;
+    face->rendering_params = NULL;
+    face->measuring_mode = DWRITE_MEASURING_MODE_NATURAL;
 
     /* Ensure IDWriteFactory4 is available before enabling color fonts */
     if (DWriteFactory::Instance4()) {
@@ -1445,35 +1463,74 @@ cairo_dwrite_font_face_create_for_dwrite_fontface (IDWriteFontFace *dwrite_font_
     return font_face;
 }
 
+/**
+ * cairo_dwrite_font_face_get_rendering_params:
+ * @font_face: The #cairo_dwrite_font_face_t object to query
+ *
+ * Gets the #IDWriteRenderingParams object of @font_face.
+ *
+ * Return value: the #IDWriteRenderingParams object or %NULL if none.
+ *
+ * Since: 1.18
+ **/
+IDWriteRenderingParams *
+cairo_dwrite_font_face_get_rendering_params (cairo_font_face_t *font_face)
+{
+    cairo_dwrite_font_face_t *dwface = reinterpret_cast<cairo_dwrite_font_face_t *>(font_face);
+    return dwface->rendering_params;
+}
+
+/**
+ * cairo_dwrite_font_face_set_rendering_params:
+ * @font_face: The #cairo_dwrite_font_face_t object to modify
+ * @params: The #IDWriteRenderingParams object
+ *
+ * Sets the #IDWriteRenderingParams object to @font_face.
+ *
+ * Since: 1.18
+ **/
 void
-cairo_dwrite_scaled_font_set_force_GDI_classic(cairo_scaled_font_t *dwrite_scaled_font, cairo_bool_t force)
+cairo_dwrite_font_face_set_rendering_params (cairo_font_face_t *font_face, IDWriteRenderingParams *params)
 {
-    cairo_dwrite_scaled_font_t *font = reinterpret_cast<cairo_dwrite_scaled_font_t*>(dwrite_scaled_font);
-    if (force && font->rendering_mode == cairo_dwrite_scaled_font_t::TEXT_RENDERING_NORMAL) {
-        font->rendering_mode = cairo_dwrite_scaled_font_t::TEXT_RENDERING_GDI_CLASSIC;
-    } else if (!force && font->rendering_mode == cairo_dwrite_scaled_font_t::TEXT_RENDERING_GDI_CLASSIC) {
-        font->rendering_mode = cairo_dwrite_scaled_font_t::TEXT_RENDERING_NORMAL;
-    }
+    cairo_dwrite_font_face_t *dwface = reinterpret_cast<cairo_dwrite_font_face_t *>(font_face);
+    if (dwface->rendering_params)
+	dwface->rendering_params->Release();
+    dwface->rendering_params = params;
+    if (dwface->rendering_params)
+	dwface->rendering_params->AddRef();
 }
 
-cairo_bool_t
-cairo_dwrite_scaled_font_get_force_GDI_classic(cairo_scaled_font_t *dwrite_scaled_font)
+/**
+ * cairo_dwrite_font_face_get_measuring_mode:
+ * @font_face: The #cairo_dwrite_font_face_t object to query
+ *
+ * Gets the #DWRITE_MEASURING_MODE enum of @font_face.
+ *
+ * Return value: The #DWRITE_MEASURING_MODE enum of @font_face.
+ *
+ * Since: 1.18
+ **/
+DWRITE_MEASURING_MODE
+cairo_dwrite_font_face_get_measuring_mode (cairo_font_face_t *font_face)
 {
-    cairo_dwrite_scaled_font_t *font = reinterpret_cast<cairo_dwrite_scaled_font_t*>(dwrite_scaled_font);
-    return font->rendering_mode == cairo_dwrite_scaled_font_t::TEXT_RENDERING_GDI_CLASSIC;
+    cairo_dwrite_font_face_t *dwface = reinterpret_cast<cairo_dwrite_font_face_t *>(font_face);
+    return dwface->measuring_mode;
 }
 
+/**
+ * cairo_dwrite_font_face_set_measuring_mode:
+ * @font_face: The #cairo_dwrite_font_face_t object to modify
+ * @mode: The #DWRITE_MEASURING_MODE enum.
+ *
+ * Sets the #DWRITE_MEASURING_MODE enum to @font_face.
+ * 
+ * Since: 1.18
+ **/
 void
-cairo_dwrite_set_cleartype_params(FLOAT gamma, FLOAT contrast, FLOAT level,
-				  int geometry, int mode)
+cairo_dwrite_font_face_set_measuring_mode (cairo_font_face_t *font_face, DWRITE_MEASURING_MODE mode)
 {
-    DWriteFactory::SetRenderingParams(gamma, contrast, level, geometry, mode);
-}
-
-int
-cairo_dwrite_get_cleartype_rendering_mode()
-{
-    return DWriteFactory::GetClearTypeRenderingMode();
+    cairo_dwrite_font_face_t *dwface = reinterpret_cast<cairo_dwrite_font_face_t *>(font_face);
+    dwface->measuring_mode = mode;
 }
 
 static cairo_int_status_t
@@ -1489,9 +1546,6 @@ _dwrite_draw_glyphs_to_gdi_surface_gdi(cairo_win32_surface_t *surface,
     RefPtr<IDWriteBitmapRenderTarget> rt;
     HRESULT hr;
 
-    cairo_dwrite_scaled_font_t::TextRenderingState renderingState =
-      scaled_font->rendering_mode;
-
     hr = gdiInterop->CreateBitmapRenderTarget(surface->dc,
 					      area.right - area.left,
 					      area.bottom - area.top,
@@ -1505,20 +1559,11 @@ _dwrite_draw_glyphs_to_gdi_surface_gdi(cairo_win32_surface_t *surface,
 	}
     }
 
-    if ((renderingState == cairo_dwrite_scaled_font_t::TEXT_RENDERING_NORMAL ||
-         renderingState == cairo_dwrite_scaled_font_t::TEXT_RENDERING_GDI_CLASSIC)
-        /* && !surface->base.permit_subpixel_antialiasing */ ) {
-      renderingState = cairo_dwrite_scaled_font_t::TEXT_RENDERING_NO_CLEARTYPE;
-      RefPtr<IDWriteBitmapRenderTarget1> rt1;
-      hr = rt->QueryInterface(&rt1);
-
-      if (SUCCEEDED(hr) && rt1) {
-        rt1->SetTextAntialiasMode(DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE);
-      }
-    }
-
-    RefPtr<IDWriteRenderingParams> params =
-        DWriteFactory::RenderingParams(renderingState);
+    IDWriteRenderingParams *params;
+    if (scaled_font->rendering_params)
+	params = scaled_font->rendering_params;
+    else
+	params = DWriteFactory::DefaultRenderingParams();
 
     /**
      * We set the number of pixels per DIP to 1.0. This is because we always want
@@ -1537,17 +1582,7 @@ _dwrite_draw_glyphs_to_gdi_surface_gdi(cairo_win32_surface_t *surface,
 	   surface->dc,
 	   area.left, area.top,
 	   SRCCOPY | NOMIRRORBITMAP);
-    DWRITE_MEASURING_MODE measureMode;
-    switch (renderingState) {
-	case cairo_dwrite_scaled_font_t::TEXT_RENDERING_GDI_CLASSIC:
-	case cairo_dwrite_scaled_font_t::TEXT_RENDERING_NO_CLEARTYPE:
-	    measureMode = DWRITE_MEASURING_MODE_GDI_CLASSIC;
-        break;
-    default:
-        measureMode = DWRITE_MEASURING_MODE_NATURAL;
-        break;
-    }
-    rt->DrawGlyphRun(0, 0, measureMode, run, params, color);
+    rt->DrawGlyphRun(0, 0, scaled_font->measuring_mode, run, params, color);
     BitBlt(surface->dc,
 	   area.left, area.top,
 	   area.right - area.left, area.bottom - area.top,
@@ -1786,59 +1821,6 @@ _cairo_dwrite_show_glyphs_on_surface(void			*surface,
 #endif
 
     return status;
-}
-
-#define ENHANCED_CONTRAST_REGISTRY_KEY \
-    HKEY_CURRENT_USER, "Software\\Microsoft\\Avalon.Graphics\\DISPLAY1\\EnhancedContrastLevel"
-
-void
-DWriteFactory::CreateRenderingParams()
-{
-    if (!Instance()) {
-	return;
-    }
-
-    Instance()->CreateRenderingParams(&mDefaultRenderingParams);
-
-    // For EnhancedContrast, we override the default if the user has not set it
-    // in the registry (by using the ClearType Tuner).
-    FLOAT contrast;
-    if (mEnhancedContrast >= 0.0 && mEnhancedContrast <= 10.0) {
-	contrast = mEnhancedContrast;
-    } else {
-	HKEY hKey;
-	if (RegOpenKeyExA(ENHANCED_CONTRAST_REGISTRY_KEY,
-			  0, KEY_READ, &hKey) == ERROR_SUCCESS)
-	{
-	    contrast = mDefaultRenderingParams->GetEnhancedContrast();
-	    RegCloseKey(hKey);
-	} else {
-	    contrast = 1.0;
-	}
-    }
-
-    // For parameters that have not been explicitly set via the SetRenderingParams API,
-    // we copy values from default params (or our overridden value for contrast)
-    FLOAT gamma =
-        mGamma >= 1.0 && mGamma <= 2.2 ?
-            mGamma : mDefaultRenderingParams->GetGamma();
-    FLOAT clearTypeLevel =
-        mClearTypeLevel >= 0.0 && mClearTypeLevel <= 1.0 ?
-            mClearTypeLevel : mDefaultRenderingParams->GetClearTypeLevel();
-    DWRITE_PIXEL_GEOMETRY pixelGeometry =
-        mPixelGeometry >= DWRITE_PIXEL_GEOMETRY_FLAT && mPixelGeometry <= DWRITE_PIXEL_GEOMETRY_BGR ?
-            (DWRITE_PIXEL_GEOMETRY)mPixelGeometry : mDefaultRenderingParams->GetPixelGeometry();
-    DWRITE_RENDERING_MODE renderingMode =
-        mRenderingMode >= DWRITE_RENDERING_MODE_DEFAULT && mRenderingMode <= DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC ?
-            (DWRITE_RENDERING_MODE)mRenderingMode : mDefaultRenderingParams->GetRenderingMode();
-
-    Instance()->CreateCustomRenderingParams(gamma, contrast, clearTypeLevel,
-	pixelGeometry, renderingMode,
-	&mCustomClearTypeRenderingParams);
-
-    Instance()->CreateCustomRenderingParams(gamma, contrast, clearTypeLevel,
-        pixelGeometry, DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC,
-        &mForceGDIClassicRenderingParams);
 }
 
 /* Check if a specific font table in a DWrite font and a scaled font is identical */
