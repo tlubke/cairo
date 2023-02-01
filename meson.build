@@ -530,7 +530,7 @@ if host_machine.system() == 'windows'
   if d2d_dep.found() and dwrite_dep.found() and d2d_header and dwrite_header and wincodec_dep.found() and wincodec_header
     feature_conf.set('CAIRO_HAS_DWRITE_FONT', 1)
     built_features += [{
-      'name': 'cairo-win32-dwrite-font',
+      'name': 'cairo-dwrite-font',
       'description': 'Microsoft Windows DWrite font backend',
       'deps': [dwrite_dep, d2d_dep, wincodec_dep],
     }]
