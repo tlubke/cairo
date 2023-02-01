@@ -2449,27 +2449,37 @@ cairo_surface_status (cairo_surface_t *surface);
  * @CAIRO_SURFACE_TYPE_PS: The surface is of type ps, since 1.2
  * @CAIRO_SURFACE_TYPE_XLIB: The surface is of type xlib, since 1.2
  * @CAIRO_SURFACE_TYPE_XCB: The surface is of type xcb, since 1.2
- * @CAIRO_SURFACE_TYPE_GLITZ: The surface is of type glitz, since 1.2
+ * @CAIRO_SURFACE_TYPE_GLITZ: The surface is of type glitz, since 1.2, deprecated 1.18
+ *   (glitz support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_QUARTZ: The surface is of type quartz, since 1.2
  * @CAIRO_SURFACE_TYPE_WIN32: The surface is of type win32, since 1.2
- * @CAIRO_SURFACE_TYPE_BEOS: The surface is of type beos, since 1.2
- * @CAIRO_SURFACE_TYPE_DIRECTFB: The surface is of type directfb, since 1.2
+ * @CAIRO_SURFACE_TYPE_BEOS: The surface is of type beos, since 1.2, deprecated 1.18
+ *   (beos support have been removed, this surface type will never be set by cairo)
+ * @CAIRO_SURFACE_TYPE_DIRECTFB: The surface is of type directfb, since 1.2, deprecated 1.18
+ *   (directfb support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_SVG: The surface is of type svg, since 1.2
- * @CAIRO_SURFACE_TYPE_OS2: The surface is of type os2, since 1.4
+ * @CAIRO_SURFACE_TYPE_OS2: The surface is of type os2, since 1.4, deprecated 1.18
+ *   (os2 support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_WIN32_PRINTING: The surface is a win32 printing surface, since 1.6
  * @CAIRO_SURFACE_TYPE_QUARTZ_IMAGE: The surface is of type quartz_image, since 1.6
  * @CAIRO_SURFACE_TYPE_SCRIPT: The surface is of type script, since 1.10
- * @CAIRO_SURFACE_TYPE_QT: The surface is of type Qt, since 1.10
+ * @CAIRO_SURFACE_TYPE_QT: The surface is of type Qt, since 1.10, deprecated 1.18
+ *   (Ot support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_RECORDING: The surface is of type recording, since 1.10
- * @CAIRO_SURFACE_TYPE_VG: The surface is a OpenVG surface, since 1.10
- * @CAIRO_SURFACE_TYPE_GL: The surface is of type OpenGL, since 1.10
- * @CAIRO_SURFACE_TYPE_DRM: The surface is of type Direct Render Manager, since 1.10
+ * @CAIRO_SURFACE_TYPE_VG: The surface is a OpenVG surface, since 1.10, deprecated 1.18
+ *   (OpenVG support have been removed, this surface type will never be set by cairo)
+ * @CAIRO_SURFACE_TYPE_GL: The surface is of type OpenGL, since 1.10, deprecated 1.18
+ *   (OpenGL support have been removed, this surface type will never be set by cairo)
+ * @CAIRO_SURFACE_TYPE_DRM: The surface is of type Direct Render Manager, since 1.10, deprecated 1.18
+ *   (DRM support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_TEE: The surface is of type 'tee' (a multiplexing surface), since 1.10
  * @CAIRO_SURFACE_TYPE_XML: The surface is of type XML (for debugging), since 1.10
  * @CAIRO_SURFACE_TYPE_SKIA: The surface is of type Skia, since 1.10, deprecated 1.18
+ *   (Skia support have been removed, this surface type will never be set by cairo)
  * @CAIRO_SURFACE_TYPE_SUBSURFACE: The surface is a subsurface created with
  *   cairo_surface_create_for_rectangle(), since 1.10
- * @CAIRO_SURFACE_TYPE_COGL: This surface is of type Cogl, since 1.12
+ * @CAIRO_SURFACE_TYPE_COGL: This surface is of type Cogl, since 1.12, deprecated 1.18
+ *   (Cogl support have been removed, this surface type will never be set by cairo)
  *
  * #cairo_surface_type_t is used to describe the type of a given
  * surface. The surface types are also known as "backends" or "surface
