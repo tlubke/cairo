@@ -1,16 +1,58 @@
+Release 1.17.8 (2023-01-30 Emmanuele Bassi <ebassi@gnome.org>)
+==============================================================
+
+A new cairo snapshot! And it only took less than one year, this time!
+
+Many thanks to everyone who contributed to cairo, and especially
+to (in no particular order):
+
+- Adrian Johnson
+- Khaled Hosny
+- Behdad Esfahbod
+- Matthias Clasen
+- Uli Schlachter
+- Manuel Stoeckl
+- Fujii Hironori
+- Tim-Philipp Müller
+- Luca Bacci
+- Caolán McNamara
+- John Ralls
+
+In a continuing effort to reduce the amount of legacy code, and increase
+the long-term maintainability of cairo, the following backends have been
+removed:
+
+- GL and GLES drawing
+
+Additionally, cairo's Autotools build system has been removed; from now on,
+cairo will only support the Meson build system. While the end result should
+be identical, further testing is appreciated.
+
+In this snapshot, cairo gained support for rendering COLRv1 fonts, and
+rendering SVG and COLRv1 fonts with custom palettes.
+
+Support for macOS and Windows has been improved, with lots of build and bug
+fixes.
+
+Lots of safety issues have been fixed, with array bounds checking and
+plugging memory leaks, as well as fixes for bugs identified via fuzzying.
+
+This is going to be the last snapshot of the 1.17 development cycle; we only
+expect minor bug fixing and improvements until the 1.18.0 release.
+
 Release 1.17.6 (2022-03-18 Emmanuele Bassi <ebassi@gnome.org>)
 ==============================================================
 
-I spy with my little eye… a Cairo snapshot!
+I spy with my little eye… a cairo snapshot!
 
-First of all, many, many thanks to everyone who contributed to Cairo
+First of all, many, many thanks to everyone who contributed to cairo
 during this development cycle. A special thank you goes to:
 
 - Adrian Johnson
 - Uli Schlachter
 
 for their tireless efforts in ensuring that the lights are still on
-in the Cairo project.
+in the cairo project.
 
 This snapshot sees the removal of the following backends and platform
 support:
@@ -24,7 +66,7 @@ support:
 - OpenVG
 
 Thanks to all past contributors for their work on them. If you were using
-any of these backends then you will need to stick to Cairo 1.16.
+any of these backends then you will need to stick to cairo 1.16.
 
 To offset the removal of the backends above, Adrian Johnson landed the
 DWrite font rendering backend on Windows.
@@ -34,7 +76,7 @@ John Ralls.
 
 Tim-Philipp Müller has kept the Meson build in top shape.
 
-This snapshot is going to be the **last** release of Cairo with the
+This snapshot is going to be the **last** release of cairo with the
 Autotools build system. The Meson build has seen many improvements and
 it is considerably easier to maintain and faster to build.
 
