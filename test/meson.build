@@ -653,7 +653,7 @@ foreach file : build_dir_files
 endforeach
 
 if build_machine.system() != 'windows'
-  run_command('ln', '-sf',
+  run_command('ln', '-sfn',
               meson.current_source_dir(),
               meson.current_build_dir() / 'srcdir',
               check: true)
