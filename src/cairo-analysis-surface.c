@@ -831,6 +831,14 @@ _cairo_analysis_surface_tag (void	                *abstract_surface,
     return backend_status;
 }
 
+static cairo_bool_t
+_cairo_analysis_surface_supports_color_glyph (void                 *abstract_surface,
+                                              cairo_scaled_font_t  *scaled_font,
+                                              unsigned long         glyph_index)
+{
+    return TRUE;
+}
+
 static const cairo_surface_backend_t cairo_analysis_surface_backend = {
     CAIRO_INTERNAL_SURFACE_TYPE_ANALYSIS,
 
@@ -865,7 +873,8 @@ static const cairo_surface_backend_t cairo_analysis_surface_backend = {
     _cairo_analysis_surface_has_show_text_glyphs,
     _cairo_analysis_surface_show_text_glyphs,
     NULL, /* get_supported_mime_types */
-    _cairo_analysis_surface_tag
+    _cairo_analysis_surface_tag,
+    _cairo_analysis_surface_supports_color_glyph
 };
 
 cairo_surface_t *

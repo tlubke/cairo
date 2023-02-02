@@ -183,7 +183,9 @@ _cairo_user_scaled_glyph_init_record_glyph (cairo_user_scaled_font_t *scaled_fon
     } else {
 	status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
 
-	if (face->scaled_font_methods.render_color_glyph) {
+	if (face->scaled_font_methods.render_color_glyph &&
+	    scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
+	{
 	    recording_surface = _cairo_user_scaled_font_create_recording_surface (scaled_font, TRUE, foreground_color);
 
 	    cr = _cairo_user_scaled_font_create_recording_context (scaled_font, recording_surface, TRUE);

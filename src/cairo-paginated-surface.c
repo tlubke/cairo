@@ -756,6 +756,14 @@ _cairo_paginated_surface_tag (void			 *abstract_surface,
 			       begin, tag_name, attributes);
 }
 
+static cairo_bool_t
+_cairo_paginated_surface_supports_color_glyph (void                 *abstract_surface,
+                                               cairo_scaled_font_t  *scaled_font,
+                                               unsigned long         glyph_index)
+{
+    return TRUE;
+}
+
 static cairo_surface_t *
 _cairo_paginated_surface_snapshot (void *abstract_other)
 {
@@ -811,4 +819,5 @@ static const cairo_surface_backend_t cairo_paginated_surface_backend = {
     _cairo_paginated_surface_show_text_glyphs,
     _cairo_paginated_surface_get_supported_mime_types,
     _cairo_paginated_surface_tag,
+    _cairo_paginated_surface_supports_color_glyph,
 };

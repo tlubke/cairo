@@ -2795,9 +2795,21 @@ composite_color_glyphs (cairo_surface_t             *surface,
                     goto UNLOCK;
 
                 if ((scaled_glyph->has_info & CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE) != 0) {
-                    skip_cluster = FALSE;
-                    break;
-                }
+		    cairo_bool_t supports_color_glyph = FALSE;
+
+		    if (surface->backend->supports_color_glyph) {
+			_cairo_scaled_font_thaw_cache (scaled_font);
+			supports_color_glyph = _cairo_surface_supports_color_glyph (surface, scaled_font, glyphs[gp].index);
+
+			memset (glyph_cache, 0, sizeof (glyph_cache));
+			_cairo_scaled_font_freeze_cache (scaled_font);
+		    }
+
+		    if (!supports_color_glyph) {
+			skip_cluster = FALSE;
+			break;
+		    }
+		}
             }
 
             if (skip_cluster) {
@@ -2967,9 +2979,9 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
 
         if (num_glyphs == 0)
             goto DONE;
-    }
-    else
+    } else {
       utf8_copy = NULL;
+    }
 
     /* The logic here is duplicated in _cairo_analysis_surface show_glyphs and
      * show_text_glyphs.  Keep in synch. */
@@ -3057,6 +3069,16 @@ _cairo_surface_tag (cairo_surface_t	        *surface,
     return _cairo_surface_set_error (surface, status);
 }
 
+cairo_bool_t
+_cairo_surface_supports_color_glyph (cairo_surface_t       *surface,
+				     cairo_scaled_font_t   *scaled_font,
+				     unsigned long          glyph_index)
+{
+    if (surface->backend->supports_color_glyph != NULL)
+	return surface->backend->supports_color_glyph (surface, scaled_font, glyph_index);
+
+    return FALSE;
+}
 
 /**
  * _cairo_surface_set_resolution:

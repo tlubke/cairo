@@ -1231,6 +1231,14 @@ _cairo_recording_surface_tag (void			 *abstract_surface,
     return status;
 }
 
+static cairo_bool_t
+_cairo_recording_surface_supports_color_glyph (void                 *abstract_surface,
+                                               cairo_scaled_font_t  *scaled_font,
+                                               unsigned long         glyph_index)
+{
+    return TRUE;
+}
+
 static void
 _command_init_copy (cairo_recording_surface_t *surface,
 		    cairo_command_header_t *dst,
@@ -1703,6 +1711,7 @@ static const cairo_surface_backend_t cairo_recording_surface_backend = {
     _cairo_recording_surface_show_text_glyphs,
     NULL, /* get_supported_mime_types */
     _cairo_recording_surface_tag,
+    _cairo_recording_surface_supports_color_glyph,
 };
 
 static unsigned int

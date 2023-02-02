@@ -336,3 +336,10 @@ _cairo_hash_bytes (uintptr_t hash,
 	hash = ((hash << 5) + hash) + *bytes++;
     return hash;
 }
+
+uintptr_t
+_cairo_hash_uintptr (uintptr_t hash,
+                     uintptr_t u)
+{
+    return _cairo_hash_bytes (hash, &u, sizeof(u));
+}

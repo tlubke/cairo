@@ -406,6 +406,10 @@ _cairo_hash_bytes (uintptr_t hash,
 		   const void *bytes,
 		   unsigned int length);
 
+cairo_private uintptr_t
+_cairo_hash_uintptr (uintptr_t hash,
+                     uintptr_t u);
+
 /* We use bits 24-27 to store phases for subpixel positions */
 #define _cairo_scaled_glyph_index(g) ((unsigned long)((g)->hash_entry.hash & 0xffffff))
 #define _cairo_scaled_glyph_xphase(g) (int)(((g)->hash_entry.hash >> 24) & 3)
@@ -1482,6 +1486,11 @@ _cairo_surface_tag (cairo_surface_t	        *surface,
 		    cairo_bool_t                 begin,
 		    const char                  *tag_name,
 		    const char                  *attributes);
+
+cairo_private cairo_bool_t
+_cairo_surface_supports_color_glyph (cairo_surface_t       *surface,
+				     cairo_scaled_font_t   *scaled_font,
+				     unsigned long          glyph_index);
 
 cairo_private cairo_status_t
 _cairo_surface_acquire_source_image (cairo_surface_t         *surface,
