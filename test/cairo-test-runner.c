@@ -730,6 +730,7 @@ static cairo_bool_t
 _has_required_ghostscript_version (const char *str)
 {
 #if ! CAIRO_CAN_TEST_PS_SURFACE
+    (void)str;
     return TRUE;
 #endif
 
@@ -742,6 +743,7 @@ static cairo_bool_t
 _has_required_poppler_version (const char *str)
 {
 #if ! CAIRO_CAN_TEST_PDF_SURFACE
+    (void)str;
     return TRUE;
 #endif
 
@@ -754,6 +756,7 @@ static cairo_bool_t
 _has_required_rsvg_version (const char *str)
 {
 #if ! CAIRO_CAN_TEST_SVG_SURFACE
+    (void)str;
     return TRUE;
 #endif
 
