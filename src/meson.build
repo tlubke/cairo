@@ -195,9 +195,6 @@ cairo_feature_sources = {
   'cairo-svg': [
     'cairo-svg-surface.c',
   ],
-  'cairo-xml': [
-    'cairo-xml-surface.c',
-  ],
   'cairo-tee': [
     'cairo-tee-surface.c',
   ],
@@ -218,7 +215,6 @@ cairo_feature_headers = {
   'cairo-gl': ['cairo-gl.h'],
   'cairo-script': ['cairo-script.h'],
   'cairo-tee': ['cairo-tee.h'],
-  'cairo-xml': ['cairo-xml.h'],
   'cairo-vg': ['cairo-vg.h'],
 }
 

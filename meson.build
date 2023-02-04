@@ -595,15 +595,6 @@ if zlib_dep.found()
   conf.set('CAIRO_HAS_INTERPRETER', 1)
 endif
 
-if zlib_dep.found() and png_dep.found() and get_option('xml').enabled()
-  feature_conf.set('CAIRO_HAS_XML_SURFACE', 1)
-  built_features += [{
-    'name': 'cairo-xml',
-    'description': 'XML surface backend',
-    'deps': [zlib_dep],
-  }]
-endif
-
 bfd_dep = cc.find_library('bfd', has_headers: ['bfd.h'], required: get_option('symbol-lookup'))
 if bfd_dep.found() and \
    cc.has_function('bfd_openr', dependencies: [bfd_dep]) and \
@@ -839,7 +830,6 @@ summary({
         'Observer': true,
         'Mime': true,
         'Tee': feature_conf.get('CAIRO_HAS_TEE_SURFACE', 0) == 1,
-        'XML': feature_conf.get('CAIRO_HAS_XML_SURFACE', 0) == 1,
         'Xlib': feature_conf.get('CAIRO_HAS_XLIB_SURFACE', 0) == 1,
         'Xlib Xrender': feature_conf.get('CAIRO_HAS_XLIB_XRENDER_SURFACE', 0) == 1,
         'Quartz': feature_conf.get('CAIRO_HAS_QUARTZ_SURFACE', 0) == 1,
