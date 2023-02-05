@@ -726,42 +726,6 @@ _has_required_cairo_version (const char *str)
 			     CAIRO_VERSION_ENCODE (major, minor, micro));
 }
 
-static cairo_bool_t
-_has_required_ghostscript_version (const char *str)
-{
-#if ! CAIRO_CAN_TEST_PS_SURFACE
-    return TRUE;
-#endif
-
-    str += 2; /* advance over "gs" */
-
-    return TRUE;
-}
-
-static cairo_bool_t
-_has_required_poppler_version (const char *str)
-{
-#if ! CAIRO_CAN_TEST_PDF_SURFACE
-    return TRUE;
-#endif
-
-    str += 7; /* advance over "poppler" */
-
-    return TRUE;
-}
-
-static cairo_bool_t
-_has_required_rsvg_version (const char *str)
-{
-#if ! CAIRO_CAN_TEST_SVG_SURFACE
-    return TRUE;
-#endif
-
-    str += 4; /* advance over "rsvg" */
-
-    return TRUE;
-}
-
 #define TEST_SIMILAR	0x1
 #define TEST_OFFSET	0x2
 #define TEST_SCALE	0x4
@@ -900,30 +864,6 @@ main (int argc, char **argv)
 
 	    str = strstr (requirements, "cairo");
 	    if (str != NULL && ! _has_required_cairo_version (str)) {
-		if (runner.list_only)
-		    goto TEST_NEXT;
-		else
-		    goto TEST_SKIPPED;
-	    }
-
-	    str = strstr (requirements, "gs");
-	    if (str != NULL && ! _has_required_ghostscript_version (str)) {
-		if (runner.list_only)
-		    goto TEST_NEXT;
-		else
-		    goto TEST_SKIPPED;
-	    }
-
-	    str = strstr (requirements, "poppler");
-	    if (str != NULL && ! _has_required_poppler_version (str)) {
-		if (runner.list_only)
-		    goto TEST_NEXT;
-		else
-		    goto TEST_SKIPPED;
-	    }
-
-	    str = strstr (requirements, "rsvg");
-	    if (str != NULL && ! _has_required_rsvg_version (str)) {
 		if (runner.list_only)
 		    goto TEST_NEXT;
 		else
