@@ -49,7 +49,6 @@
 #include "cairo-recording-surface-private.h"
 #include "cairo-region-private.h"
 #include "cairo-surface-inline.h"
-#include "cairo-tee-surface-private.h"
 
 /**
  * SECTION:cairo-surface

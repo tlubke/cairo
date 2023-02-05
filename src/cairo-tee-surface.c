@@ -44,7 +44,6 @@
 
 #include "cairo-default-context-private.h"
 #include "cairo-error-private.h"
-#include "cairo-tee-surface-private.h"
 #include "cairo-recording-surface-inline.h"
 #include "cairo-surface-wrapper-private.h"
 #include "cairo-array-private.h"
@@ -564,44 +563,4 @@ cairo_tee_surface_index (cairo_surface_t *abstract_surface,
 	slave = _cairo_array_index (&surface->slaves, index);
 	return slave->target;
     }
-}
-
-cairo_surface_t *
-_cairo_tee_surface_find_match (void *abstract_surface,
-			       const cairo_surface_backend_t *backend,
-			       cairo_content_t content)
-{
-    cairo_tee_surface_t *surface = abstract_surface;
-    cairo_surface_wrapper_t *slaves;
-    int num_slaves, n;
-
-    /* exact match first */
-    if (surface->master.target->backend == backend &&
-	surface->master.target->content == content)
-    {
-	return surface->master.target;
-    }
-
-    num_slaves = _cairo_array_num_elements (&surface->slaves);
-    slaves = _cairo_array_index (&surface->slaves, 0);
-    for (n = 0; n < num_slaves; n++) {
-	if (slaves[n].target->backend == backend &&
-	    slaves[n].target->content == content)
-	{
-	    return slaves[n].target;
-	}
-    }
-
-    /* matching backend? */
-    if (surface->master.target->backend == backend)
-	return surface->master.target;
-
-    num_slaves = _cairo_array_num_elements (&surface->slaves);
-    slaves = _cairo_array_index (&surface->slaves, 0);
-    for (n = 0; n < num_slaves; n++) {
-	if (slaves[n].target->backend == backend)
-	    return slaves[n].target;
-    }
-
-    return NULL;
 }
