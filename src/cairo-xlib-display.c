@@ -479,8 +479,11 @@ _cairo_xlib_display_get_xrender_format_for_pixman(cairo_xlib_display_t *display,
     case PIXMAN_TYPE_GRAY:
 	/* XXX Find matching visual/colormap */
 	tmpl.type = PictTypeIndexed;
-	//tmpl.colormap = screen->visuals[PIXMAN_FORMAT_VIS(format)].vid;
-	//mask |= PictFormatColormap;
+	tmpl.colormap = PIXMAN_FORMAT_VIS(format);
+	mask |= PictFormatColormap;
+    break;
+
+    default:
 	return NULL;
     }
 #undef MASK
