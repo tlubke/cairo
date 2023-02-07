@@ -303,9 +303,9 @@ _pixman_format_to_masks (pixman_format_code_t	 format,
     case PIXMAN_TYPE_COLOR:
     case PIXMAN_TYPE_GRAY:
         masks->alpha_mask = 0;
-        masks->red_mask   = 0;
-        masks->green_mask = 8;
-        masks->blue_mask  = 0;
+        masks->red_mask   = MASK(a);
+        masks->green_mask = MASK(g);
+        masks->blue_mask  = MASK(b);
         return TRUE;
     case PIXMAN_TYPE_OTHER:
     case PIXMAN_TYPE_YUY2:
