@@ -245,6 +245,7 @@ write_ppm (cairo_surface_t *surface, int fd)
 			      rgb, 3);
 	    }
 	    break;
+    case CAIRO_FORMAT_C8:
 	case CAIRO_FORMAT_G8:
 	case CAIRO_FORMAT_A8:
 	    len = _cairo_write (fd,

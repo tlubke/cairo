@@ -184,12 +184,15 @@ cairo_gl_context_get_glyph_cache (cairo_gl_context_t *ctx,
     case CAIRO_FORMAT_RGBA128F:
     case CAIRO_FORMAT_RGB96F:
     case CAIRO_FORMAT_RGB30:
+    case CAIRO_FORMAT_ARGB16:
     case CAIRO_FORMAT_RGB16_565:
     case CAIRO_FORMAT_ARGB32:
     case CAIRO_FORMAT_RGB24:
 	cache = &ctx->glyph_cache[0];
 	content = CAIRO_CONTENT_COLOR_ALPHA;
 	break;
+    case CAIRO_FORMAT_C8:
+    case CAIRO_FORMAT_G8:
     case CAIRO_FORMAT_A8:
     case CAIRO_FORMAT_A1:
 	cache = &ctx->glyph_cache[1];

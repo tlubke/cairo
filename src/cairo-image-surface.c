@@ -229,7 +229,7 @@ _pixman_format_from_masks (cairo_format_masks_t *masks,
 	else
 	    format_type = PIXMAN_TYPE_ABGR;
     } else if (masks->alpha_mask) {
-	format_type = PIXMAN_TYPE_A;
+	    format_type = PIXMAN_TYPE_A;
     } else {
 	return FALSE;
     }
@@ -300,9 +300,14 @@ _pixman_format_to_masks (pixman_format_code_t	 format,
         masks->green_mask = 0;
         masks->blue_mask  = 0;
         return TRUE;
-    case PIXMAN_TYPE_OTHER:
     case PIXMAN_TYPE_COLOR:
     case PIXMAN_TYPE_GRAY:
+        masks->alpha_mask = 0;
+        masks->red_mask   = 0;
+        masks->green_mask = 0;
+        masks->blue_mask  = 0;
+        return TRUE;
+    case PIXMAN_TYPE_OTHER:
     case PIXMAN_TYPE_YUY2:
     case PIXMAN_TYPE_YV12:
     default:
@@ -766,7 +771,6 @@ _cairo_format_bits_per_pixel (cairo_format_t format)
 	return 16;
     case CAIRO_FORMAT_C8:
     case CAIRO_FORMAT_G8:
-	return 8;
     case CAIRO_FORMAT_A8:
 	return 8;
     case CAIRO_FORMAT_A4:
