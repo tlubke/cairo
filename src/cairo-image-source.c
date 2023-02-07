@@ -499,6 +499,7 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 	color.red = color.green = color.blue = 0;
 	return pixman_image_create_solid_fill (&color);
 
+    case CAIRO_FORMAT_C8:
     case CAIRO_FORMAT_G8:
 	pixel = *(uint8_t *) (image->data + y * image->stride + x);
 	if (pixel == 0xff)
@@ -508,7 +509,7 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 
 	color.alpha = 0xffff;
 	color.red = color.blue = color.green = (pixel << 8) | pixel;
-	return pixman_image_create_solid_fill (&color)
+	return pixman_image_create_solid_fill (&color);
 
     case CAIRO_FORMAT_ARGB16:
 	pixel = *(uint16_t *) (image->data + y * image->stride + 2 * x);

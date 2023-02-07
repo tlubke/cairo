@@ -363,6 +363,10 @@ write_png (cairo_surface_t	*surface,
 	bpc = 8;
 	png_color_type = PNG_COLOR_TYPE_RGB;
 	break;
+    case CAIRO_FORMAT_C8:
+	bpc = 8;
+	png_color_type = PNG_COLOR_TYPE_PALETTE;
+	break;
     case CAIRO_FORMAT_G8:
 	bpc = 8;
 	png_color_type = PNG_COLOR_TYPE_GRAY;

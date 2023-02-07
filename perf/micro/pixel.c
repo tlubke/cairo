@@ -48,8 +48,10 @@ pixel_direct (cairo_t *cr, int width, int height, int loops)
     case CAIRO_FORMAT_A1: bpp = 0; break;
     case CAIRO_FORMAT_A4: bpp = 4; break;
     case CAIRO_FORMAT_A8:
+    case CAIRO_FORMAT_C8:
     case CAIRO_FORMAT_G8: bpp = 8; break;
     case CAIRO_FORMAT_ARGB16:
+    case CAIRO_FORMAT_RGB16_565: bpp = 16; break;
     case CAIRO_FORMAT_RGB24:
     case CAIRO_FORMAT_RGB30:
     case CAIRO_FORMAT_ARGB32: bpp = 32; break;

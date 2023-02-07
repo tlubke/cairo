@@ -260,6 +260,12 @@ _cairo_gl_get_image_format_and_type_gl (pixman_format_code_t pixman_format,
 	*format = GL_ALPHA;
 	*type = GL_UNSIGNED_BYTE;
 	return TRUE;
+    case PIXMAN_c8:
+    case PIXMAN_g8:
+	*internal_format = GL_LUMINANCE;
+	*format = GL_LUMINANCE;
+	*type = GL_UNSIGNED_BYTE;
+	return TRUE;
 
 #if PIXMAN_VERSION >= PIXMAN_VERSION_ENCODE(0,27,2)
     case PIXMAN_a8r8g8b8_sRGB:
@@ -274,7 +280,6 @@ _cairo_gl_get_image_format_and_type_gl (pixman_format_code_t pixman_format,
     case PIXMAN_b2g3r3:
     case PIXMAN_a2r2g2b2:
     case PIXMAN_a2b2g2r2:
-    case PIXMAN_c8:
     case PIXMAN_x4a4:
     /* case PIXMAN_x4c4: */
     case PIXMAN_x4g4:
