@@ -96,6 +96,8 @@ _cairo_surface_is_quartz_image (const cairo_surface_t *surface);
 cairo_private cairo_bool_t
 _cairo_quartz_image_surface_is_zero (const cairo_quartz_image_surface_t *surface);
 
+cairo_private CGColorSpaceRef
+_cairo_quartz_create_color_space (CGContextRef context);
 cairo_private CGContextRef
 _cairo_quartz_image_surface_get_cg_context (cairo_surface_t *surface);
 
@@ -107,6 +109,9 @@ cairo_private cairo_font_face_t*
 _cairo_quartz_font_face_create_for_ctfont (CTFontRef ctFont);
 cairo_private void
 _cairo_quartz_set_antialiasing (CGContextRef context, cairo_antialias_t antialias);
+
+cairo_status_t _cairo_quartz_surface_to_png (cairo_surface_t *abstract_surface, const char *dest);
+cairo_private void _cairo_quartz_image_to_png (CGImageRef, const char *dest);
 
 #else
 
