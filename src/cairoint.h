@@ -897,6 +897,10 @@ cairo_private void
 _cairo_font_options_init_copy (cairo_font_options_t		*options,
 			       const cairo_font_options_t	*other);
 
+cairo_private cairo_bool_t
+_cairo_font_options_compare (const cairo_font_options_t	*a,
+                             const cairo_font_options_t	*b);
+
 cairo_private void
 _cairo_font_options_fini (cairo_font_options_t *options);
 
