@@ -146,7 +146,7 @@ _cairo_quartz_image_surface_flush (void *asurface,
     CGImageRef oldImage = surface->image;
     CGImageRef newImage = NULL;
     void *image_data;
-    const unsigned int size = surface->imageSurface->height * surface->imageSurface->stride;
+
     if (flags)
 	return CAIRO_STATUS_SUCCESS;
 
