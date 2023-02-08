@@ -1471,10 +1471,14 @@ find_name (tt_name_t *name, unsigned long size, int name_id, int platform, int e
 	    if (offset + len > size)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    str = _cairo_strndup (((char*)name) + offset, len);
+	    str = _cairo_malloc (len + 1);
 	    if (str == NULL)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
+	    memcpy (str,
+		    ((char*)name) + offset,
+		    len);
+	    str[len] = 0;
 	    break;
 	}
     }
