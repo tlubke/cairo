@@ -1166,9 +1166,8 @@ cairo_set_fill_rule (cairo_t *cr, cairo_fill_rule_t fill_rule)
  * cairo_set_line_width() and ignore this note.
  *
  * As with the other stroke parameters, the current line width is
- * examined by cairo_stroke(), cairo_stroke_extents(), and
- * cairo_stroke_to_path(), but does not have any effect during path
- * construction.
+ * examined by cairo_stroke(), and cairo_stroke_extents(), but does not have
+ * any effect during path construction.
  *
  * The default line width value is 2.0.
  *
@@ -1242,9 +1241,8 @@ slim_hidden_def (cairo_set_hairline);
  * styles are drawn.
  *
  * As with the other stroke parameters, the current line cap style is
- * examined by cairo_stroke(), cairo_stroke_extents(), and
- * cairo_stroke_to_path(), but does not have any effect during path
- * construction.
+ * examined by cairo_stroke(), and cairo_stroke_extents(), but does not have
+ * any effect during path construction.
  *
  * The default line cap style is %CAIRO_LINE_CAP_BUTT.
  *
@@ -1274,9 +1272,8 @@ slim_hidden_def (cairo_set_line_cap);
  * styles are drawn.
  *
  * As with the other stroke parameters, the current line join style is
- * examined by cairo_stroke(), cairo_stroke_extents(), and
- * cairo_stroke_to_path(), but does not have any effect during path
- * construction.
+ * examined by cairo_stroke(), and cairo_stroke_extents(), but does not have
+ * any effect during path construction.
  *
  * The default line join style is %CAIRO_LINE_JOIN_MITER.
  *
@@ -1411,9 +1408,8 @@ cairo_get_dash (cairo_t *cr,
  * converted to a bevel.
  *
  * As with the other stroke parameters, the current line miter limit is
- * examined by cairo_stroke(), cairo_stroke_extents(), and
- * cairo_stroke_to_path(), but does not have any effect during path
- * construction.
+ * examined by cairo_stroke(), and cairo_stroke_extents(), but does not have
+ * any effect during path construction.
  *
  * The default miter limit value is 10.0, which will convert joins
  * with interior angles less than 11 degrees to bevels instead of
@@ -2941,7 +2937,7 @@ cairo_copy_clip_rectangle_list (cairo_t *cr)
  * CAIRO_TAG_DEST:
  *
  * Create a destination for a hyperlink. Destination tag attributes
- * are detailed at [Destinations][dests].
+ * are detailed at [Destinations][dest].
  *
  * Since: 1.16
  **/
@@ -2950,7 +2946,7 @@ cairo_copy_clip_rectangle_list (cairo_t *cr)
  * CAIRO_TAG_LINK:
  *
  * Create hyperlink. Link tag attributes are detailed at
- * [Links][links].
+ * [Links][link].
  *
  * Since: 1.16
  **/
@@ -4044,7 +4040,7 @@ slim_hidden_def (cairo_has_current_point);
  * cairo_move_to(), cairo_line_to(), cairo_curve_to(),
  * cairo_rel_move_to(), cairo_rel_line_to(), cairo_rel_curve_to(),
  * cairo_arc(), cairo_arc_negative(), cairo_rectangle(),
- * cairo_text_path(), cairo_glyph_path(), cairo_stroke_to_path().
+ * cairo_text_path(), cairo_glyph_path().
  *
  * Some functions use and alter the current point but do not
  * otherwise change current path:

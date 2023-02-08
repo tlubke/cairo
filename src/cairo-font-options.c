@@ -662,7 +662,7 @@ cairo_font_options_get_variations (cairo_font_options_t *options)
 /**
  * cairo_font_options_set_color_mode:
  * @options: a #cairo_font_options_t
- * @font_color: the new color mode
+ * @color_mode: the new color mode
  *
  * Sets the color mode for the font options object. This controls
  * whether color fonts are to be rendered in color or as outlines.

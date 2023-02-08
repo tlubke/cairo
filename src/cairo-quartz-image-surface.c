@@ -377,15 +377,27 @@ cairo_quartz_image_surface_create (cairo_surface_t *surface)
 }
 
 
+/**
+ * cairo_quartz_image_surface_get_image:
+ * @surface: a #cairo_surface_t
+ *
+ * Returns a #cairo_surface_t image surface that refers to the same bits
+ * as the image of the quartz surface.
+ *
+ * Return value: a #cairo_surface_t (owned by the quartz #cairo_surface_t),
+ * or %NULL if the quartz surface is not an image surface.
+ *
+ * Since: 1.6
+ */
 cairo_surface_t *
-cairo_quartz_image_surface_get_image (cairo_surface_t *asurface)
+cairo_quartz_image_surface_get_image (cairo_surface_t *surface)
 {
-    cairo_quartz_image_surface_t *surface = (cairo_quartz_image_surface_t*) asurface;
+    cairo_quartz_image_surface_t *qsurface = (cairo_quartz_image_surface_t*) surface;
 
     /* Throw an error for a non-quartz surface */
-    if (! _cairo_surface_is_quartz (asurface)) {
+    if (! _cairo_surface_is_quartz (surface)) {
         return SURFACE_ERROR_TYPE_MISMATCH;
     }
 
-    return (cairo_surface_t*) surface->imageSurface;
+    return (cairo_surface_t*) qsurface->imageSurface;
 }

@@ -56,7 +56,6 @@ _cairo_cache_entry_is_non_zero (const void *entry)
  * @keys_equal: a function to return %TRUE if two keys are equal
  * @entry_destroy: destroy notifier for cache entries
  * @max_size: the maximum size for this cache
- * Returns: the newly created #cairo_cache_t
  *
  * Creates a new cache using the keys_equal() function to determine
  * the equality of entries.
@@ -84,6 +83,8 @@ _cairo_cache_entry_is_non_zero (const void *entry)
  * _cairo_cache_freeze() and _cairo_cache_thaw() calls can be
  * used to establish a window during which no automatic removal of
  * entries will occur.
+ *
+ * Returns: the newly created #cairo_cache_t
  **/
 cairo_status_t
 _cairo_cache_init (cairo_cache_t		*cache,
