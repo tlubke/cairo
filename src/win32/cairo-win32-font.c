@@ -1335,9 +1335,9 @@ _cairo_win32_scaled_font_load_type1_data (void	            *abstract_font,
 							 length);
 }
 
-static cairo_surface_t *
-_compute_mask (cairo_surface_t *surface,
-	       int quality)
+cairo_surface_t *
+_cairo_compute_glyph_mask (cairo_surface_t *surface,
+			   int quality)
 {
     cairo_image_surface_t *glyph;
     cairo_image_surface_t *mask;
@@ -1421,7 +1421,7 @@ _cairo_win32_scaled_font_init_glyph_surface (cairo_win32_scaled_font_t *scaled_f
     if (status)
 	goto FAIL;
 
-    image = _compute_mask (surface, scaled_font->quality);
+    image = _cairo_compute_glyph_mask (surface, scaled_font->quality);
     status = image->status;
     if (status)
 	goto FAIL;
