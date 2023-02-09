@@ -1126,42 +1126,6 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
-/* Helper function adapted from _compute_mask in cairo-win32-font.c */
-
-/* Compute an alpha-mask from a monochrome RGB24 image
- */
-static cairo_surface_t *
-_compute_a8_mask (cairo_surface_t *surface)
-{
-    cairo_image_surface_t *glyph;
-    cairo_image_surface_t *mask;
-    int i, j;
-
-    glyph = (cairo_image_surface_t *)cairo_surface_map_to_image (surface, NULL);
-    if (unlikely (glyph->base.status))
-        return &glyph->base;
-
-    /* No quality param, just use the non-ClearType path */
-
-    /* Compute an alpha-mask by using the green channel of a (presumed monochrome)
-     * RGB24 image.
-     */
-    mask = (cairo_image_surface_t *)
-        cairo_image_surface_create (CAIRO_FORMAT_A8, glyph->width, glyph->height);
-    if (likely (mask->base.status == CAIRO_STATUS_SUCCESS)) {
-        for (i = 0; i < glyph->height; i++) {
-            uint32_t *p = (uint32_t *) (glyph->data + i * glyph->stride);
-            uint8_t *q = (uint8_t *) (mask->data + i * mask->stride);
-
-            for (j = 0; j < glyph->width; j++)
-                *q++ = 255 - ((*p++ & 0x0000ff00) >> 8);
-        }
-    }
-
-    cairo_surface_unmap_image (surface, &glyph->base);
-    return &mask->base;
-}
-
 static cairo_int_status_t
 _cairo_dwrite_scaled_font_init_glyph_surface(cairo_dwrite_scaled_font_t *scaled_font,
 					     cairo_scaled_glyph_t	*scaled_glyph)
@@ -1240,7 +1204,7 @@ _cairo_dwrite_scaled_font_init_glyph_surface(cairo_dwrite_scaled_font_t *scaled_
 
     GdiFlush();
 
-    image = _compute_a8_mask (&surface->base);
+    image = _cairo_compute_glyph_mask (&surface->base, CLEARTYPE_QUALITY);
     status = (cairo_int_status_t)image->status;
     if (status)
 	goto FAIL;
