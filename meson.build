@@ -4,8 +4,8 @@ project('cairo', 'c', 'cpp',
   default_options: ['warning_level=2'],
 )
 
-# Keep in sync with configure.ac!
 freetype_required_version = '>= 9.7.3'
+freetype_colrv1_required_version = '>= 25.0.19'
 fontconfig_required_version = '>= 2.2.95'
 xrender_required_version = '>= 0.6'
 xcb_required_version = '>= 1.6'
@@ -342,9 +342,8 @@ if freetype_dep.found()
         conf.set('CAIRO_CAN_TEST_TTX_FONT', 1)
       endif
     endif
-    # When FT COLRv1 API is no longer experimental we can change this to a
-    # version check for the stable COLRv1 API.
-    if cc.get_define('DEBUG_ENABLE_COLR_V1') != ''
+    if freetype_dep.version().version_compare(freetype_colrv1_required_version) and \
+       cc.has_function('FT_Get_Color_Glyph_Paint', dependencies: freetype_dep)
       conf.set('HAVE_FT_COLR_V1', 1)
     endif
     check_funcs += ft_check_funcs
