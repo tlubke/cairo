@@ -3408,7 +3408,6 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
     int load_flags = scaled_font->ft_options.load_flags;
     cairo_bool_t vertical_layout = FALSE;
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
-    cairo_bool_t scaled_glyph_loaded = FALSE;
     cairo_ft_glyph_private_t *glyph_priv;
     int color_flag = 0;
 
@@ -3528,46 +3527,20 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
     if (info & CAIRO_SCALED_GLYPH_INFO_PATH) {
 	cairo_path_fixed_t *path = NULL; /* hide compiler warning */
 
-	if (scaled_glyph->has_info & CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE) {
-	    path = _cairo_path_fixed_create ();
-	    if (!path) {
-		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-		goto FAIL;
-	    }
+	/* Load non-color glyph */
+	status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
+						    scaled_glyph,
+						    face,
+						    load_flags,
+						    FALSE,
+						    vertical_layout);
+	if (unlikely (status))
+	    goto FAIL;
 
-	    status = _cairo_recording_surface_get_path (scaled_glyph->recording_surface, path);
-	    if (unlikely (status)) {
-		_cairo_path_fixed_destroy (path);
-		goto FAIL;
-	    }
-
-	} else {
-	    /*
-	     * A kludge -- the above code will trash the outline,
-	     * so reload it. This will probably never occur though
-	     */
-	    if ((info & (CAIRO_SCALED_GLYPH_INFO_SURFACE | CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE)) != 0) {
-		scaled_glyph_loaded = FALSE;
-		load_flags |= FT_LOAD_NO_BITMAP;
-	    }
-
-	    if (!scaled_glyph_loaded) {
-		status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
-							    scaled_glyph,
-							    face,
-							    load_flags,
-							    FALSE,
-							    vertical_layout);
-		if (unlikely (status))
-		    goto FAIL;
-	    }
-
-	    if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
-		status = _cairo_ft_face_decompose_glyph_outline (face, &path);
-	    } else {
-		status = CAIRO_INT_STATUS_UNSUPPORTED;
-	    }
-	}
+	if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE)
+	    status = _cairo_ft_face_decompose_glyph_outline (face, &path);
+	else
+	    status = CAIRO_INT_STATUS_UNSUPPORTED;
 
 	if (unlikely (status))
 	    goto FAIL;
