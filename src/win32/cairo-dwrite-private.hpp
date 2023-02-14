@@ -99,6 +99,36 @@ public:
 	return mFactoryInstance;
     }
 
+    static RefPtr<IDWriteFactory1> Instance1()
+    {
+	if (!mFactoryInstance1) {
+	    if (Instance()) {
+		Instance()->QueryInterface(&mFactoryInstance1);
+	    }
+	}
+	return mFactoryInstance1;
+    }
+
+    static RefPtr<IDWriteFactory2> Instance2()
+    {
+	if (!mFactoryInstance2) {
+	    if (Instance()) {
+		Instance()->QueryInterface(&mFactoryInstance2);
+	    }
+	}
+	return mFactoryInstance2;
+    }
+
+    static RefPtr<IDWriteFactory3> Instance3()
+    {
+	if (!mFactoryInstance3) {
+	    if (Instance()) {
+		Instance()->QueryInterface(&mFactoryInstance3);
+	    }
+	}
+	return mFactoryInstance3;
+    }
+
     static RefPtr<IDWriteFactory4> Instance4()
     {
 	if (!mFactoryInstance4) {
@@ -149,6 +179,9 @@ public:
 
 private:
     static RefPtr<IDWriteFactory> mFactoryInstance;
+    static RefPtr<IDWriteFactory1> mFactoryInstance1;
+    static RefPtr<IDWriteFactory2> mFactoryInstance2;
+    static RefPtr<IDWriteFactory3> mFactoryInstance3;
     static RefPtr<IDWriteFactory4> mFactoryInstance4;
     static RefPtr<IDWriteFontCollection> mSystemCollection;
     static RefPtr<IDWriteRenderingParams> mDefaultRenderingParams;
