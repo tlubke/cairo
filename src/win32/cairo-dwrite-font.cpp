@@ -716,10 +716,15 @@ _cairo_dwrite_scaled_font_init_glyph_metrics(cairo_dwrite_scaled_font_t *scaled_
     // We pad the extents here because GetDesignGlyphMetrics returns "ideal" metrics
     // for the glyph outline, without accounting for hinting/gridfitting/antialiasing,
     // and therefore it does not always cover all pixels that will actually be touched.
-    if (scaled_font->base.options.antialias != CAIRO_ANTIALIAS_NONE &&
-	extents.width > 0 && extents.height > 0) {
-	extents.width += scaled_font->mat_inverse.xx * 2;
-	extents.x_bearing -= scaled_font->mat_inverse.xx;
+    if (extents.width > 0 && extents.height > 0) {
+	double x = 1, y = 1;
+	cairo_matrix_transform_distance (&scaled_font->mat_inverse, &x, &y);
+	x = fabs(x);
+	y = fabs(y);
+	extents.width += x * 2;
+	extents.x_bearing -= x;
+	extents.height += y * 2;
+	extents.y_bearing -= y;
     }
 
     _cairo_scaled_glyph_set_metrics (scaled_glyph,
