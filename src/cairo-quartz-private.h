@@ -81,8 +81,7 @@ typedef struct cairo_quartz_image_surface {
     cairo_surface_t base;
 
     int width, height;
-
-    CGImageRef image;
+    CGContextRef cgContext;
     cairo_image_surface_t *imageSurface;
 } cairo_quartz_image_surface_t;
 
@@ -92,16 +91,13 @@ _cairo_quartz_verify_surface_size(int width, int height);
 cairo_private cairo_bool_t
 _cairo_surface_is_quartz (const cairo_surface_t *surface);
 
-cairo_private CGImageRef
-CairoQuartzCreateCGImage (cairo_format_t format,
-			      unsigned int width,
-			      unsigned int height,
-			      unsigned int stride,
-			      void *data,
-			      cairo_bool_t interpolate,
-			      CGColorSpaceRef colorSpaceOverride,
-			      CGDataProviderReleaseDataCallback releaseCallback,
-			      void *releaseInfo);
+cairo_private cairo_bool_t
+_cairo_surface_is_quartz_image (const cairo_surface_t *surface);
+cairo_private cairo_bool_t
+_cairo_quartz_image_surface_is_zero (const cairo_quartz_image_surface_t *surface);
+
+cairo_private CGContextRef
+_cairo_quartz_image_surface_get_cg_context (cairo_surface_t *surface);
 
 cairo_private CGFontRef
 _cairo_quartz_scaled_font_get_cg_font_ref (cairo_scaled_font_t *sfont);
