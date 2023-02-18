@@ -292,7 +292,15 @@ cairo_quartz_image_surface_create (cairo_surface_t *surface)
 			 NULL, /* device */
 			 _cairo_content_from_format (format),
 			 FALSE); /* is_vector */
-    colorspace = CGColorSpaceCreateDeviceRGB ();
+
+    if (_cairo_surface_is_quartz (surface) || _cairo_surface_is_quartz_image (surface)) {
+	CGContextRef context = cairo_quartz_surface_get_cg_context(surface);
+	colorspace = _cairo_quartz_create_color_space (context);
+    }
+    else {
+	colorspace = CGDisplayCopyColorSpace (CGMainDisplayID ());
+    }
+
     bitinfo |= format == CAIRO_FORMAT_ARGB32 ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaNoneSkipFirst;
 
     qisurf->width = width;

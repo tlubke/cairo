@@ -26,7 +26,7 @@
 
 #include "cairo-boilerplate-private.h"
 
-#include <cairo-quartz.h>
+#include <cairo-quartz-private.h>
 
 static cairo_surface_t *
 _cairo_boilerplate_quartz_create_surface (const char		    *name,
@@ -56,7 +56,7 @@ static const cairo_boilerplate_target_t targets[] = {
 	cairo_surface_create_similar,
 	NULL, NULL,
 	_cairo_boilerplate_get_image_surface,
-	cairo_surface_write_to_png,
+	_cairo_quartz_surface_to_png,
 	NULL, NULL, NULL,
 	TRUE, FALSE, FALSE
     },
@@ -68,7 +68,7 @@ static const cairo_boilerplate_target_t targets[] = {
 	cairo_surface_create_similar,
 	NULL, NULL,
 	_cairo_boilerplate_get_image_surface,
-	cairo_surface_write_to_png,
+	_cairo_quartz_surface_to_png,
 	NULL, NULL, NULL,
         FALSE, FALSE, FALSE
     },
