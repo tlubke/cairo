@@ -452,6 +452,10 @@ test_pdf_sources = [
   'pdf-tagged-text.c',
 ]
 
+test_pdf_structure_sources = [
+  'pdf-structure.c',
+]
+
 test_ps_sources = [
   'ps-eps.c',
   'ps-features.c',
@@ -555,6 +559,9 @@ endif
 
 if feature_conf.get('CAIRO_HAS_PDF_SURFACE', 0) == 1
   test_sources += test_pdf_sources
+  if host_machine.system() != 'windows'
+    test_sources += test_pdf_structure_sources
+  endif
   has_multipage_surfaces = true
   add_fallback_resolution = true
   build_any2ppm = true

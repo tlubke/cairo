@@ -149,7 +149,7 @@ layout_paragraph (cairo_t *cr)
 	*end = ' ';
 	if (text_extents.width + 2*MARGIN > PAGE_WIDTH) {
 	    int len = prev_end - begin;
-	    char *s = malloc (len);
+	    char *s = xmalloc (len);
 	    memcpy (s, begin, len);
 	    s[len-1] = 0;
 	    paragraph_text[paragraph_num_lines++] = s;
@@ -204,9 +204,9 @@ draw_page_num (cairo_surface_t *surface, cairo_t *cr, const char *prefix, int nu
 static void
 draw_contents (cairo_surface_t *surface, cairo_t *cr, const struct section *section)
 {
-    char buf[100];
+    char *attrib;
 
-    sprintf(buf, "dest='%s'", section->heading);
+    xasprintf (&attrib, "dest='%s'", section->heading);
     cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     switch (section->level) {
 	case 0:
@@ -230,25 +230,26 @@ draw_contents (cairo_surface_t *surface, cairo_t *cr, const struct section *sect
     cairo_set_source_rgb (cr, 0, 0, 1);
     cairo_tag_begin (cr, "TOCI", NULL);
     cairo_tag_begin (cr, "Reference", NULL);
-    cairo_tag_begin (cr, CAIRO_TAG_LINK, buf);
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, attrib);
     cairo_show_text (cr, section->heading);
     cairo_tag_end (cr, CAIRO_TAG_LINK);
     cairo_tag_end (cr, "Reference");
     cairo_tag_end (cr, "TOCI");
     cairo_restore (cr);
     y_pos += HEADING_HEIGHT;
+    free (attrib);
 }
 
 static void
 draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *section)
 {
     int flags, i;
-    char buf[100];
-    char buf2[100];
+    char *name_attrib;
+    char *dest_attrib;
 
     cairo_tag_begin (cr, "Sect", NULL);
-    sprintf(buf, "name='%s'", section->heading);
-    sprintf(buf2, "dest='%s'", section->heading);
+    xasprintf(&name_attrib, "name='%s'", section->heading);
+    xasprintf(&dest_attrib, "dest='%s'", section->heading);
     cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
     if (section->level == 0) {
 	cairo_show_page (cr);
@@ -256,7 +257,7 @@ draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *secti
 	cairo_set_font_size(cr, HEADING1_SIZE);
 	cairo_move_to (cr, MARGIN, MARGIN);
 	cairo_tag_begin (cr, "H1", NULL);
-	cairo_tag_begin (cr, CAIRO_TAG_DEST, buf);
+	cairo_tag_begin (cr, CAIRO_TAG_DEST, name_attrib);
 	cairo_show_text (cr, section->heading);
 	cairo_tag_end (cr, CAIRO_TAG_DEST);
 	cairo_tag_end (cr, "H1");
@@ -265,7 +266,7 @@ draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *secti
 	outline_parents[0] = cairo_pdf_surface_add_outline (surface,
 							    CAIRO_PDF_OUTLINE_ROOT,
 							    section->heading,
-							    buf2,
+							    dest_attrib,
 							    flags);
     } else {
 	if (section->level == 1) {
@@ -286,7 +287,7 @@ draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *secti
 	    cairo_tag_begin (cr, "H2", NULL);
 	else
 	    cairo_tag_begin (cr, "H3", NULL);
-	cairo_tag_begin (cr, CAIRO_TAG_DEST, buf);
+	cairo_tag_begin (cr, CAIRO_TAG_DEST, name_attrib);
 	cairo_show_text (cr, section->heading);
 	cairo_tag_end (cr, CAIRO_TAG_DEST);
 	if (section->level == 1)
@@ -297,7 +298,7 @@ draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *secti
 	outline_parents[section->level] = cairo_pdf_surface_add_outline (surface,
 									 outline_parents[section->level - 1],
 									 section->heading,
-									 buf2,
+									 dest_attrib,
 									 flags);
     }
 
@@ -310,13 +311,15 @@ draw_section (cairo_surface_t *surface, cairo_t *cr, const struct section *secti
 	draw_paragraph (cr);
     }
     cairo_tag_end (cr, "Sect");
+    free (name_attrib);
+    free (dest_attrib);
 }
 
 static void
 draw_cover (cairo_surface_t *surface, cairo_t *cr)
 {
     cairo_text_extents_t text_extents;
-    char buf[200];
+    char *attrib;
     cairo_rectangle_t url_box;
     const char *cairo_url = "https://www.cairographics.org/";
     const double url_box_margin = 20.0;
@@ -344,10 +347,11 @@ draw_cover (cairo_surface_t *surface, cairo_t *cr)
     url_box.height = -text_extents.height + 2*url_box_margin;
     cairo_rectangle(cr, url_box.x, url_box.y, url_box.width, url_box.height);
     cairo_stroke(cr);
-    snprintf(buf, sizeof(buf), "rect=[%f %f %f %f] uri=\'%s\'",
+    xasprintf(&attrib, "rect=[%f %f %f %f] uri=\'%s\'",
              url_box.x, url_box.y, url_box.width, url_box.height, cairo_url);
-    cairo_tag_begin (cr, CAIRO_TAG_LINK, buf);
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, attrib);
     cairo_tag_end (cr, CAIRO_TAG_LINK);
+    free (attrib);
 
     /* Create link to not yet emmited page number */
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "page=5");
@@ -419,6 +423,32 @@ create_document (cairo_surface_t *surface, cairo_t *cr)
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "uri='http://127.0.0.1/' rect=[10.0 -10.0 100.0 100.0]");
     cairo_tag_end (cr, CAIRO_TAG_LINK);
 
+
+    /* Distilled from Mozilla bug https://bugzilla.mozilla.org/show_bug.cgi?id=1725743:
+     * attempting to emit a Destination tag within a pushed group will lead to an
+     * assertion in _cairo_pdf_interchange_end_structure_tag when processing a
+     * following LINK tag that is outside the pushed group.
+     */
+
+    /* PushLayer */
+    cairo_push_group_with_content (cr, CAIRO_CONTENT_COLOR_ALPHA);
+
+    /* Destination */
+    cairo_tag_begin (cr, CAIRO_TAG_DEST, "name='a' x=42 y=42");
+    cairo_tag_end (cr, CAIRO_TAG_DEST);
+
+    /* PopLayer */
+    cairo_pop_group_to_source (cr);
+    cairo_paint_with_alpha (cr, 1);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+
+    /* Link */
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, "rect=[100 200 300 400] uri='http://127.0.0.1/'");
+    cairo_tag_end (cr, CAIRO_TAG_LINK);
+
+    /* End of extra Mozilla testcase. */
+
+
     cairo_show_page (cr);
 
     page_num = 0;
@@ -448,6 +478,8 @@ create_document (cairo_surface_t *surface, cairo_t *cr)
     }
 
     cairo_show_page (cr);
+
+    cairo_set_source_rgb (cr, 0, 0, 1);
 
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "dest='cover'");
     cairo_move_to (cr, PAGE_WIDTH/3, 2*PAGE_HEIGHT/5);

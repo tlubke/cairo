@@ -1039,6 +1039,8 @@ cairo_rectangle_list_destroy (cairo_rectangle_list_t *rectangle_list);
 
 #define CAIRO_TAG_DEST "cairo.dest"
 #define CAIRO_TAG_LINK "Link"
+#define CAIRO_TAG_CONTENT "cairo.content"
+#define CAIRO_TAG_CONTENT_REF "cairo.content_ref"
 
 cairo_public void
 cairo_tag_begin (cairo_t *cr, const char *tag_name, const char *attributes);

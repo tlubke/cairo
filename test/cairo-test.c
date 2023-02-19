@@ -185,7 +185,7 @@ _cairo_test_init (cairo_test_context_t *ctx,
 	ctx->own_targets = FALSE;
 
 	ctx->srcdir = parent->srcdir;
-	ctx->refdir = parent->refdir;
+	ctx->refdir = xstrdup (parent->refdir);
     } else {
 	int tmp_num_targets;
 	cairo_bool_t tmp_limited_targets;
@@ -204,7 +204,10 @@ _cairo_test_init (cairo_test_context_t *ctx,
                 ctx->srcdir = "srcdir";
 #endif
         }
-	ctx->refdir = getenv ("CAIRO_REF_DIR");
+
+	ctx->refdir = xstrdup (getenv ("CAIRO_REF_DIR"));
+        if (ctx->refdir == NULL)
+            xasprintf (&ctx->refdir, "%s/reference", ctx->srcdir);
     }
 
 #ifdef HAVE_UNISTD_H
@@ -246,6 +249,7 @@ cairo_test_fini (cairo_test_context_t *ctx)
 	fclose (ctx->log_file);
     ctx->log_file = NULL;
 
+    free (ctx->refdir);
     free (ctx->ref_name);
     cairo_surface_destroy (ctx->ref_image);
     cairo_surface_destroy (ctx->ref_image_flattened);
