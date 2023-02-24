@@ -1044,8 +1044,8 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
 	if (FAILED(hr) || !have_run)
 	    break;
 
-	DWRITE_COLOR_GLYPH_RUN1 const* color_run;
-	hr = run_enumerator->GetCurrentRun(&color_run);
+	DWRITE_COLOR_GLYPH_RUN1_WORKAROUND const* color_run;
+	hr = run_enumerator->GetCurrentRun(reinterpret_cast<const DWRITE_COLOR_GLYPH_RUN1**>(&color_run));
 	if (FAILED(hr))
 	    return _cairo_dwrite_error (hr, "GetCurrentRun failed");
 
