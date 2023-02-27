@@ -522,7 +522,6 @@ if host_machine.system() == 'windows'
   d2d_header = cpp_compiler.has_header('d2d1.h')
   d2d_3_header = cpp_compiler.has_header('d2d1_3.h')
   dwrite_header = cpp_compiler.has_header('dwrite.h')
-  dwrite_3_header = cpp_compiler.has_header('dwrite_3.h')
   wincodec_dep = cpp_compiler.find_library('windowscodecs', required: get_option('dwrite'))
   wincodec_header = cpp_compiler.has_header('wincodec.h')
 
@@ -537,11 +536,6 @@ if host_machine.system() == 'windows'
 
     if cpp_compiler.has_header('d2d1_3.h')
       conf.set('HAVE_D2D1_3_H', 1)
-    endif
-
-    # Exclude MinGW dwrite_3.h because it has a broken definition of DWRITE_COLOR_GLYPH_RUN1.
-    if cpp_compiler.has_header('dwrite_3.h') and cpp_compiler.get_define('__MINGW32__') == ''
-      conf.set('HAVE_DWRITE_3_H', 1)
     endif
 
     add_project_arguments('-DWINVER=_WIN32_WINNT_WIN10', '-D_WIN32_WINNT=_WIN32_WINNT_WIN10', '-DNTDDI_VERSION=NTDDI_WIN10_RS3', language: ['c', 'cpp'])
