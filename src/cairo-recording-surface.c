@@ -364,7 +364,10 @@ _cairo_recording_surface_create_bbtree (cairo_recording_surface_t *surface)
     return CAIRO_STATUS_SUCCESS;
 
 cleanup:
-    bbtree_del (&surface->bbtree);
+    if (surface->bbtree.left)
+	bbtree_del (surface->bbtree.left);
+    if (surface->bbtree.right)
+	bbtree_del (surface->bbtree.right);
     return status;
 }
 
