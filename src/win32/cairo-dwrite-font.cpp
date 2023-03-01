@@ -1738,15 +1738,6 @@ _cairo_dwrite_show_glyphs_on_surface(void			*surface,
     if (op != CAIRO_OPERATOR_SOURCE && op != CAIRO_OPERATOR_OVER)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
-    /* If we have a fallback mask clip set on the dst, we have
-     * to go through the fallback path */
-    if (!_cairo_surface_is_win32_printing (&dst->base)) {
-        if (clip != NULL)
-            _cairo_win32_display_surface_set_clip (to_win32_display_surface (dst), clip);
-        else
-            _cairo_win32_display_surface_unset_clip (to_win32_display_surface (dst));
-    }
-
     /* It is vital that dx values for dxy_buf are calculated from the delta of
      * _logical_ x coordinates (not user x coordinates) or else the sum of all
      * previous dx values may start to diverge from the current glyph's x
