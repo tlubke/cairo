@@ -1798,7 +1798,7 @@ _cairo_win32_font_face_scaled_font_create (void			*abstract_face,
     if (font_face->hfont) {
         /* Check whether it's OK to go ahead and use the font-face's HFONT. */
         if (_is_scale (ctm, 1.) &&
-            _is_scale (font_matrix, -font_face->logfont.lfHeight)) {
+            _is_scale (font_matrix, -font_face->logfont.lfHeight * WIN32_FONT_LOGICAL_SCALE)) {
             hfont = font_face->hfont;
         }
     }
