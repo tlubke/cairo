@@ -42,14 +42,6 @@ if gtk_dep.found()
   ]
 endif
 
-if feature_conf.get('CAIRO_HAS_XML_SURFACE', 0) == 1
-  expat_dep = dependency('expat', fallback: ['expat', 'expat_dep'])
-  cairo_utils += [
-    ['trace-to-xml.c', {'deps': [expat_dep]}],
-    ['xml-to-trace.c', {'deps': [expat_dep]}],
-  ]
-endif
-
 foreach util : cairo_utils
   exe_name = util[0].split('.')[0]
   util_deps = util.get(1, {}).get('deps', [])
