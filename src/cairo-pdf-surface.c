@@ -2476,7 +2476,6 @@ _cairo_pdf_surface_open_content_stream (cairo_pdf_surface_t       *surface,
 					int                        struct_parents)
 {
     cairo_int_status_t status;
-    char buf[1000];
 
     assert (surface->pdf_stream.active == FALSE);
     assert (surface->group_stream.active == FALSE);
@@ -2488,9 +2487,9 @@ _cairo_pdf_surface_open_content_stream (cairo_pdf_surface_t       *surface,
     if (is_form) {
 	assert (bbox != NULL);
 
+	cairo_output_stream_t *mem_stream = _cairo_memory_stream_create ();
 	if (is_group) {
-	    snprintf(buf,
-		     sizeof(buf),
+	    _cairo_output_stream_printf (mem_stream,
 		     "   /Type /XObject\n"
 		     "   /Subtype /Form\n"
 		     "   /BBox [ %f %f %f %f ]\n"
@@ -2507,8 +2506,7 @@ _cairo_pdf_surface_open_content_stream (cairo_pdf_surface_t       *surface,
 		     bbox->p2.y,
 		     surface->content_resources.id);
 	} else {
-	    snprintf(buf,
-		     sizeof(buf),
+	    _cairo_output_stream_printf (mem_stream,
 		     "   /Type /XObject\n"
 		     "   /Subtype /Form\n"
 		     "   /BBox [ %f %f %f %f ]\n"
@@ -2520,15 +2518,25 @@ _cairo_pdf_surface_open_content_stream (cairo_pdf_surface_t       *surface,
 		     surface->content_resources.id);
 	}
 	if (struct_parents >= 0) {
-	    snprintf(buf + strlen(buf),
-		     sizeof(buf) - strlen(buf),
+	    _cairo_output_stream_printf (mem_stream,
 		"   /StructParents %d\n", struct_parents);
 	}
+
+	unsigned char *data;
+	unsigned long length;
+	status = _cairo_memory_stream_destroy (mem_stream, &data, &length);
+	if (unlikely (status))
+	    return status;
+
+	char *str = _cairo_strndup ((const char*)data, length); /* Add NULL terminator */
+
 	status =
 	    _cairo_pdf_surface_open_stream (surface,
 					    resource,
 					    surface->compress_streams,
-					    buf);
+					    str);
+	free (str);
+	free (data);
     } else {
 	status =
 	    _cairo_pdf_surface_open_stream (surface,
