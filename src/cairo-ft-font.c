@@ -3314,11 +3314,13 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
     if (scaled_font->unscaled->have_color && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
 	color_flag = FT_LOAD_COLOR;
 #endif
+    /* Ensure use_em_size = FALSE as the format (bitmap or outline)
+     * may change with the size. */
     status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
 						scaled_glyph,
 						face,
 						load_flags | color_flag,
-						!hint_metrics,
+						FALSE,
 						vertical_layout);
     if (unlikely (status))
 	return status;
@@ -3342,6 +3344,18 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
     } else {
 	/* For anything else we let FreeType render a bitmap. */
 	 glyph_priv->format =  CAIRO_FT_GLYPH_TYPE_BITMAP;
+    }
+
+    /* If hinting is off, load the glyph with font size set the the em size. */
+    if (!hint_metrics) {
+	status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
+						    scaled_glyph,
+						    face,
+						    load_flags | color_flag,
+						    TRUE,
+						    vertical_layout);
+	if (unlikely (status))
+	    return status;
     }
 
     _cairo_ft_scaled_glyph_get_metrics (scaled_font,
@@ -3369,6 +3383,7 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
     }
 
     if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1) {
+	/* Restore font size if previously loaded at em_size. */
 	if (!hint_metrics) {
 	    status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
 							scaled_glyph,
