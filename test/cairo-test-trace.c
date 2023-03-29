@@ -1515,11 +1515,11 @@ read_excludes (test_trace_t *test, const char *filename)
 
 	/* whitespace delimits */
 	s = line;
-	while (*s != '\0' && isspace (*s))
+	while (*s != '\0' && isspace ((unsigned char)*s))
 	    s++;
 
 	t = s;
-	while (*t != '\0' && ! isspace (*t))
+	while (*t != '\0' && ! isspace ((unsigned char)*t))
 	    t++;
 
 	if (s != t) {
