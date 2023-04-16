@@ -5,6 +5,14 @@ include:
     ref: '88ed1082df2af02090916566742543f1dbaee988'
     file: '/templates/fedora.yml'
 
+# From https://gitlab.freedesktop.org/freedesktop/ci-templates/-/blob/master/src/gitlab-ci.tmpl
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '34'
@@ -12,7 +20,7 @@ variables:
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
-  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2022-12-10.0-main"
+  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-04-03.0-main"
 
   DEFAULT_MESON_ARGS: >
     --default-library=both
