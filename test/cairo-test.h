@@ -239,7 +239,7 @@ struct _cairo_test_context {
     FILE *log_file;
     const char *output;
     const char *srcdir; /* directory containing sources and input data */
-    const char *refdir; /* directory containing reference images */
+    char *refdir; /* directory containing reference images */
 
     char *ref_name; /* cache of the current reference image */
     cairo_surface_t *ref_image;
