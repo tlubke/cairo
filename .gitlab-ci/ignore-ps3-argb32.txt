@@ -68,7 +68,6 @@ filter-nearest-offset
 filter-nearest-transformed
 finer-grained-fallbacks
 font-matrix-translation
-ft-color-font
 ft-text-vertical-layout-type1
 ft-text-vertical-layout-type3
 gradient-constant-alpha
@@ -208,7 +207,6 @@ trap-clip
 twin
 unclosed-strokes
 user-font
-user-font-color
 user-font-mask
 user-font-proxy
 user-font-rescale

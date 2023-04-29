@@ -58,7 +58,6 @@ pixman-rotate
 ps-surface-source
 radial-gradient-mask-source
 radial-gradient-source
-record1414x-fill-alpha
 record1414x-paint
 record1414x-paint-alpha
 record1414x-paint-alpha-clip
