@@ -2518,19 +2518,17 @@ _cairo_ft_glyph_fini (cairo_scaled_glyph_private_t *glyph_private,
 }
 
 
-#ifdef HAVE_FT_PALETTE_SELECT
 static void
 _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
 				    FT_Face                  face,
 				    unsigned int            *num_entries_ret,
 				    FT_Color               **entries_ret)
 {
-    FT_Palette_Data palette_data;
-    unsigned int num_entries;
-    FT_Color *entries;
+    unsigned int num_entries = 0;
+    FT_Color *entries = NULL;
 
-    num_entries = 0;
-    entries = NULL;
+#ifdef HAVE_FT_PALETTE_SELECT
+    FT_Palette_Data palette_data;
 
     if (FT_Palette_Data_Get (face, &palette_data) == 0 && palette_data.num_palettes > 0) {
 	FT_UShort palette_index = CAIRO_COLOR_PALETTE_DEFAULT;
@@ -2552,13 +2550,14 @@ _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
             }
         }
     }
+#endif
+
     if (num_entries_ret)
 	*num_entries_ret = num_entries;
 
     if (entries_ret)
 	*entries_ret = entries;
 }
-#endif
 
 /* returns TRUE if foreground color used */
 static cairo_bool_t
@@ -2628,9 +2627,7 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 									     scaled_glyph,
 									     face,
 									     foreground_color);
-#ifdef HAVE_FT_PALETTE_SELECT
 	_cairo_ft_scaled_glyph_set_palette (scaled_font, face, NULL, NULL);
-#endif
 
         load_flags &= ~FT_LOAD_MONOCHROME;
 	/* clear load target mode */
