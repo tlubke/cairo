@@ -2600,6 +2600,7 @@ _cairo_ft_scaled_glyph_set_foreground_color (cairo_ft_scaled_font_t *scaled_font
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 				     cairo_scaled_glyph_t	*scaled_glyph,
+				     cairo_ft_glyph_private_t   *glyph_priv,
 				     cairo_scaled_glyph_info_t	 info,
 				     FT_Face face,
 				     const cairo_color_t        *foreground_color,
@@ -2611,7 +2612,6 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
     cairo_status_t status;
     cairo_image_surface_t	*surface;
     cairo_bool_t uses_foreground_color = FALSE;
-    cairo_ft_glyph_private_t *glyph_priv = scaled_glyph->dev_private;
 
     /* Only one info type at a time handled in this function */
     assert (info == CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE || info == CAIRO_SCALED_GLYPH_INFO_SURFACE);
@@ -3302,7 +3302,6 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
     _cairo_scaled_glyph_attach_private (scaled_glyph, &glyph_priv->base,
 					&ft_glyph_private_key,
 					_cairo_ft_glyph_fini);
-    scaled_glyph->dev_private = glyph_priv;
 
     /* We need to load color to determine if this is a color format. */
     int color_flag = 0;
@@ -3461,8 +3460,8 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
 	    goto FAIL;
     }
 
-    /* scaled_glyph->dev_private is intialized by _cairo_ft_scaled_glyph_init_metrics() */
-    glyph_priv = scaled_glyph->dev_private;
+    glyph_priv = (cairo_ft_glyph_private_t *) _cairo_scaled_glyph_find_private (scaled_glyph,
+										&ft_glyph_private_key);
     assert (glyph_priv != NULL);
 
     if (info & CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE) {
@@ -3514,6 +3513,7 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
 	} else {
 	    status = _cairo_ft_scaled_glyph_init_surface (scaled_font,
 							  scaled_glyph,
+							  glyph_priv,
 							  CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE,
 							  face,
 							  foreground_color,
@@ -3527,6 +3527,7 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
     if (info & CAIRO_SCALED_GLYPH_INFO_SURFACE) {
 	status = _cairo_ft_scaled_glyph_init_surface (scaled_font,
 						      scaled_glyph,
+						      glyph_priv,
 						      CAIRO_SCALED_GLYPH_INFO_SURFACE,
 						      face,
 						      NULL, /* foreground color */
