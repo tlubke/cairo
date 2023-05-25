@@ -77,6 +77,7 @@ static const cairo_solid_pattern_t _cairo_pattern_nil = {
       CAIRO_EXTEND_GRADIENT_DEFAULT,	/* extend */
       FALSE,				/* has component alpha */
       FALSE,				/* is_foreground_marker */
+      CAIRO_DITHER_DEFAULT,		/* dither */
       { 1., 0., 0., 1., 0., 0., },	/* matrix */
       1.0                               /* opacity */
     }
@@ -94,6 +95,7 @@ static const cairo_solid_pattern_t _cairo_pattern_nil_null_pointer = {
       CAIRO_EXTEND_GRADIENT_DEFAULT,	/* extend */
       FALSE,				/* has component alpha */
       FALSE,				/* is_foreground_marker */
+      CAIRO_DITHER_DEFAULT,		/* dither */
       { 1., 0., 0., 1., 0., 0., },	/* matrix */
       1.0                               /* opacity */
     }
@@ -111,6 +113,7 @@ const cairo_solid_pattern_t _cairo_pattern_black = {
       CAIRO_EXTEND_REPEAT,		/* extend */
       FALSE,				/* has component alpha */
       FALSE,				/* is_foreground_marker */
+      CAIRO_DITHER_DEFAULT,		/* dither */
       { 1., 0., 0., 1., 0., 0., },	/* matrix */
       1.0                               /* opacity */
     },
@@ -129,6 +132,7 @@ const cairo_solid_pattern_t _cairo_pattern_clear = {
       CAIRO_EXTEND_REPEAT,		/* extend */
       FALSE,				/* has component alpha */
       FALSE,				/* is_foreground_marker */
+      CAIRO_DITHER_DEFAULT,		/* dither */
       { 1., 0., 0., 1., 0., 0., },	/* matrix */
       1.0                               /* opacity */
     },
@@ -147,6 +151,7 @@ const cairo_solid_pattern_t _cairo_pattern_white = {
       CAIRO_EXTEND_REPEAT,		/* extend */
       FALSE,				/* has component alpha */
       FALSE,				/* is_foreground_marker */
+      CAIRO_DITHER_DEFAULT,		/* dither */
       { 1., 0., 0., 1., 0., 0., },	/* matrix */
       1.0                               /* opacity */
     },
@@ -239,6 +244,8 @@ _cairo_pattern_init (cairo_pattern_t *pattern, cairo_pattern_type_t type)
 
     pattern->has_component_alpha = FALSE;
     pattern->is_foreground_marker = FALSE;
+
+    pattern->dither    = CAIRO_DITHER_DEFAULT;
 
     cairo_matrix_init_identity (&pattern->matrix);
 
@@ -2088,6 +2095,45 @@ cairo_filter_t
 cairo_pattern_get_filter (cairo_pattern_t *pattern)
 {
     return pattern->filter;
+}
+
+/**
+ * cairo_pattern_get_dither:
+ * @pattern: a #cairo_pattern_t
+ *
+ * Gets the current dithering mode, as set by
+ * cairo_pattern_set_dither().
+ *
+ * Return value: the current dithering mode.
+ *
+ * Since: 1.18
+ **/
+cairo_dither_t
+cairo_pattern_get_dither (cairo_pattern_t *pattern)
+{
+    return pattern->dither;
+}
+
+/**
+ * cairo_pattern_set_dither:
+ * @pattern: a #cairo_pattern_t
+ * @dither: a #cairo_dither_t describing the new dithering mode
+ *
+ * Set the dithering mode of the rasterizer used for drawing shapes.
+ * This value is a hint, and a particular backend may or may not support
+ * a particular value.  At the current time, only pixman is supported.
+ *
+ * Since: 1.18
+ **/
+void
+cairo_pattern_set_dither (cairo_pattern_t *pattern, cairo_dither_t dither)
+{
+    if (pattern->status)
+        return;
+
+    pattern->dither = dither;
+    _cairo_pattern_notify_observers (pattern, CAIRO_PATTERN_NOTIFY_DITHER);
+
 }
 
 /**
