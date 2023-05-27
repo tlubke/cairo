@@ -136,7 +136,7 @@ _cairo_win32_device_get (void)
     device->msimg32_dll = NULL;
     device->alpha_blend = _cairo_win32_device_get_alpha_blend (device);
 
-    if (_cairo_atomic_ptr_cmpxchg ((void **)&__cairo_win32_device, NULL, device))
+    if (_cairo_atomic_ptr_cmpxchg ((cairo_atomic_intptr_t *)&__cairo_win32_device, NULL, device))
 	return cairo_device_reference(&device->base);
 
     _cairo_win32_device_destroy (device);
