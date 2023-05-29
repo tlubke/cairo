@@ -20,7 +20,7 @@ variables:
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
-  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-04-03.0-main"
+  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-04-21.0-main"
 
   DEFAULT_MESON_ARGS: >
     --default-library=both
