@@ -3503,7 +3503,7 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
 	    goto FAIL;
     }
 
-    if (info & CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE) {
+    if ((info & CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE) && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR) {
 	if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_SVG ||
 	    glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1)
 	{
