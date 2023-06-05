@@ -883,7 +883,7 @@ main (int argc, char **argv)
 	if (ctx.test->preamble != NULL) {
 	    status = _cairo_test_runner_preamble (&runner, &ctx);
 	    if (getenv ("CAIRO_TEST_UGLY_HACK_TO_IGNORE_PS_FAILURES")) {
-		if (strcmp (ctx.test_name, "ps-eps") == 0 || strcmp (ctx.test_name, "fallback-resolution") == 0) {
+		if (strcmp (ctx.test_name, "ps-eps") == 0) {
 		    if (status == CAIRO_TEST_FAILURE) {
 			cairo_test_log (&ctx, "Turning FAIL into XFAIL due to env\n");
 			fprintf (stderr, "Turning FAIL into XFAIL due to env\n");

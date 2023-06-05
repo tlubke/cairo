@@ -64,7 +64,6 @@ fill-rule
 filter-nearest-offset
 filter-nearest-transformed
 font-matrix-translation
-ft-color-font
 ft-text-vertical-layout-type1
 ft-text-vertical-layout-type3
 gradient-zero-stops
