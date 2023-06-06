@@ -2653,8 +2653,7 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 
     glyph = face->glyph;
 
-    if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V0 ||
-	glyph_priv->format == CAIRO_FT_GLYPH_TYPE_OUTLINE) {
+    if (glyph_priv->format == CAIRO_FT_GLYPH_TYPE_OUTLINE) {
 
 	status = _render_glyph_outline (face, &scaled_font->ft_options.base,
 					    &surface);
