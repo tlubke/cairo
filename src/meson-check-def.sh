@@ -32,7 +32,7 @@ echo Checking that $so has the same symbol list as $def
 
 {
     echo EXPORTS
-    eval $get_cairo_syms | c++filt --no-params | grep -v '^_cairo_test_\|^_fini\|^_init\|^_save[fg]pr\|^_rest[fg]pr\|^_Z\|^__gnu\|^__bss\|^_edata\|^_end' | sort -u
+    eval $get_cairo_syms | c++filt --no-params | grep -v '^_cairo_test_\|^_fini\|^_init\|^_save[fg]pr\|^_rest[fg]pr\|^_Z\|^__gnu\|^_bss_end\|^__bss\|^_edata\|^_end\|^__end\|^_fbss\|^_fdata\|^_ftext' | sort -u
 } | diff "$def" - >&2 || stat=1
 
 exit $stat
