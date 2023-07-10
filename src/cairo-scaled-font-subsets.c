@@ -611,7 +611,7 @@ _cairo_sub_font_map_glyph (cairo_sub_font_t	*sub_font,
                         free (ucs4);
                         return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		    }
-                    if (strlen(font_utf8) != text_utf8_len) {
+                    if (strlen(font_utf8) != (size_t)text_utf8_len) {
                         free (font_utf8);
                         free (ucs4);
                         return _cairo_error (CAIRO_STATUS_INVALID_SIZE);
