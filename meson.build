@@ -313,7 +313,7 @@ if freetype_dep.found()
   feature_conf.set('CAIRO_HAS_FT_FONT', 1)
   built_features += [{
     'name': 'cairo-ft',
-    'description': 'Freetype font backend',
+    'description': 'FreeType font backend',
     'deps': [freetype_dep],
     # cairo-ft.h includes fontconfig.h so it needs its cflags
     'compile-deps': [fontconfig_dep.partial_dependency(compile_args: true, includes: true)],

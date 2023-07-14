@@ -1162,7 +1162,7 @@ cairo_cff_font_read_font_metrics (cairo_cff_font_t *font, cairo_hash_table_t  *t
         if (p < end)
             p = decode_number (p, &yy);
     }
-    /* Freetype uses 1/abs(yy) to get units per EM */
+    /* FreeType uses 1/abs(yy) to get units per EM */
     font->units_per_em = _cairo_round(1.0/fabs(yy));
 }
 

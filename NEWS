@@ -108,7 +108,7 @@ includes implementation of core functionality, performance
 optimizations, and stabilization.
 
 Subpixel positioning support allows improved glyph outlines with the
-Freetype font backend.
+FreeType font backend.
 
 For a complete log of changes, please see
 
@@ -8223,7 +8223,7 @@ the PNG generation in the demos. These have now been resolved.
 2003-10
 =======
 Graydon Hoare <graydon@redhat.com> implemented the first real text
-support using Freetype/fontconfig, (previous versions of cairo used
+support using FreeType/fontconfig, (previous versions of cairo used
 Xft and could only draw text when using an X backend).
 
 2003-09
