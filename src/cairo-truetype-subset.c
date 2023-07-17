@@ -1358,9 +1358,9 @@ _cairo_truetype_reverse_cmap (cairo_scaled_font_t *scaled_font,
 
 	    if (range_size > 0) {
 		if ((char*)glyph_ids + 2*range_size > (char*)map + size) {
-                status = CAIRO_INT_STATUS_UNSUPPORTED;
-                 goto fail;
-            }
+                    status = CAIRO_INT_STATUS_UNSUPPORTED;
+                    goto fail;
+                }
 
 		for (j = 0; j < range_size; j++) {
 		    if (glyph_ids[j] == g_id_be) {
