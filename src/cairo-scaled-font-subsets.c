@@ -430,7 +430,7 @@ _cairo_sub_font_glyph_map_to_unicode (cairo_sub_font_glyph_t *sub_font_glyph,
     if (utf8 != NULL && utf8_len != 0) {
 	if (sub_font_glyph->utf8 != NULL) {
 	    if (utf8_len == sub_font_glyph->utf8_len &&
-		memcmp (utf8, sub_font_glyph->utf8, utf8_len) == 0)
+		strncmp (utf8, sub_font_glyph->utf8, utf8_len) == 0)
 	    {
 		/* Requested utf8 mapping matches the existing mapping */
 		*is_mapped = TRUE;
@@ -611,11 +611,6 @@ _cairo_sub_font_map_glyph (cairo_sub_font_t	*sub_font,
                         free (ucs4);
                         return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		    }
-                    if (strlen(font_utf8) != (size_t)text_utf8_len) {
-                        free (font_utf8);
-                        free (ucs4);
-                        return _cairo_error (CAIRO_STATUS_INVALID_SIZE);
-                    }
 		    font_utf8_len = text_utf8_len;
 		}
 		free (ucs4);
