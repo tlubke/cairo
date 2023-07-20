@@ -1,5 +1,5 @@
 project('cairo', 'c', 'cpp',
-  meson_version: '>= 0.56.0',
+  meson_version: '>= 0.59.0',
   version: run_command(find_program('version.py'), check: true).stdout().strip(),
   default_options: ['warning_level=2'],
 )
@@ -263,12 +263,10 @@ if png_dep.found()
   endif
 endif
 
-# Don't build fontconfig as a subproject on Windows unless
-# explicitly requested
+# Disable fontconfig by default on platforms where it is optional
 fontconfig_option = get_option('fontconfig')
-if host_machine.system() == 'windows' and not fontconfig_option.enabled()
-  fontconfig_option = false
-endif
+fontconfig_required = host_machine.system() not in ['windows', 'darwin']
+fontconfig_option = fontconfig_option.disable_auto_if(not fontconfig_required)
 
 fontconfig_dep = dependency('fontconfig',
   required: fontconfig_option,
@@ -301,8 +299,13 @@ endif
 
 ttx = find_program('ttx', required: false)
 
+# Disable FreeType by default on platforms where it is optional
+freetype_option = get_option('freetype')
+freetype_required = host_machine.system() not in ['windows', 'darwin']
+freetype_option = freetype_option.disable_auto_if(not freetype_required)
+
 freetype_dep = dependency('freetype2',
-  required: get_option('freetype'),
+  required: freetype_option,
   version: freetype_required_version,
   fallback: ['freetype2', 'freetype_dep'],
 )
@@ -310,7 +313,7 @@ if freetype_dep.found()
   feature_conf.set('CAIRO_HAS_FT_FONT', 1)
   built_features += [{
     'name': 'cairo-ft',
-    'description': 'Freetype font backend',
+    'description': 'FreeType font backend',
     'deps': [freetype_dep],
     # cairo-ft.h includes fontconfig.h so it needs its cflags
     'compile-deps': [fontconfig_dep.partial_dependency(compile_args: true, includes: true)],
