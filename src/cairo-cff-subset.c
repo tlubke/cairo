@@ -1185,6 +1185,8 @@ cairo_cff_font_read_top_dict (cairo_cff_font_t *font)
         goto fail;
 
     element = _cairo_array_index (&index, 0);
+    if (element == NULL)
+        return CAIRO_STATUS_NO_MEMORY;
     status = cff_dict_read (font->top_dict, element->data, element->length);
     if (unlikely (status))
         goto fail;
@@ -3128,6 +3130,8 @@ _cairo_cff_scaled_font_is_cid_cff (cairo_scaled_font_t *scaled_font)
 	goto fail2;
 
     element = _cairo_array_index (&index, 0);
+    if (element == NULL)
+        goto fail3;
     status = cff_dict_read (top_dict, element->data, element->length);
     if (unlikely (status))
         goto fail3;
