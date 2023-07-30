@@ -1334,7 +1334,7 @@ _get_bitmap_surface (FT_Bitmap		     *bitmap,
 	    unsigned int i, count = height * width;
 	    uint32_t *p = (uint32_t *) data;
 	    for (i = 0; i < count; i++)
-		p[i] = be32_to_cpu (p[i]);
+		p[i] = bswap_32 (p[i]);
 	}
 	format = CAIRO_FORMAT_ARGB32;
 	break;
