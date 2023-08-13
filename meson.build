@@ -97,16 +97,6 @@ endif
 
 add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
-# Make sure source directory hasn't been configured with autotools
-fs = import('fs')
-if fs.exists('config.h') or fs.exists('src/cairo-features.h') or fs.exists('src/cairo-supported-features.h')
-  error('''
-        The source directory '@0@' appears to contain
-        autotools configuration artifacts. This can cause difficult to
-        debug build problems. Please clean it up and then re-run meson.
-        '''.format(meson.source_root()))
-endif
-
 pkgmod = import('pkgconfig')
 python3 = import('python').find_installation()
 
