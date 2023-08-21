@@ -1606,11 +1606,6 @@ cairo_private cairo_bool_t
 _pixman_format_to_masks (pixman_format_code_t	 pixman_format,
 			 cairo_format_masks_t	*masks);
 
-#if PIXMAN_VERSION >= PIXMAN_VERSION_ENCODE(0,39,0)
-cairo_private pixman_dither_t
-_pixman_dither_from_cairo_dither (cairo_dither_t dither);
-#endif
-
 
 cairo_private void
 _cairo_image_scaled_glyph_fini (cairo_scaled_font_t *scaled_font,
