@@ -31,16 +31,16 @@
 
 static void *_dlhandle = RTLD_NEXT;
 #define DLCALL(name, args...) ({ \
-    static typeof (&name) name##_real; \
-    if (name##_real == NULL) { \
-	name##_real = dlsym (_dlhandle, #name); \
-	if (name##_real == NULL && _dlhandle == RTLD_NEXT) { \
+    static typeof (&name) fdr_##name##_real; \
+    if (fdr_##name##_real == NULL) { \
+	fdr_##name##_real = dlsym (_dlhandle, #name); \
+	if (fdr_##name##_real == NULL && _dlhandle == RTLD_NEXT) { \
 	    _dlhandle = dlopen ("libcairo.so", RTLD_LAZY); \
-	    name##_real = dlsym (_dlhandle, #name); \
-	    assert (name##_real != NULL); \
+	    fdr_##name##_real = dlsym (_dlhandle, #name); \
+	    assert (fdr_##name##_real != NULL); \
 	} \
     } \
-    (*name##_real) (args);  \
+    (* fdr_##name##_real) (args);  \
 })
 
 static cairo_device_t *fdr_context;
@@ -109,8 +109,13 @@ fdr_write (void *closure, const unsigned char *data, unsigned int len)
     return CAIRO_STATUS_SUCCESS;
 }
 
+#define cairo_create(s) fdr_cairo_create(s)
+
 cairo_t *
-cairo_create (cairo_surface_t *surface)
+fdr_cairo_create (cairo_surface_t *surface);
+
+cairo_t *
+fdr_cairo_create (cairo_surface_t *surface)
 {
     cairo_surface_t *tee;
 
@@ -150,8 +155,13 @@ fdr_remove_tee (cairo_surface_t *surface)
     fdr_surface_destroy (surface);
 }
 
+#define cairo_destroy(cr) fdr_cairo_destroy(cr)
+
 void
-cairo_destroy (cairo_t *cr)
+fdr_cairo_destroy (cairo_t *cr);
+
+void
+fdr_cairo_destroy (cairo_t *cr)
 {
     cairo_surface_t *tee;
 
@@ -162,8 +172,13 @@ cairo_destroy (cairo_t *cr)
 	fdr_remove_tee (fdr_tee_surface_index (tee, 0));
 }
 
+#define cairo_pattern_destroy(p) fdr_cairo_pattern_destroy(p)
+
 void
-cairo_pattern_destroy (cairo_pattern_t *pattern)
+fdr_cairo_pattern_destroy (cairo_pattern_t *pattern);
+
+void
+fdr_cairo_pattern_destroy (cairo_pattern_t *pattern)
 {
     if (DLCALL (cairo_pattern_get_type, pattern) == CAIRO_PATTERN_TYPE_SURFACE) {
 	cairo_surface_t *surface;
@@ -179,8 +194,13 @@ cairo_pattern_destroy (cairo_pattern_t *pattern)
     DLCALL (cairo_pattern_destroy, pattern);
 }
 
+#define cairo_get_target(cr) fdr_cairo_get_target(cr)
+
 cairo_surface_t *
-cairo_get_target (cairo_t *cr)
+fdr_cairo_get_target (cairo_t *cr);
+
+cairo_surface_t *
+fdr_cairo_get_target (cairo_t *cr)
 {
     cairo_surface_t *tee;
 
@@ -188,8 +208,13 @@ cairo_get_target (cairo_t *cr)
     return fdr_tee_surface_index (tee, 0);
 }
 
+#define cairo_get_group_target(cr) fdr_cairo_get_group_target(cr)
+
 cairo_surface_t *
-cairo_get_group_target (cairo_t *cr)
+fdr_cairo_get_group_target (cairo_t *cr);
+
+cairo_surface_t *
+fdr_cairo_get_group_target (cairo_t *cr)
 {
     cairo_surface_t *tee;
 
@@ -197,8 +222,13 @@ cairo_get_group_target (cairo_t *cr)
     return fdr_tee_surface_index (tee, 0);
 }
 
+#define cairo_pattern_create_for_surface(s) fdr_cairo_pattern_create_for_surface(s)
+
 cairo_pattern_t *
-cairo_pattern_create_for_surface (cairo_surface_t *surface)
+fdr_cairo_pattern_create_for_surface (cairo_surface_t *surface);
+
+cairo_pattern_t *
+fdr_cairo_pattern_create_for_surface (cairo_surface_t *surface)
 {
     cairo_surface_t *tee;
 
@@ -209,9 +239,15 @@ cairo_pattern_create_for_surface (cairo_surface_t *surface)
     return DLCALL (cairo_pattern_create_for_surface, surface);
 }
 
+#define cairo_pattern_get_surface(p,s) fdr_cairo_pattern_get_surface(p,s)
+
 cairo_status_t
-cairo_pattern_get_surface (cairo_pattern_t *pattern,
-			   cairo_surface_t **surface)
+fdr_cairo_pattern_get_surface (cairo_pattern_t *pattern,
+                               cairo_surface_t **surface);
+
+cairo_status_t
+fdr_cairo_pattern_get_surface (cairo_pattern_t *pattern,
+                               cairo_surface_t **surface)
 {
     cairo_status_t status;
     cairo_surface_t *tee;
@@ -227,10 +263,17 @@ cairo_pattern_get_surface (cairo_pattern_t *pattern,
     return CAIRO_STATUS_SUCCESS;
 }
 
+#define cairo_set_source_surface(cr,s,x,y) fdr_cairo_set_source_surface(cr,s,x,y)
+
 void
-cairo_set_source_surface (cairo_t *cr,
-			  cairo_surface_t *surface,
-			  double x, double y)
+fdr_cairo_set_source_surface (cairo_t *cr,
+                              cairo_surface_t *surface,
+                              double x, double y);
+
+void
+fdr_cairo_set_source_surface (cairo_t *cr,
+                              cairo_surface_t *surface,
+                              double x, double y)
 {
     cairo_surface_t *tee;
 
@@ -241,10 +284,17 @@ cairo_set_source_surface (cairo_t *cr,
     DLCALL (cairo_set_source_surface, cr, surface, x, y);
 }
 
+#define cairo_surface_create_similar(s,c,w,h) fdr_cairo_surface_create_similar(s,c,w,h)
+
 cairo_surface_t *
-cairo_surface_create_similar (cairo_surface_t *surface,
-			      cairo_content_t content,
-			      int width, int height)
+fdr_cairo_surface_create_similar (cairo_surface_t *surface,
+                                  cairo_content_t content,
+                                  int width, int height);
+
+cairo_surface_t *
+fdr_cairo_surface_create_similar (cairo_surface_t *surface,
+                                  cairo_content_t content,
+                                  int width, int height)
 {
     cairo_surface_t *tee;
 
