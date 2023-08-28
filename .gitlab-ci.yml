@@ -84,11 +84,7 @@ fedora image:
       systemd-devel
       systemd-udev
       expat-devel
-      autoconf
-      automake
-      make
       which
-      libtool
       diffutils
       xorg-x11-server-Xvfb
       dejavu-sans-fonts
