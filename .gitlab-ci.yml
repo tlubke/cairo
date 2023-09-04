@@ -16,7 +16,7 @@ workflow:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '38'
-  FDO_DISTRIBUTION_TAG: '2023-04-29.1'
+  FDO_DISTRIBUTION_TAG: '2023-08-28.1'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
