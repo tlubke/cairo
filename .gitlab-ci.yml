@@ -16,7 +16,7 @@ workflow:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '38'
-  FDO_DISTRIBUTION_TAG: '2023-04-29.1'
+  FDO_DISTRIBUTION_TAG: '2023-08-28.1'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
@@ -84,11 +84,7 @@ fedora image:
       systemd-devel
       systemd-udev
       expat-devel
-      autoconf
-      automake
-      make
       which
-      libtool
       diffutils
       xorg-x11-server-Xvfb
       dejavu-sans-fonts
@@ -98,11 +94,56 @@ fedora image:
       fonttools
       util-linux
 
+.build fedora:
+  extends:
+    - '.fdo.distribution-image@fedora'
+    - '.ccache_setup'
+  stage: 'build'
+  variables:
+    MESON_ARGS: >
+      ${DEFAULT_MESON_ARGS}
+      ${EXTRA_MESON_ARGS}
+  script:
+    - export CFLAGS="-Werror -Wno-error=deprecated-declarations"
+    - meson setup ${MESON_ARGS} builddir
+    - meson compile -C builddir
+
+    # Run test scripts
+    - mkdir builddir/src/.libs
+    - touch builddir/src/.libs/libfoo.so
+    # Run all the tests, except for the big test executable which
+    # gets run separately
+    - meson test -C builddir --no-suite=slow --print-errorlogs
+
+    # TODO: These aren't set up as Meson tests yet
+    - (cd doc/public && bash "check-doc-syntax.sh")
+    # FIXME: The following line really needs gtk-doc to run first
+    - (cd doc/public && DOC_MODULE=cairo bash "check-doc-coverage.sh")
+
+    - meson install -C builddir
+  artifacts:
+    expire_in: "7 days"
+    when: "always"
+    paths:
+      - "*"
+
+fedora build shared:
+  extends:
+    - '.build fedora'
+  variables:
+    EXTRA_MESON_ARGS: '--default-library=shared'
+
+fedora build static:
+  extends:
+    - '.build fedora'
+  variables:
+    EXTRA_MESON_ARGS: '--default-library=static'
+
 .test fedora:
   dependencies:
-    - 'fedora build'
+    - 'fedora build shared'
   needs:
-    - 'fedora build'
+    - 'fedora build shared'
   extends:
     - '.fdo.distribution-image@fedora'
     - '.ccache_setup'
@@ -220,38 +261,6 @@ test fedora xlib:
     - export CAIRO_TEST_TARGET="xlib,xlib-window,xlib-render-0_0,xlib-fallback"
     - export srcdir=../../test
     - (cd builddir/test && xvfb-run ./cairo-test-suite)
-
-fedora build:
-  extends:
-    - '.fdo.distribution-image@fedora'
-    - '.ccache_setup'
-  stage: 'build'
-  variables:
-    MESON_ARGS: >
-      ${DEFAULT_MESON_ARGS}
-  script:
-    - export CFLAGS="-Werror -Wno-error=deprecated-declarations"
-    - meson builddir ${MESON_ARGS}
-    - ninja -C builddir
-
-    # Run test scripts
-    - mkdir builddir/src/.libs
-    - touch builddir/src/.libs/libfoo.so
-    # Run all the tests, except for the big test executable which
-    # gets run separately
-    - meson test -C builddir --no-suite=slow --print-errorlogs
-
-    # TODO: These aren't set up as Meson tests yet
-    - (cd doc/public && bash "check-doc-syntax.sh")
-    # FIXME: The following line really needs gtk-doc to run first
-    - (cd doc/public && DOC_MODULE=cairo bash "check-doc-coverage.sh")
-
-    - ninja -C builddir install
-  artifacts:
-    expire_in: "7 days"
-    when: "always"
-    paths:
-      - "*"
 
 mingw-32 build:
   extends:
