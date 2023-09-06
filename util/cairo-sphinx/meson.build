@@ -6,7 +6,7 @@ cairo_sphinx_sources = [
   'sphinx.c',
 ]
 
-libcairosphinx = library('cairo-sphinx', libcairo_sphinx_sources,
+libcairosphinx = shared_library('cairo-sphinx', libcairo_sphinx_sources,
   include_directories: [incbase, incsrc],
   dependencies: deps,
   install: true,
