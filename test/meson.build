@@ -190,6 +190,7 @@ test_sources = [
   'large-source.c',
   'large-source-roi.c',
   'large-twin-antialias-mixed.c',
+  'leaks.c',
   'leaky-dash.c',
   'leaky-dashed-rectangle.c',
   'leaky-dashed-stroke.c',
