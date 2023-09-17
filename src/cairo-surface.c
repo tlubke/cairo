@@ -983,6 +983,9 @@ cairo_surface_destroy (cairo_surface_t *surface)
     if (surface->owns_device)
         cairo_device_destroy (surface->device);
 
+    if (surface->has_font_options)
+	_cairo_font_options_fini (&surface->font_options);
+
     assert (surface->snapshot_of == NULL);
     assert (! _cairo_surface_has_snapshots (surface));
     /* paranoid check that nobody took a reference whilst finishing */
