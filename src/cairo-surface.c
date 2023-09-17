@@ -453,6 +453,7 @@ _cairo_surface_copy_similar_properties (cairo_surface_t *surface,
 
 	cairo_surface_get_font_options (other, &options);
 	_cairo_surface_set_font_options (surface, &options);
+	_cairo_font_options_fini (&options);
     }
 
     cairo_surface_set_fallback_resolution (surface,
