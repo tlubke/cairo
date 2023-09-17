@@ -27,7 +27,8 @@
 #include "cairo-test.h"
 
 
-// Once upon a time, _cairo_gstate_fini leaked font options
+// Once upon a time, _cairo_gstate_fini(), _cairo_scaled_font_fini_internal(),
+// and _cairo_ft_scaled_font_fini() leaked font options.
 static cairo_test_status_t
 leaks_set_scaled_font (cairo_t *cr, int width, int height)
 {
