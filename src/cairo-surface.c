@@ -453,6 +453,7 @@ _cairo_surface_copy_similar_properties (cairo_surface_t *surface,
 
 	cairo_surface_get_font_options (other, &options);
 	_cairo_surface_set_font_options (surface, &options);
+	_cairo_font_options_fini (&options);
     }
 
     cairo_surface_set_fallback_resolution (surface,
@@ -982,6 +983,9 @@ cairo_surface_destroy (cairo_surface_t *surface)
 
     if (surface->owns_device)
         cairo_device_destroy (surface->device);
+
+    if (surface->has_font_options)
+	_cairo_font_options_fini (&surface->font_options);
 
     assert (surface->snapshot_of == NULL);
     assert (! _cairo_surface_has_snapshots (surface));

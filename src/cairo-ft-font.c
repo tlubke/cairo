@@ -2173,6 +2173,7 @@ _cairo_ft_scaled_font_fini (void *abstract_font)
     if (scaled_font == NULL)
         return;
 
+    _cairo_font_options_fini (&scaled_font->ft_options.base);
     _cairo_unscaled_font_destroy (&scaled_font->unscaled->base);
 }
 

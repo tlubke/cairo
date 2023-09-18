@@ -2204,6 +2204,7 @@ _cairo_script_surface_finish (void *abstract_surface)
 
     _cairo_pattern_fini (&surface->cr.current_source.base);
     _cairo_path_fixed_fini (&surface->cr.current_path);
+    _cairo_font_options_fini (&surface->cr.current_font_options);
     _cairo_surface_clipper_reset (&surface->clipper);
 
     status = cairo_device_acquire (&ctx->base);
