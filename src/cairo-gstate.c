@@ -1920,6 +1920,8 @@ _cairo_gstate_ensure_scaled_font (cairo_gstate_t *gstate)
 					    &font_ctm,
 					    &options);
 
+    _cairo_font_options_fini (&options);
+
     status = cairo_scaled_font_status (scaled_font);
     if (unlikely (status))
 	return status;
