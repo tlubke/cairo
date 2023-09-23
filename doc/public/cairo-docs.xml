@@ -105,5 +105,5 @@
     <title>Index of new symbols in 1.18</title>
     <xi:include href="xml/api-index-1.18.xml"/>
   </chapter>
-  <xi:include href="language-bindings.xml"/>
+  <xi:include href="xml/language-bindings.xml"/>
 </book>
