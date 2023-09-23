@@ -459,7 +459,6 @@ typedef enum _cairo_format {
  *
  * Since: 1.18
  **/
-#define CAIRO_HAS_DITHER
 typedef enum _cairo_dither {
     CAIRO_DITHER_NONE,
     CAIRO_DITHER_DEFAULT,
