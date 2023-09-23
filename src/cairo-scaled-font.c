@@ -2661,7 +2661,7 @@ _cairo_scaled_glyph_set_path (cairo_scaled_glyph_t *scaled_glyph,
  * glyph, or NULL if foreground color not required.
  *
  * Sets the surface that was used to record the glyph.
- */
+ **/
 void
 _cairo_scaled_glyph_set_recording_surface (cairo_scaled_glyph_t *scaled_glyph,
 					   cairo_scaled_font_t  *scaled_font,
@@ -2694,7 +2694,7 @@ _cairo_scaled_glyph_set_recording_surface (cairo_scaled_glyph_t *scaled_glyph,
  * used when rendering the surface color.
  *
  * Sets the color surface of the glyph.
- */
+ **/
 void
 _cairo_scaled_glyph_set_color_surface (cairo_scaled_glyph_t  *scaled_glyph,
 	                               cairo_scaled_font_t   *scaled_font,
