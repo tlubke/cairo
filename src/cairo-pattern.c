@@ -63,6 +63,14 @@
  * functions.
  **/
 
+/**
+ * CAIRO_HAS_MIME_SURFACE:
+ *
+ * Unused symbol, always defined.
+ *
+ * Since: 1.12
+ **/
+
 static freed_pool_t freed_pattern_pool[5];
 
 static const cairo_solid_pattern_t _cairo_pattern_nil = {
