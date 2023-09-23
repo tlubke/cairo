@@ -25,12 +25,8 @@
 
 #include "cairo-test.h"
 
-/* History:
- * 
- * 2023: v3 of a patch to use pixman dithering with cairo
- */
-static cairo_test_status_t
-draw (cairo_t *cr, int width, int height)
+static void
+set_dither_source (cairo_t *cr, int width)
 {
     cairo_pattern_t *gradient = cairo_pattern_create_linear (0, 0, width, 0);
     cairo_pattern_add_color_stop_rgba (gradient, 0., 25./255, 25./255, 25./255, 1.0);
@@ -38,9 +34,34 @@ draw (cairo_t *cr, int width, int height)
     
     cairo_set_source (cr, gradient);
     cairo_pattern_set_dither (gradient, CAIRO_DITHER_BEST);
+    cairo_pattern_destroy (gradient);
+}
+
+/* History:
+ *
+ * 2023: v3 of a patch to use pixman dithering with cairo
+ */
+static cairo_test_status_t
+draw (cairo_t *cr, int width, int height)
+{
+    set_dither_source (cr, width);
     cairo_paint (cr);
 
-    cairo_pattern_destroy (gradient);
+    return CAIRO_TEST_SUCCESS;
+}
+
+static cairo_test_status_t
+draw2 (cairo_t *cr, int width, int height)
+{
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_paint (cr);
+
+    set_dither_source (cr, width);
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_ADD);
+    for (int i = 0; i < 5; i++) {
+        cairo_paint (cr);
+    }
 
     return CAIRO_TEST_SUCCESS;
 }
@@ -51,3 +72,9 @@ CAIRO_TEST (dithergradient,
 	    NULL, /* requirements */
 	    400, 100,
 	    NULL, draw)
+CAIRO_TEST (dithergradient2,
+	    "Testing the creation of a dithered gradient (in argb32)",
+	    "gradient, dither", /* keywords */
+	    NULL, /* requirements */
+	    400, 100,
+	    NULL, draw2)
