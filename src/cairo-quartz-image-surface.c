@@ -49,6 +49,15 @@
 #define SURFACE_ERROR_INVALID_SIZE (_cairo_surface_create_in_error(_cairo_error(CAIRO_STATUS_INVALID_SIZE)))
 #define SURFACE_ERROR_INVALID_FORMAT (_cairo_surface_create_in_error(_cairo_error(CAIRO_STATUS_INVALID_FORMAT)))
 
+/**
+ * CAIRO_HAS_QUARTZ_IMAGE_SURFACE:
+ *
+ * Defined if the Quartz image surface backend is available.
+ * This macro can be used to conditionally compile backend-specific code.
+ *
+ * Since: 1.10
+ **/
+
 static cairo_surface_t *
 _cairo_quartz_image_surface_create_similar (void *asurface,
 					    cairo_content_t content,
@@ -326,7 +335,7 @@ cairo_quartz_image_surface_create (cairo_surface_t *surface)
  * or %NULL if the quartz surface is not an image surface.
  *
  * Since: 1.6
- */
+ **/
 cairo_surface_t *
 cairo_quartz_image_surface_get_image (cairo_surface_t *surface)
 {

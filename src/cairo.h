@@ -459,7 +459,6 @@ typedef enum _cairo_format {
  *
  * Since: 1.18
  **/
-#define CAIRO_HAS_DITHER
 typedef enum _cairo_dither {
     CAIRO_DITHER_NONE,
     CAIRO_DITHER_DEFAULT,
@@ -2401,6 +2400,16 @@ cairo_public cairo_surface_t *
 cairo_surface_create_observer (cairo_surface_t *target,
 			       cairo_surface_observer_mode_t mode);
 
+/**
+ * cairo_surface_observer_callback_t:
+ * @observer: the #cairo_surface_observer_t
+ * @target: the observed surface
+ * @data: closure used when adding the callback
+ *
+ * A generic callback function for surface operations.
+ *
+ * Since: 1.12
+ **/
 typedef void (*cairo_surface_observer_callback_t) (cairo_surface_t *observer,
 						   cairo_surface_t *target,
 						   void *data);
@@ -2441,34 +2450,34 @@ cairo_surface_observer_add_finish_callback (cairo_surface_t *abstract_surface,
 					    void *data);
 
 cairo_public cairo_status_t
-cairo_surface_observer_print (cairo_surface_t *surface,
+cairo_surface_observer_print (cairo_surface_t *abstract_surface,
 			      cairo_write_func_t write_func,
 			      void *closure);
 cairo_public double
-cairo_surface_observer_elapsed (cairo_surface_t *surface);
+cairo_surface_observer_elapsed (cairo_surface_t *abstract_surface);
 
 cairo_public cairo_status_t
-cairo_device_observer_print (cairo_device_t *device,
+cairo_device_observer_print (cairo_device_t *abstract_device,
 			     cairo_write_func_t write_func,
 			     void *closure);
 
 cairo_public double
-cairo_device_observer_elapsed (cairo_device_t *device);
+cairo_device_observer_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_paint_elapsed (cairo_device_t *device);
+cairo_device_observer_paint_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_mask_elapsed (cairo_device_t *device);
+cairo_device_observer_mask_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_fill_elapsed (cairo_device_t *device);
+cairo_device_observer_fill_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_stroke_elapsed (cairo_device_t *device);
+cairo_device_observer_stroke_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_glyphs_elapsed (cairo_device_t *device);
+cairo_device_observer_glyphs_elapsed (cairo_device_t *abstract_device);
 
 cairo_public cairo_surface_t *
 cairo_surface_reference (cairo_surface_t *surface);
