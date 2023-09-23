@@ -48,6 +48,7 @@
     <xi:include href="xml/cairo-xlib-xrender.xml"/>
     <xi:include href="xml/cairo-script.xml"/>
     <xi:include href="xml/cairo-surface-observer.xml"/>
+    <xi:include href="xml/cairo-tee.xml"/>
   </chapter>
   <chapter id="cairo-support">
     <title>Utilities</title>
