@@ -3901,7 +3901,7 @@ cairo_get_operator (cairo_t *cr)
 }
 
 #if 0
-/**
+/*
  * cairo_get_opacity:
  * @cr: a cairo context
  *
