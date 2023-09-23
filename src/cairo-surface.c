@@ -127,13 +127,18 @@ const cairo_surface_t name = {					\
     NULL,				/* snapshot_detach */	\
     { NULL, NULL },			/* snapshots */		\
     { NULL, NULL },			/* snapshot */		\
-    { CAIRO_ANTIALIAS_DEFAULT,		/* antialias */		\
+    {                                   /* font options begin */\
+      CAIRO_ANTIALIAS_DEFAULT,		/* antialias */		\
       CAIRO_SUBPIXEL_ORDER_DEFAULT,	/* subpixel_order */	\
       CAIRO_LCD_FILTER_DEFAULT,		/* lcd_filter */	\
       CAIRO_HINT_STYLE_DEFAULT,		/* hint_style */	\
       CAIRO_HINT_METRICS_DEFAULT,	/* hint_metrics */	\
-      CAIRO_ROUND_GLYPH_POS_DEFAULT	/* round_glyph_positions */	\
-    },					/* font_options */		\
+      CAIRO_ROUND_GLYPH_POS_DEFAULT,	/* round_glyph_positions */	\
+      NULL,                            /* variations */ \
+      CAIRO_COLOR_MODE_DEFAULT,                /* color mode */ \
+      CAIRO_COLOR_PALETTE_DEFAULT,     /* color palette */ \
+      NULL, 0,                         /* custom palette */ \
+    },					/* font_options end */		\
     NULL,                               /* foreground_source */		\
     FALSE,                              /* foreground_used */   \
 }

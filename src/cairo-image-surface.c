@@ -248,6 +248,27 @@ _pixman_format_from_masks (cairo_format_masks_t *masks,
     return TRUE;
 }
 
+#if PIXMAN_VERSION >= PIXMAN_VERSION_ENCODE(0,39,0)
+/* Convenience function to convert #cairo_dither_t into #pixman_dither_t */
+static pixman_dither_t
+_cairo_dither_to_pixman_dither (cairo_dither_t dither)
+{
+    switch (dither) {
+    case CAIRO_DITHER_FAST:
+        return PIXMAN_DITHER_FAST;
+    case CAIRO_DITHER_GOOD:
+        return PIXMAN_DITHER_GOOD;
+    case CAIRO_DITHER_BEST:
+        return PIXMAN_DITHER_BEST;
+    case CAIRO_DITHER_NONE:
+    case CAIRO_DITHER_DEFAULT:
+    default:
+        return PIXMAN_DITHER_NONE;
+    }
+}
+#endif
+
+
 /* A mask consisting of N bits set to 1. */
 #define MASK(N) ((1UL << (N))-1)
 
@@ -930,6 +951,8 @@ _cairo_image_surface_paint (void			*abstract_surface,
 			    const cairo_clip_t		*clip)
 {
     cairo_image_surface_t *surface = abstract_surface;
+    pixman_dither_t pixman_dither = _cairo_dither_to_pixman_dither (source->dither);
+    pixman_image_set_dither (surface->pixman_image, pixman_dither);
 
     TRACE ((stderr, "%s (surface=%d)\n",
 	    __FUNCTION__, surface->base.unique_id));

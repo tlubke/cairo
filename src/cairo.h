@@ -440,6 +440,39 @@ typedef enum _cairo_format {
     CAIRO_FORMAT_RGBA128F  = 7
 } cairo_format_t;
 
+/**
+ * cairo_dither_t:
+ * @CAIRO_DITHER_NONE: No dithering.
+ * @CAIRO_DITHER_DEFAULT: Default choice at cairo compile time. Currently NONE.
+ * @CAIRO_DITHER_FAST: Fastest dithering algorithm supported by the backend
+ * @CAIRO_DITHER_GOOD: An algorithm with smoother dithering than FAST
+ * @CAIRO_DITHER_BEST: Best algorithm available in the backend
+ *
+ * Dither is an intentionally applied form of noise used to randomize
+ * quantization error, preventing large-scale patterns such as color banding
+ * in images (e.g. for gradients). Ordered dithering applies a precomputed
+ * threshold matrix to spread the errors smoothly.
+ *
+ *  #cairo_dither_t is modeled on pixman dithering algorithm choice.
+ * As of Pixman 0.40, FAST corresponds to a 8x8 ordered bayer noise and GOOD
+ * and BEST use an ordered 64x64 precomputed blue noise.
+ *
+ * Since: 1.18
+ **/
+#define CAIRO_HAS_DITHER
+typedef enum _cairo_dither {
+    CAIRO_DITHER_NONE,
+    CAIRO_DITHER_DEFAULT,
+    CAIRO_DITHER_FAST,
+    CAIRO_DITHER_GOOD,
+    CAIRO_DITHER_BEST
+} cairo_dither_t;
+
+cairo_public void
+cairo_pattern_set_dither (cairo_pattern_t *pattern, cairo_dither_t dither);
+
+cairo_public cairo_dither_t
+cairo_pattern_get_dither (cairo_pattern_t *pattern);
 
 /**
  * cairo_write_func_t:

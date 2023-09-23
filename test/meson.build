@@ -124,6 +124,7 @@ test_sources = [
   'device-offset-fractional.c',
   'device-offset-positive.c',
   'device-offset-scale.c',
+  'dithergradient.c',
   'error-setters.c',
   'extend-pad.c',
   'extend-pad-border.c',

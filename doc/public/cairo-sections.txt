@@ -409,6 +409,9 @@ cairo_pattern_get_type
 cairo_pattern_get_reference_count
 cairo_pattern_set_user_data
 cairo_pattern_get_user_data
+cairo_dither_t
+cairo_set_dither
+cairo_get_dither
 </SECTION>
 
 <SECTION>
