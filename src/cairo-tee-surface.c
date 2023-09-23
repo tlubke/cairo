@@ -35,8 +35,22 @@
  *	Chris Wilson <chris@chris-wilson.co.uk>
  */
 
-/* This surface supports redirecting all its input to multiple surfaces.
+/**
+ * SECTION:cairo-tee
+ * @Title: Tee surface
+ * @Short_Description: Redirect input to multiple surfaces
+ * @See_Also: #cairo_surface_t
+ *
+ * The "tee" surface supports redirecting all its input to multiple surfaces.
  */
+
+/**
+ * CAIRO_HAS_TEE_SURFACE:
+ *
+ * Defined if the tee surface backend is available.
+ *
+ * Since: 1.10
+ **/
 
 #include "cairoint.h"
 
