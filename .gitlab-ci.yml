@@ -115,11 +115,6 @@ fedora image:
     # gets run separately
     - meson test -C builddir --no-suite=slow --print-errorlogs
 
-    # TODO: These aren't set up as Meson tests yet
-    - (cd doc/public && bash "check-doc-syntax.sh")
-    # FIXME: The following line really needs gtk-doc to run first
-    - (cd doc/public && DOC_MODULE=cairo bash "check-doc-coverage.sh")
-
     - meson install -C builddir
   artifacts:
     expire_in: "7 days"
