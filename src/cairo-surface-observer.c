@@ -2002,6 +2002,18 @@ cairo_surface_observer_elapsed (cairo_surface_t *abstract_surface)
     return _cairo_time_to_ns (_cairo_observation_total_elapsed (&surface->log));
 }
 
+/**
+ * cairo_device_observer_print:
+ * @abstract_device: the observed #cairo_device_t
+ * @write_func: the write function
+ * @closure: data to pass to the @write_func
+ *
+ * Prints the device log using the given function.
+ *
+ * Returns: the status after the operation
+ *
+ * Since: 1.12
+ */
 cairo_status_t
 cairo_device_observer_print (cairo_device_t *abstract_device,
 			     cairo_write_func_t write_func,
@@ -2023,6 +2035,16 @@ cairo_device_observer_print (cairo_device_t *abstract_device,
     return _cairo_output_stream_destroy (stream);
 }
 
+/**
+ * cairo_device_observer_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the total elapsed time of the observation.
+ *
+ * Returns: the elapsed time, in nanoseconds.
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_elapsed (cairo_device_t *abstract_device)
 {
@@ -2038,6 +2060,16 @@ cairo_device_observer_elapsed (cairo_device_t *abstract_device)
     return _cairo_time_to_ns (_cairo_observation_total_elapsed (&device->log));
 }
 
+/**
+ * cairo_device_observer_paint_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the elapsed time of the paint operations.
+ *
+ * Returns: the elapsed time, in nanoseconds.
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_paint_elapsed (cairo_device_t *abstract_device)
 {
@@ -2053,6 +2085,16 @@ cairo_device_observer_paint_elapsed (cairo_device_t *abstract_device)
     return _cairo_time_to_ns (device->log.paint.elapsed);
 }
 
+/**
+ * cairo_device_observer_mask_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the elapsed time of the mask operations.
+ *
+ * Returns: the elapsed time, in nanoseconds
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_mask_elapsed (cairo_device_t *abstract_device)
 {
@@ -2068,6 +2110,16 @@ cairo_device_observer_mask_elapsed (cairo_device_t *abstract_device)
     return _cairo_time_to_ns (device->log.mask.elapsed);
 }
 
+/**
+ * cairo_device_observer_fill_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the elapsed time of the fill operations.
+ *
+ * Returns: the elapsed time, in nanoseconds.
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_fill_elapsed (cairo_device_t *abstract_device)
 {
@@ -2083,6 +2135,16 @@ cairo_device_observer_fill_elapsed (cairo_device_t *abstract_device)
     return _cairo_time_to_ns (device->log.fill.elapsed);
 }
 
+/**
+ * cairo_device_observer_stroke_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the elapsed time of the stroke operations.
+ *
+ * Returns: the elapsed time, in nanoseconds.
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_stroke_elapsed (cairo_device_t *abstract_device)
 {
@@ -2098,6 +2160,16 @@ cairo_device_observer_stroke_elapsed (cairo_device_t *abstract_device)
     return _cairo_time_to_ns (device->log.stroke.elapsed);
 }
 
+/**
+ * cairo_device_observer_glyphs_elapsed:
+ * @abstract_device: the observed #cairo_device_t
+ *
+ * Returns the elapsed time of the glyph operations.
+ *
+ * Returns: the elapsed time, in nanoseconds.
+ *
+ * Since: 1.12
+ */
 double
 cairo_device_observer_glyphs_elapsed (cairo_device_t *abstract_device)
 {
