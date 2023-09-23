@@ -2447,27 +2447,27 @@ cairo_public double
 cairo_surface_observer_elapsed (cairo_surface_t *surface);
 
 cairo_public cairo_status_t
-cairo_device_observer_print (cairo_device_t *device,
+cairo_device_observer_print (cairo_device_t *abstract_device,
 			     cairo_write_func_t write_func,
 			     void *closure);
 
 cairo_public double
-cairo_device_observer_elapsed (cairo_device_t *device);
+cairo_device_observer_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_paint_elapsed (cairo_device_t *device);
+cairo_device_observer_paint_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_mask_elapsed (cairo_device_t *device);
+cairo_device_observer_mask_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_fill_elapsed (cairo_device_t *device);
+cairo_device_observer_fill_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_stroke_elapsed (cairo_device_t *device);
+cairo_device_observer_stroke_elapsed (cairo_device_t *abstract_device);
 
 cairo_public double
-cairo_device_observer_glyphs_elapsed (cairo_device_t *device);
+cairo_device_observer_glyphs_elapsed (cairo_device_t *abstract_device);
 
 cairo_public cairo_surface_t *
 cairo_surface_reference (cairo_surface_t *surface);
