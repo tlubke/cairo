@@ -633,7 +633,7 @@ if feature_conf.get('CAIRO_HAS_SVG_SURFACE', 0) == 1
 endif
 
 pixman_dep = dependency('pixman-1',
-  version: '>= 0.36.0',
+  version: '>= 0.40.0',
   fallback: ['pixman', 'idep_pixman'],
 )
 if pixman_dep.found()
