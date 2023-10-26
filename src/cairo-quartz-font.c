@@ -77,10 +77,10 @@ static const CGFloat font_scale = 1.0;
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED < 1080
 #define FONT_ORIENTATION_HORIZONTAL kCTFontHorizontalOrientation
-#define FONT_COLOR_GLYPHS kCTFontTraitColorGlyphs
+#define FONT_COLOR_GLYPHS kCTFontColorGlyphsTrait
 #else
 #define FONT_ORIENTATION_HORIZONTAL kCTFontOrientationHorizontal
-#define FONT_COLOR_GLYPHS kCTFontColorGlyphsTrait
+#define FONT_COLOR_GLYPHS kCTFontTraitColorGlyphs
 #endif
 
 static void
