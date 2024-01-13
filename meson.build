@@ -198,7 +198,7 @@ else
   endif
 endif
 
-lzo_dep = dependency('lzo2', required: false)
+lzo_dep = dependency('lzo2', required: get_option('lzo'))
 if lzo_dep.found()
   conf.set('HAVE_LZO', 1)
 endif

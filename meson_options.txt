@@ -16,6 +16,7 @@ option('zlib', type : 'feature', value : 'auto') # script, ps, pdf, xml surfaces
 option('tests', type : 'feature', value : 'auto')
 
 # Util deps
+option('lzo', type : 'feature', value : 'auto')
 option('gtk2-utils', type : 'feature', value : 'disabled')
 
 # Misc deps
