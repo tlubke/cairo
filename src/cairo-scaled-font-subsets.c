@@ -922,6 +922,7 @@ _cairo_scaled_font_subsets_map_glyph (cairo_scaled_font_subsets_t	*subsets,
             font_face = cairo_scaled_font_get_font_face (scaled_font);
             cairo_matrix_init_identity (&identity);
             _cairo_font_options_init_default (&font_options);
+            cairo_scaled_font_get_font_options (scaled_font, &font_options);
             cairo_font_options_set_hint_style (&font_options, CAIRO_HINT_STYLE_NONE);
             cairo_font_options_set_hint_metrics (&font_options, CAIRO_HINT_METRICS_OFF);
             unscaled_font = cairo_scaled_font_create (font_face,

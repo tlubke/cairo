@@ -429,6 +429,7 @@ test_ft_font_sources = [
   'ft-text-vertical-layout-type1.c',
   'ft-text-vertical-layout-type3.c',
   'ft-text-antialias-none.c',
+  'ft-variable-font.c',
 ]
 
 test_ft_svg_font_sources = [
