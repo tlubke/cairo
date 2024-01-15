@@ -165,6 +165,17 @@ _cairo_quartz_font_face_create_for_toy (cairo_toy_font_face_t   *toy_face,
 	cgFont = CGFontCreateWithFontName (FontName);
 	CFRelease (FontName);
 
+	if (!cgFont) {
+            /* Attempt to create font by replacing hyphens for spaces in font name. */
+            for (size_t i = 0; i < strlen (full_name); i++) {
+                if (full_name[i] == '-')
+                    full_name[i] = ' ';
+            }
+            FontName = CFStringCreateWithCString (NULL, full_name, kCFStringEncodingASCII);
+            cgFont = CGFontCreateWithFontName (FontName);
+            CFRelease (FontName);
+	}
+
 	if (cgFont)
 	    break;
     }
