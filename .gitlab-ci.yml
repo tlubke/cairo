@@ -91,6 +91,7 @@ fedora image:
       dejavu-sans-mono-fonts
       dejavu-serif-fonts
       google-noto-emoji-color-fonts
+      google-noto-sans-vf-fonts
       fonttools
       util-linux
 

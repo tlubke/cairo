@@ -107,6 +107,7 @@ cairo_type1_font_create (cairo_scaled_font_subset_t  *scaled_font_subset,
     cairo_matrix_init_identity (&ctm);
 
     _cairo_font_options_init_default (&font_options);
+    cairo_scaled_font_get_font_options (scaled_font_subset->scaled_font, &font_options);
     cairo_font_options_set_hint_style (&font_options, CAIRO_HINT_STYLE_NONE);
     cairo_font_options_set_hint_metrics (&font_options, CAIRO_HINT_METRICS_OFF);
 
