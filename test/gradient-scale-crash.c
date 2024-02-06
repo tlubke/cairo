@@ -38,6 +38,7 @@ draw (cairo_t *cr, int width, int height)
     cairo_set_source(cr, p);
     cairo_rectangle(cr, 0, 0, 100, 100);
     cairo_paint(cr);
+    cairo_pattern_destroy(p);
     return CAIRO_TEST_SUCCESS;
 }
 
