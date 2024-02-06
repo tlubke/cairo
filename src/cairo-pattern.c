@@ -2801,6 +2801,12 @@ _cairo_gradient_pattern_fit_to_range (const cairo_gradient_pattern_t *gradient,
 	dim = MAX (dim, fabs (radial->cd1.center.y - radial->cd2.center.y));
 	dim = MAX (dim, fabs (radial->cd1.radius   - radial->cd2.radius));
     }
+    dim = MAX (dim, fabs (gradient->base.matrix.xx));
+    dim = MAX (dim, fabs (gradient->base.matrix.xy));
+    dim = MAX (dim, fabs (gradient->base.matrix.x0));
+    dim = MAX (dim, fabs (gradient->base.matrix.yx));
+    dim = MAX (dim, fabs (gradient->base.matrix.yy));
+    dim = MAX (dim, fabs (gradient->base.matrix.y0));
 
     if (unlikely (dim > max_value)) {
 	cairo_matrix_t scale;

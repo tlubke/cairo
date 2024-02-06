@@ -160,6 +160,7 @@ test_sources = [
   'get-path-extents.c',
   'gradient-alpha.c',
   'gradient-constant-alpha.c',
+  'gradient-scale-crash.c',
   'gradient-zero-stops.c',
   'gradient-zero-stops-mask.c',
   'group-clip.c',
