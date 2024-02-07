@@ -29,16 +29,21 @@
 static cairo_test_status_t
 draw (cairo_t *cr, int width, int height)
 {
-    cairo_pattern_t *p = cairo_pattern_create_linear(0, 0, 0, 100);
-    cairo_pattern_add_color_stop_rgb(p, 0, 1, 1, 1);
-    cairo_pattern_add_color_stop_rgb(p, 1, 1, 0, 0);
+    cairo_pattern_t *p = cairo_pattern_create_linear (0, 0, 0, 100);
+
+    cairo_pattern_add_color_stop_rgb (p, 0, 1, 1, 1);
+    cairo_pattern_add_color_stop_rgb (p, 1, 1, 0, 0);
+
     cairo_matrix_t m;
-    cairo_matrix_init(&m, 100000, 0, 0, 100000, 0, 0);
-    cairo_pattern_set_matrix(p, &m);
-    cairo_set_source(cr, p);
-    cairo_rectangle(cr, 0, 0, 100, 100);
-    cairo_paint(cr);
-    cairo_pattern_destroy(p);
+    cairo_matrix_init (&m, 100000, 0, 0, 100000, 0, 0);
+    cairo_pattern_set_matrix (p, &m);
+
+    cairo_set_source (cr, p);
+    cairo_rectangle (cr, 0, 0, 100, 100);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (p);
+
     return CAIRO_TEST_SUCCESS;
 }
 
