@@ -159,6 +159,7 @@ static DEFINE_NIL_SURFACE(CAIRO_STATUS_INVALID_STRIDE, _cairo_surface_nil_invali
 static DEFINE_NIL_SURFACE(CAIRO_STATUS_INVALID_SIZE, _cairo_surface_nil_invalid_size);
 static DEFINE_NIL_SURFACE(CAIRO_STATUS_DEVICE_TYPE_MISMATCH, _cairo_surface_nil_device_type_mismatch);
 static DEFINE_NIL_SURFACE(CAIRO_STATUS_DEVICE_ERROR, _cairo_surface_nil_device_error);
+static DEFINE_NIL_SURFACE(CAIRO_STATUS_PNG_ERROR, _cairo_surface_nil_png_error);
 
 static DEFINE_NIL_SURFACE(CAIRO_INT_STATUS_UNSUPPORTED, _cairo_surface_nil_unsupported);
 static DEFINE_NIL_SURFACE(CAIRO_INT_STATUS_NOTHING_TO_DO, _cairo_surface_nil_nothing_to_do);
@@ -3133,6 +3134,8 @@ _cairo_surface_create_in_error (cairo_status_t status)
 	return (cairo_surface_t *) &_cairo_surface_nil_device_type_mismatch;
     case CAIRO_STATUS_DEVICE_ERROR:
 	return (cairo_surface_t *) &_cairo_surface_nil_device_error;
+    case CAIRO_STATUS_PNG_ERROR:
+	return (cairo_surface_t *) &_cairo_surface_nil_png_error;
     case CAIRO_STATUS_SUCCESS:
     case CAIRO_STATUS_LAST_STATUS:
 	ASSERT_NOT_REACHED;
@@ -3161,7 +3164,6 @@ _cairo_surface_create_in_error (cairo_status_t status)
     case CAIRO_STATUS_INVALID_MESH_CONSTRUCTION:
     case CAIRO_STATUS_DEVICE_FINISHED:
     case CAIRO_STATUS_JBIG2_GLOBAL_MISSING:
-    case CAIRO_STATUS_PNG_ERROR:
     case CAIRO_STATUS_FREETYPE_ERROR:
     case CAIRO_STATUS_WIN32_GDI_ERROR:
     case CAIRO_INT_STATUS_DWRITE_ERROR:
