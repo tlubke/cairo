@@ -341,6 +341,11 @@ mingw-64 build:
         meson subprojects update --reset &&
         meson build $env:MESON_ARGS &&
         ninja -C build"
+  artifacts:
+    expire_in: "7 days"
+    when: "always"
+    paths:
+      - 'build/meson-logs/'
 
 vs2019 shared amd64:
   extends: '.build windows'
