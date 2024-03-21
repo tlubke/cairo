@@ -2435,6 +2435,22 @@ done:
     }
 }
 
+typedef enum {
+    CAIRO_FT_GLYPH_TYPE_BITMAP,
+    CAIRO_FT_GLYPH_TYPE_OUTLINE,
+    CAIRO_FT_GLYPH_TYPE_SVG,
+    CAIRO_FT_GLYPH_TYPE_COLR_V0,
+    CAIRO_FT_GLYPH_TYPE_COLR_V1,
+} cairo_ft_glyph_format_t;
+
+typedef struct {
+    cairo_scaled_glyph_private_t base;
+
+    cairo_ft_glyph_format_t format;
+} cairo_ft_glyph_private_t;
+
+static const int ft_glyph_private_key;
+
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 				   cairo_scaled_glyph_t   *scaled_glyph,
@@ -2445,6 +2461,11 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 {
     FT_Error error;
     cairo_status_t status;
+    cairo_ft_glyph_private_t *glyph_priv;
+
+    glyph_priv = (cairo_ft_glyph_private_t *) _cairo_scaled_glyph_find_private (scaled_glyph,
+                                                                                &ft_glyph_private_key);
+    assert (glyph_priv != NULL);
 
     if (use_em_size) {
 	cairo_matrix_t em_size;
@@ -2458,6 +2479,11 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 	return status;
 
     cairo_ft_apply_variations (face, scaled_font);
+
+#if defined(FT_LOAD_COLOR) && defined(HAVE_FT_LOAD_NO_SVG)
+    if (load_flags & FT_LOAD_COLOR && glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1)
+        load_flags |= FT_LOAD_NO_SVG;
+#endif
 
     error = FT_Load_Glyph (face,
 			   _cairo_scaled_glyph_index(scaled_glyph),
@@ -2494,20 +2520,6 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 
     return CAIRO_STATUS_SUCCESS;
 }
-
-typedef enum {
-    CAIRO_FT_GLYPH_TYPE_BITMAP,
-    CAIRO_FT_GLYPH_TYPE_OUTLINE,
-    CAIRO_FT_GLYPH_TYPE_SVG,
-    CAIRO_FT_GLYPH_TYPE_COLR_V0,
-    CAIRO_FT_GLYPH_TYPE_COLR_V1,
-} cairo_ft_glyph_format_t;
-
-typedef struct {
-    cairo_scaled_glyph_private_t base;
-
-    cairo_ft_glyph_format_t format;
-} cairo_ft_glyph_private_t;
 
 static void
 _cairo_ft_glyph_fini (cairo_scaled_glyph_private_t *glyph_private,
@@ -3274,8 +3286,6 @@ _cairo_ft_scaled_glyph_is_colr_v1 (cairo_ft_scaled_font_t *scaled_font,
     return FALSE;
 }
 
-static const int ft_glyph_private_key;
-
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
 				     cairo_scaled_glyph_t    *scaled_glyph,
@@ -3328,7 +3338,15 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
 #endif
 
     if (is_svg_format) {
-         glyph_priv->format = CAIRO_FT_GLYPH_TYPE_SVG;
+        glyph_priv->format = CAIRO_FT_GLYPH_TYPE_SVG;
+
+#if defined(HAVE_FT_COLR_V1) && defined(HAVE_FT_LOAD_NO_SVG)
+        /* Prefer COLRv1 table over SVG table due to performance reasons for now */
+        if (_cairo_ft_scaled_glyph_is_colr_v1 (scaled_font, scaled_glyph, face)) {
+            glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V1;
+        }
+#endif
+
     } else if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
 	glyph_priv->format = CAIRO_FT_GLYPH_TYPE_OUTLINE;
 	if (color_flag) {
