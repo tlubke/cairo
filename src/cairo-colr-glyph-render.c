@@ -47,6 +47,10 @@
 #include <malloc.h>
 #endif
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 #if HAVE_FT_COLR_V1
 
 #include <ft2build.h>
