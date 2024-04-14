@@ -315,11 +315,8 @@ mingw-64 build:
       -Dzlib=enabled
       ${EXTRA_MESON_ARGS}
   before_script:
-    # Make sure meson is up to date, so we don't need to rebuild the image with each release
-    # FIXME: don't update meson version for now, since there seems to be a bug
-    # in newer meson versions (0.63.3 at the time of writing) where it can't
-    # find some hash file and then meson subprojects update fails)
-    # - pip3 install -U meson
+    # Make sure meson is up to date, latest fontconfig requires a newer Meson than what's on the image
+    - pip3 install -U meson
   script:
     # Make sure powershell exists on errors
     # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-6
