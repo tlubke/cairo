@@ -135,6 +135,7 @@ check_headers = [
   ['xlocale.h'],
   ['sys/ioctl.h'],
   ['intsafe.h'],
+  ['alloca.h'],
 ]
 
 check_types = [
