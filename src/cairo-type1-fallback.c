@@ -747,7 +747,7 @@ _cairo_type1_fallback_init_internal (cairo_type1_subset_t	*type1_subset,
         goto fail1;
     }
 
-    type1_subset->widths = calloc (sizeof (double), font->scaled_font_subset->num_glyphs);
+    type1_subset->widths = calloc (font->scaled_font_subset->num_glyphs, sizeof (double));
     if (unlikely (type1_subset->widths == NULL)) {
         status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
         goto fail2;
@@ -841,7 +841,7 @@ _cairo_type2_charstrings_init (cairo_type2_charstrings_t *type2_subset,
 
     _cairo_array_init (&type2_subset->charstrings, sizeof (cairo_array_t));
 
-    type2_subset->widths = calloc (sizeof (int), font->scaled_font_subset->num_glyphs);
+    type2_subset->widths = calloc (font->scaled_font_subset->num_glyphs, sizeof (int));
     if (unlikely (type2_subset->widths == NULL)) {
         status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
         goto fail1;

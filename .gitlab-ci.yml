@@ -2,7 +2,7 @@
 include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
   - project: 'freedesktop/ci-templates'
-    ref: '7811ba9814a3bad379377241c6c6b62d78b20eac'
+    ref: '98b1218f146a1ec96d65e3ce0041f9a6ec5cb5e6'
     file: '/templates/fedora.yml'
 
 # From https://gitlab.freedesktop.org/freedesktop/ci-templates/-/blob/master/src/gitlab-ci.tmpl
@@ -15,8 +15,8 @@ workflow:
 
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
-  FDO_DISTRIBUTION_VERSION: '38'
-  FDO_DISTRIBUTION_TAG: '2023-08-28.1'
+  FDO_DISTRIBUTION_VERSION: '40'
+  FDO_DISTRIBUTION_TAG: '2024-04-26.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest

@@ -1782,7 +1782,7 @@ _cairo_type1_subset_init (cairo_type1_subset_t		*type1_subset,
     if (unlikely (type1_subset->base_font == NULL))
 	goto fail1;
 
-    type1_subset->widths = calloc (sizeof (double), scaled_font_subset->num_glyphs);
+    type1_subset->widths = calloc (scaled_font_subset->num_glyphs, sizeof (double));
     if (unlikely (type1_subset->widths == NULL))
 	goto fail2;
 
