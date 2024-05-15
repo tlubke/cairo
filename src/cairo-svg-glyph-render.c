@@ -3208,7 +3208,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
  * @debug_level: 0 - quiet, 1 - print errors, 2 - print warnings, 3 - info
  * @return TRUE on success, ie no errors, FALSE if error
  **/
-cairo_bool_t
+cairo_public cairo_bool_t
 _cairo_debug_svg_render (cairo_t       *cr,
                          const char    *svg_document,
                          const char    *element,
