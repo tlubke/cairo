@@ -643,6 +643,9 @@ pixman_dep = dependency('pixman-1',
 if pixman_dep.found()
   feature_conf.set('CAIRO_HAS_IMAGE_SURFACE', 1)
   conf.set('HAS_PIXMAN_GLYPHS', 1)
+  if pixman_dep.version().version_compare('>= 0.42.3')
+    conf.set('HAS_PIXMAN_r8g8b8_sRGB', 1)
+  endif
   if pixman_dep.type_name() == 'internal'
     internal_deps += [pixman_dep]
   else
