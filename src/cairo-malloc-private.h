@@ -63,6 +63,22 @@
    ((size) != 0 ? malloc(size) : NULL)
 
 /**
+ * _cairo_calloc:
+ * @a: number of elements to allocate
+ * @size: size of each element
+ *
+ * Allocates @a*@size memory using calloc().
+ * The memory should be freed using free().
+ * calloc is skipped, if 0 bytes are requested, and %NULL will be returned.
+ *
+ * Return value: A pointer to the newly allocated memory, or %NULL in
+ * case of calloc() failure or overflow.
+ **/
+
+#define _cairo_calloc(a, size)			\
+    ((((a) != 0) && ((size) != 0)) ? calloc(a, size) : NULL)
+
+/**
  * _cairo_malloc_ab:
  * @a: number of elements to allocate
  * @size: size of each element

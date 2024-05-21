@@ -1193,7 +1193,7 @@ _cairo_recording_surface_tag (void			 *abstract_surface,
 
     surface->has_tags = TRUE;
 
-    command = calloc (1, sizeof (cairo_command_tag_t));
+    command = _cairo_calloc (1, sizeof (cairo_command_tag_t));
     if (unlikely (command == NULL)) {
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
@@ -1516,7 +1516,7 @@ _cairo_recording_surface_copy__tag (cairo_recording_surface_t *surface,
     cairo_command_tag_t *command;
     cairo_status_t status;
 
-    command = calloc (1, sizeof (*command));
+    command = _cairo_calloc (1, sizeof (*command));
     if (unlikely (command == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto err;
