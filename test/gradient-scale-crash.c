@@ -48,7 +48,7 @@ draw (cairo_t *cr, int width, int height)
 }
 
 CAIRO_TEST (gradient_scale_crash,
-	    "Exercises a bug found in scaling gradient pattern",
+	    "Verify fix for https://gitlab.freedesktop.org/cairo/cairo/-/issues/789",
 	    "gradient, pattern", /* keywords */
 	    NULL, /* requirements */
 	    0, 0,
