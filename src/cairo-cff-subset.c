@@ -1314,9 +1314,13 @@ cairo_cff_font_read_global_subroutines (cairo_cff_font_t *font)
 	return status;
 
     num_subs = _cairo_array_num_elements (&font->global_sub_index);
-    font->global_subs_used = _cairo_calloc (num_subs, sizeof(cairo_bool_t));
-    if (unlikely (font->global_subs_used == NULL))
-	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+    if (num_subs > 0) {
+	font->global_subs_used = _cairo_calloc (num_subs, sizeof(cairo_bool_t));
+	if (unlikely (font->global_subs_used == NULL))
+	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+    } else {
+	font->global_subs_used = NULL;
+    }
 
     if (num_subs < 1240)
         font->global_sub_bias = 107;
