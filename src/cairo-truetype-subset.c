@@ -1181,8 +1181,7 @@ cairo_truetype_subset_init_internal (cairo_truetype_subset_t     *truetype_subse
     /* The widths array returned must contain only widths for the
      * glyphs in font_subset. Any subglyphs appended after
      * font_subset->num_glyphs are omitted. */
-    truetype_subset->widths = calloc (sizeof (double),
-                                      font->scaled_font_subset->num_glyphs);
+    truetype_subset->widths = calloc (font->scaled_font_subset->num_glyphs, sizeof (double));
     if (unlikely (truetype_subset->widths == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto fail3;
