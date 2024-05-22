@@ -1,7 +1,8 @@
 project('cairo', 'c', 'cpp',
-  meson_version: '>= 0.59.0',
+  meson_version: '>= 1.3.0',
   version: run_command(find_program('version.py'), check: true).stdout().strip(),
-  default_options: ['warning_level=2'],
+  default_options: ['c_std=gnu11,c11',
+                    'warning_level=2'],
 )
 
 freetype_required_version = '>= 9.7.3'
