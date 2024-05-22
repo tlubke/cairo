@@ -135,6 +135,7 @@ check_headers = [
   ['xlocale.h'],
   ['sys/ioctl.h'],
   ['intsafe.h'],
+  ['alloca.h'],
 ]
 
 check_types = [
@@ -340,6 +341,9 @@ if freetype_dep.found()
         conf.set('CAIRO_CAN_TEST_TTX_FONT', 1)
       endif
     endif
+    if cc.get_define('FT_LOAD_NO_SVG', dependencies: freetype_dep, prefix: '#include <freetype/freetype.h>') != ''
+      conf.set('HAVE_FT_LOAD_NO_SVG', 1)
+    endif
     if freetype_dep.version().version_compare(freetype_colrv1_required_version) and \
        cc.has_function('FT_Get_Color_Glyph_Paint', dependencies: freetype_dep)
       conf.set('HAVE_FT_COLR_V1', 1)
@@ -369,7 +373,7 @@ if x11_dep.found() and xext_dep.found()
 
   # Can skip the run check by providing the result in a cross file or
   # native file as bool property value.
-  prop = meson.get_external_property('ipc_rmid_deferred_release', 'auto')
+  prop = meson.get_external_property('ipc_rmid_deferred_release', meson.is_cross_build() ? 'false' : 'auto')
   # We don't know the type of prop (bool, string) but need to differentiate
   # between a set value (bool) or the fallback value (string), so convert to
   # a string and check the string value.
@@ -639,6 +643,9 @@ pixman_dep = dependency('pixman-1',
 if pixman_dep.found()
   feature_conf.set('CAIRO_HAS_IMAGE_SURFACE', 1)
   conf.set('HAS_PIXMAN_GLYPHS', 1)
+  if pixman_dep.version().version_compare('>= 0.42.3')
+    conf.set('HAS_PIXMAN_r8g8b8_sRGB', 1)
+  endif
   if pixman_dep.type_name() == 'internal'
     internal_deps += [pixman_dep]
   else

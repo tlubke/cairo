@@ -113,6 +113,8 @@ static const char *roman_numerals[] = {
 
 #define MAX_PARAGRAPH_LINES 20
 
+static const char *utf8_destination = "l\xc3\xa4nk";
+
 static int paragraph_num_lines;
 static char *paragraph_text[MAX_PARAGRAPH_LINES];
 static double paragraph_height;
@@ -329,20 +331,20 @@ draw_cover (cairo_surface_t *surface, cairo_t *cr)
 
     cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
     cairo_set_font_size(cr, 16);
-    cairo_move_to (cr, PAGE_WIDTH/3, PAGE_HEIGHT/3);
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.15*PAGE_HEIGHT);
     cairo_tag_begin (cr, "Span", NULL);
     cairo_show_text (cr, "PDF Features Test");
     cairo_tag_end (cr, "Span");
 
     /* Test URL link using "rect" attribute. The entire rectangle surrounding the URL should be a clickable link.  */
-    cairo_move_to (cr, PAGE_WIDTH/3, 2*PAGE_HEIGHT/3);
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.2*PAGE_HEIGHT);
     cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, TEXT_SIZE);
     cairo_set_source_rgb (cr, 0, 0, 1);
     cairo_show_text (cr, cairo_url);
     cairo_text_extents (cr, cairo_url, &text_extents);
     url_box.x = PAGE_WIDTH/3 - url_box_margin;
-    url_box.y = 2*PAGE_HEIGHT/3 - url_box_margin;
+    url_box.y = 0.2*PAGE_HEIGHT - url_box_margin;
     url_box.width = text_extents.width + 2*url_box_margin;
     url_box.height = -text_extents.height + 2*url_box_margin;
     cairo_rectangle(cr, url_box.x, url_box.y, url_box.width, url_box.height);
@@ -355,21 +357,43 @@ draw_cover (cairo_surface_t *surface, cairo_t *cr)
 
     /* Create link to not yet emmited page number */
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "page=5");
-    cairo_move_to (cr, PAGE_WIDTH/3, 4*PAGE_HEIGHT/5);
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.25*PAGE_HEIGHT);
     cairo_show_text (cr, "link to page 5");
     cairo_tag_end (cr, CAIRO_TAG_LINK);
 
     /* Create link to not yet emmited destination */
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "dest='Section 3.3'");
-    cairo_move_to (cr, PAGE_WIDTH/3, 4.2*PAGE_HEIGHT/5);
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.3*PAGE_HEIGHT);
     cairo_show_text (cr, "link to page section 3.3");
     cairo_tag_end (cr, CAIRO_TAG_LINK);
 
     /* Create link to external file */
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.35*PAGE_HEIGHT);
     cairo_tag_begin (cr, CAIRO_TAG_LINK, "file='foo.pdf' page=1");
-    cairo_move_to (cr, PAGE_WIDTH/3, 4.4*PAGE_HEIGHT/5);
     cairo_show_text (cr, "link file 'foo.pdf'");
     cairo_tag_end (cr, CAIRO_TAG_LINK);
+
+    /* Create link to missing dest */
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.4*PAGE_HEIGHT);
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, "dest='I don\\'t exist'");
+    cairo_show_text (cr, "link to missing dest");
+    cairo_tag_end (cr, CAIRO_TAG_LINK);
+
+    /* Create link to missing dest with URI fallback*/
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.45*PAGE_HEIGHT);
+    xasprintf(&attrib, "dest='I also don\\'t exist' uri='%s'", cairo_url);
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, attrib);
+    cairo_show_text (cr, "link to missing dest with uri fallback");
+    cairo_tag_end (cr, CAIRO_TAG_LINK);
+    free (attrib);
+
+    /* Create link to utf8 dest */
+    cairo_move_to (cr, PAGE_WIDTH/3, 0.5*PAGE_HEIGHT);
+    xasprintf(&attrib, "dest='%s'", utf8_destination);
+    cairo_tag_begin (cr, CAIRO_TAG_LINK, attrib);
+    cairo_show_text (cr, "link to utf8 dest");
+    cairo_tag_end (cr, CAIRO_TAG_LINK);
+    free (attrib);
 
     draw_page_num (surface, cr, "cover", 0);
 }
@@ -377,6 +401,8 @@ draw_cover (cairo_surface_t *surface, cairo_t *cr)
 static void
 create_document (cairo_surface_t *surface, cairo_t *cr)
 {
+    char *attrib;
+
     layout_paragraph (cr);
 
     cairo_pdf_surface_set_thumbnail_size (surface, PAGE_WIDTH/10, PAGE_HEIGHT/10);
@@ -490,6 +516,14 @@ create_document (cairo_surface_t *surface, cairo_t *cr)
     cairo_move_to (cr, PAGE_WIDTH/3, 3*PAGE_HEIGHT/5);
     cairo_show_text (cr, "link to page 3");
     cairo_tag_end (cr, CAIRO_TAG_LINK);
+
+    /* Create utf8 dest */
+    cairo_move_to (cr, PAGE_WIDTH/3, 4*PAGE_HEIGHT/5);
+    xasprintf(&attrib, "name='%s'", utf8_destination);
+    cairo_tag_begin (cr, CAIRO_TAG_DEST, attrib);
+    cairo_show_text (cr, utf8_destination);
+    cairo_tag_end (cr, CAIRO_TAG_DEST);
+    free (attrib);
 
     cairo_tag_end (cr, "Document");
 }

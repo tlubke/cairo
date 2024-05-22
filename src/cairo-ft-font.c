@@ -109,6 +109,32 @@
 #define DOUBLE_TO_16_16(d) ((FT_Fixed)((d) * 65536.0))
 #define DOUBLE_FROM_16_16(t) ((double)(t) / 65536.0)
 
+/* SCALE() mimics code from commit 399b00a99b2bbc1c56a05974c936aa69a08021f5
+ * concerning a potential division by 0, but instead of doing a * (1/b), it
+ * does a/b, thus improving the accuracy. With a * (1/b), for a bitmap font
+ * of size 13, the computed -y_bearing was 0x1.6000000000001p+3 instead of
+ * 0x1.6p+3 (= 11). This triggered a bug in GNU Emacs (when built against
+ * cairo), which rounded the value to an integer with ceil().
+ * Details:
+ *   https://gitlab.freedesktop.org/cairo/cairo/-/issues/503
+ *   https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44284
+ *
+ * Note that rounding errors are not necessarily expected by applications
+ * in simple cases like the GNU Emacs one (an identity transformation,
+ * which should normally leave the inputs unchanged). However, with the
+ * current cairo code, due to the scaling, there is no guarantee that
+ * rounding errors will always be avoided at the end. For instance,
+ * (a/b)*b may be different from a, but this is still better than doing
+ * (a*(1/b))*b.
+ *
+ * According to the commit mentioned above, avoiding a division by zero
+ * was an attempt to fix
+ *   https://bugzilla.gnome.org/show_bug.cgi?id=311299
+ * but this did not actually solve the problem. So it might be possible
+ * to change SCALE() to just do (a) / (b).
+ */
+#define SCALE(a,b) ((b) == 0 ? 0.0 : (a) / (b))
+
 /* This is the max number of FT_face objects we keep open at once
  */
 #define MAX_OPEN_FACES 10
@@ -2104,27 +2130,15 @@ _cairo_ft_font_face_scaled_font_create (void		    *abstract_font_face,
      */
     if (scaled_font->base.options.hint_metrics != CAIRO_HINT_METRICS_OFF ||
 	face->units_per_EM == 0) {
-	double x_factor, y_factor;
-
-	if (unscaled->x_scale == 0)
-	    x_factor = 0;
-	else
-	    x_factor = 1 / unscaled->x_scale;
-
-	if (unscaled->y_scale == 0)
-	    y_factor = 0;
-	else
-	    y_factor = 1 / unscaled->y_scale;
-
-	fs_metrics.ascent =        DOUBLE_FROM_26_6(metrics->ascender) * y_factor;
-	fs_metrics.descent =       DOUBLE_FROM_26_6(- metrics->descender) * y_factor;
-	fs_metrics.height =        DOUBLE_FROM_26_6(metrics->height) * y_factor;
+	fs_metrics.ascent =        SCALE (DOUBLE_FROM_26_6 (metrics->ascender), unscaled->y_scale);
+	fs_metrics.descent =       SCALE (DOUBLE_FROM_26_6 (- metrics->descender), unscaled->y_scale);
+	fs_metrics.height =        SCALE (DOUBLE_FROM_26_6 (metrics->height), unscaled->y_scale);
 	if (!_cairo_ft_scaled_font_is_vertical (&scaled_font->base)) {
-	    fs_metrics.max_x_advance = DOUBLE_FROM_26_6(metrics->max_advance) * x_factor;
+	    fs_metrics.max_x_advance = SCALE (DOUBLE_FROM_26_6 (metrics->max_advance), unscaled->x_scale);
 	    fs_metrics.max_y_advance = 0;
 	} else {
 	    fs_metrics.max_x_advance = 0;
-	    fs_metrics.max_y_advance = DOUBLE_FROM_26_6(metrics->max_advance) * y_factor;
+	    fs_metrics.max_y_advance = SCALE (DOUBLE_FROM_26_6 (metrics->max_advance), unscaled->y_scale);
 	}
     } else {
 	double scale = face->units_per_EM;
@@ -2435,6 +2449,22 @@ done:
     }
 }
 
+typedef enum {
+    CAIRO_FT_GLYPH_TYPE_BITMAP,
+    CAIRO_FT_GLYPH_TYPE_OUTLINE,
+    CAIRO_FT_GLYPH_TYPE_SVG,
+    CAIRO_FT_GLYPH_TYPE_COLR_V0,
+    CAIRO_FT_GLYPH_TYPE_COLR_V1,
+} cairo_ft_glyph_format_t;
+
+typedef struct {
+    cairo_scaled_glyph_private_t base;
+
+    cairo_ft_glyph_format_t format;
+} cairo_ft_glyph_private_t;
+
+static const int ft_glyph_private_key;
+
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 				   cairo_scaled_glyph_t   *scaled_glyph,
@@ -2445,6 +2475,11 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 {
     FT_Error error;
     cairo_status_t status;
+    cairo_ft_glyph_private_t *glyph_priv;
+
+    glyph_priv = (cairo_ft_glyph_private_t *) _cairo_scaled_glyph_find_private (scaled_glyph,
+                                                                                &ft_glyph_private_key);
+    assert (glyph_priv != NULL);
 
     if (use_em_size) {
 	cairo_matrix_t em_size;
@@ -2458,6 +2493,11 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 	return status;
 
     cairo_ft_apply_variations (face, scaled_font);
+
+#if defined(FT_LOAD_COLOR) && defined(HAVE_FT_LOAD_NO_SVG)
+    if (load_flags & FT_LOAD_COLOR && glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1)
+        load_flags |= FT_LOAD_NO_SVG;
+#endif
 
     error = FT_Load_Glyph (face,
 			   _cairo_scaled_glyph_index(scaled_glyph),
@@ -2494,20 +2534,6 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 
     return CAIRO_STATUS_SUCCESS;
 }
-
-typedef enum {
-    CAIRO_FT_GLYPH_TYPE_BITMAP,
-    CAIRO_FT_GLYPH_TYPE_OUTLINE,
-    CAIRO_FT_GLYPH_TYPE_SVG,
-    CAIRO_FT_GLYPH_TYPE_COLR_V0,
-    CAIRO_FT_GLYPH_TYPE_COLR_V1,
-} cairo_ft_glyph_format_t;
-
-typedef struct {
-    cairo_scaled_glyph_private_t base;
-
-    cairo_ft_glyph_format_t format;
-} cairo_ft_glyph_private_t;
 
 static void
 _cairo_ft_glyph_fini (cairo_scaled_glyph_private_t *glyph_private,
@@ -3137,7 +3163,6 @@ _cairo_ft_scaled_glyph_get_metrics (cairo_ft_scaled_font_t     *scaled_font,
 				    cairo_text_extents_t *fs_metrics)
 {
     FT_Glyph_Metrics *metrics;
-    double x_factor, y_factor;
     cairo_ft_unscaled_font_t *unscaled = scaled_font->unscaled;
     cairo_bool_t hint_metrics = scaled_font->base.options.hint_metrics != CAIRO_HINT_METRICS_OFF;
     FT_GlyphSlot glyph = face->glyph;
@@ -3146,16 +3171,6 @@ _cairo_ft_scaled_glyph_get_metrics (cairo_ft_scaled_font_t     *scaled_font,
      * Compute font-space metrics
      */
     metrics = &glyph->metrics;
-
-    if (unscaled->x_scale == 0)
-	x_factor = 0;
-    else
-	x_factor = 1 / unscaled->x_scale;
-
-    if (unscaled->y_scale == 0)
-	y_factor = 0;
-    else
-	y_factor = 1 / unscaled->y_scale;
 
     /*
      * Note: Y coordinates of the horizontal bearing need to be negated.
@@ -3181,13 +3196,13 @@ _cairo_ft_scaled_glyph_get_metrics (cairo_ft_scaled_font_t     *scaled_font,
 
 	    advance = ((metrics->horiAdvance + 32) & -64);
 
-	    fs_metrics->x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
-	    fs_metrics->y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
+	    fs_metrics->x_bearing = SCALE (DOUBLE_FROM_26_6 (x1), unscaled->x_scale);
+	    fs_metrics->y_bearing = SCALE (DOUBLE_FROM_26_6 (y1), unscaled->y_scale);
 
-	    fs_metrics->width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
-	    fs_metrics->height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
+	    fs_metrics->width  = SCALE (DOUBLE_FROM_26_6 (x2 - x1), unscaled->x_scale);
+	    fs_metrics->height  = SCALE (DOUBLE_FROM_26_6 (y2 - y1), unscaled->y_scale);
 
-	    fs_metrics->x_advance = DOUBLE_FROM_26_6 (advance) * x_factor;
+	    fs_metrics->x_advance = SCALE (DOUBLE_FROM_26_6 (advance), unscaled->x_scale);
 	    fs_metrics->y_advance = 0;
 	} else {
 	    x1 = (metrics->vertBearingX) & -64;
@@ -3197,37 +3212,37 @@ _cairo_ft_scaled_glyph_get_metrics (cairo_ft_scaled_font_t     *scaled_font,
 
 	    advance = ((metrics->vertAdvance + 32) & -64);
 
-	    fs_metrics->x_bearing = DOUBLE_FROM_26_6 (x1) * x_factor;
-	    fs_metrics->y_bearing = DOUBLE_FROM_26_6 (y1) * y_factor;
+	    fs_metrics->x_bearing = SCALE (DOUBLE_FROM_26_6 (x1), unscaled->x_scale);
+	    fs_metrics->y_bearing = SCALE (DOUBLE_FROM_26_6 (y1), unscaled->y_scale);
 
-	    fs_metrics->width  = DOUBLE_FROM_26_6 (x2 - x1) * x_factor;
-	    fs_metrics->height  = DOUBLE_FROM_26_6 (y2 - y1) * y_factor;
+	    fs_metrics->width  = SCALE (DOUBLE_FROM_26_6 (x2 - x1), unscaled->x_scale);
+	    fs_metrics->height  = SCALE (DOUBLE_FROM_26_6 (y2 - y1), unscaled->y_scale);
 
 	    fs_metrics->x_advance = 0;
-	    fs_metrics->y_advance = DOUBLE_FROM_26_6 (advance) * y_factor;
+	    fs_metrics->y_advance = SCALE (DOUBLE_FROM_26_6 (advance), unscaled->y_scale);
 	}
     } else {
-	fs_metrics->width  = DOUBLE_FROM_26_6 (metrics->width) * x_factor;
-	fs_metrics->height = DOUBLE_FROM_26_6 (metrics->height) * y_factor;
+	fs_metrics->width  = SCALE (DOUBLE_FROM_26_6 (metrics->width), unscaled->x_scale);
+	fs_metrics->height = SCALE (DOUBLE_FROM_26_6 (metrics->height), unscaled->y_scale);
 
 	if (!vertical_layout) {
-	    fs_metrics->x_bearing = DOUBLE_FROM_26_6 (metrics->horiBearingX) * x_factor;
-	    fs_metrics->y_bearing = DOUBLE_FROM_26_6 (-metrics->horiBearingY) * y_factor;
+	    fs_metrics->x_bearing = SCALE (DOUBLE_FROM_26_6 (metrics->horiBearingX), unscaled->x_scale);
+	    fs_metrics->y_bearing = SCALE (DOUBLE_FROM_26_6 (-metrics->horiBearingY), unscaled->y_scale);
 
 	    if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-		fs_metrics->x_advance = DOUBLE_FROM_26_6 (metrics->horiAdvance) * x_factor;
+		fs_metrics->x_advance = SCALE (DOUBLE_FROM_26_6 (metrics->horiAdvance), unscaled->x_scale);
 	    else
-		fs_metrics->x_advance = DOUBLE_FROM_16_16 (glyph->linearHoriAdvance) * x_factor;
-	    fs_metrics->y_advance = 0 * y_factor;
+		fs_metrics->x_advance = SCALE (DOUBLE_FROM_16_16 (glyph->linearHoriAdvance), unscaled->x_scale);
+	    fs_metrics->y_advance = 0;
 	} else {
-	    fs_metrics->x_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingX) * x_factor;
-	    fs_metrics->y_bearing = DOUBLE_FROM_26_6 (metrics->vertBearingY) * y_factor;
+	    fs_metrics->x_bearing = SCALE (DOUBLE_FROM_26_6 (metrics->vertBearingX), unscaled->x_scale);
+	    fs_metrics->y_bearing = SCALE (DOUBLE_FROM_26_6 (metrics->vertBearingY), unscaled->y_scale);
 
-	    fs_metrics->x_advance = 0 * x_factor;
+	    fs_metrics->x_advance = 0;
 	    if (hint_metrics || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-		fs_metrics->y_advance = DOUBLE_FROM_26_6 (metrics->vertAdvance) * y_factor;
+		fs_metrics->y_advance = SCALE (DOUBLE_FROM_26_6 (metrics->vertAdvance), unscaled->y_scale);
 	    else
-		fs_metrics->y_advance = DOUBLE_FROM_16_16 (glyph->linearVertAdvance) * y_factor;
+		fs_metrics->y_advance = SCALE (DOUBLE_FROM_16_16 (glyph->linearVertAdvance), unscaled->y_scale);
 	}
     }
 }
@@ -3273,8 +3288,6 @@ _cairo_ft_scaled_glyph_is_colr_v1 (cairo_ft_scaled_font_t *scaled_font,
 #endif
     return FALSE;
 }
-
-static const int ft_glyph_private_key;
 
 static cairo_int_status_t
 _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
@@ -3328,7 +3341,15 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
 #endif
 
     if (is_svg_format) {
-         glyph_priv->format = CAIRO_FT_GLYPH_TYPE_SVG;
+        glyph_priv->format = CAIRO_FT_GLYPH_TYPE_SVG;
+
+#if defined(HAVE_FT_COLR_V1) && defined(HAVE_FT_LOAD_NO_SVG)
+        /* Prefer COLRv1 table over SVG table due to performance reasons for now */
+        if (_cairo_ft_scaled_glyph_is_colr_v1 (scaled_font, scaled_glyph, face)) {
+            glyph_priv->format = CAIRO_FT_GLYPH_TYPE_COLR_V1;
+        }
+#endif
+
     } else if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
 	glyph_priv->format = CAIRO_FT_GLYPH_TYPE_OUTLINE;
 	if (color_flag) {

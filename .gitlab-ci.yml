@@ -2,7 +2,7 @@
 include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
   - project: 'freedesktop/ci-templates'
-    ref: '7811ba9814a3bad379377241c6c6b62d78b20eac'
+    ref: '98b1218f146a1ec96d65e3ce0041f9a6ec5cb5e6'
     file: '/templates/fedora.yml'
 
 # From https://gitlab.freedesktop.org/freedesktop/ci-templates/-/blob/master/src/gitlab-ci.tmpl
@@ -15,12 +15,13 @@ workflow:
 
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
-  FDO_DISTRIBUTION_VERSION: '38'
-  FDO_DISTRIBUTION_TAG: '2023-08-28.1'
+  FDO_DISTRIBUTION_VERSION: '40'
+  FDO_DISTRIBUTION_TAG: '2024-04-26.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
-  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-04-21.0-main"
+  # (This one is from the lastest stable branch since it's likely to stay around unchanged for longer)
+  WINDOWS_IMAGE: "registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2024-03-05.0-1.24"
 
   DEFAULT_MESON_ARGS: >
     --default-library=both
@@ -314,11 +315,8 @@ mingw-64 build:
       -Dzlib=enabled
       ${EXTRA_MESON_ARGS}
   before_script:
-    # Make sure meson is up to date, so we don't need to rebuild the image with each release
-    # FIXME: don't update meson version for now, since there seems to be a bug
-    # in newer meson versions (0.63.3 at the time of writing) where it can't
-    # find some hash file and then meson subprojects update fails)
-    # - pip3 install -U meson
+    # Make sure meson is up to date, latest fontconfig requires a newer Meson than what's on the image
+    - pip3 install -U meson
   script:
     # Make sure powershell exists on errors
     # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-6
@@ -340,6 +338,11 @@ mingw-64 build:
         meson subprojects update --reset &&
         meson build $env:MESON_ARGS &&
         ninja -C build"
+  artifacts:
+    expire_in: "7 days"
+    when: "always"
+    paths:
+      - 'build/meson-logs/'
 
 vs2019 shared amd64:
   extends: '.build windows'

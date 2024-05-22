@@ -177,6 +177,54 @@ test_group (cairo_t *cr)
     cairo_tag_end (cr, "Document");
 }
 
+/* https://bugzilla.mozilla.org/show_bug.cgi?id=1896173
+ * This particular combination of tags and groups resulted in a crash.
+ */
+static void
+test_group2 (cairo_t *cr)
+{
+    cairo_tag_begin (cr, "H", "");
+    text (cr, "Heading");
+    cairo_tag_end (cr, "H");
+
+    cairo_push_group (cr);
+
+    cairo_tag_begin (cr, "P", "");
+    text (cr, "Para1");
+    cairo_tag_end (cr, "P");
+
+    cairo_pop_group_to_source (cr);
+    cairo_paint (cr);
+
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    text (cr, "text");
+}
+
+/* Check that the fix for test_group2() works when there is a top level tag. */
+static void
+test_group3 (cairo_t *cr)
+{
+    cairo_tag_begin (cr, "Document", NULL);
+
+    cairo_tag_begin (cr, "H", "");
+    text (cr, "Heading");
+    cairo_tag_end (cr, "H");
+
+    cairo_push_group (cr);
+
+    cairo_tag_begin (cr, "P", "");
+    text (cr, "Para1");
+    cairo_tag_end (cr, "P");
+
+    cairo_pop_group_to_source (cr);
+    cairo_paint (cr);
+
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    text (cr, "text");
+
+    cairo_tag_end (cr, "Document");
+}
+
 static void
 test_group_ref (cairo_t *cr)
 {
@@ -434,6 +482,8 @@ static const struct pdf_structure_test pdf_structure_tests[] = {
     { "simple", test_simple },
     { "simple-ref", test_simple_ref },
     { "group", test_group },
+    { "group2", test_group2 },
+    { "group3", test_group3 },
     { "group-ref", test_group_ref },
     { "repeated-group", test_repeated_group },
     { "multipage-simple", test_multipage_simple },
