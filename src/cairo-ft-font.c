@@ -62,13 +62,9 @@
 #include FT_TRUETYPE_TABLES_H
 #include FT_XFREE86_H
 #include FT_MULTIPLE_MASTERS_H
-#if HAVE_FT_GLYPHSLOT_EMBOLDEN
 #include FT_SYNTHESIS_H
-#endif
 
-#if HAVE_FT_LIBRARY_SETLCDFILTER
 #include FT_LCD_FILTER_H
-#endif
 
 #if HAVE_FT_SVG_DOCUMENT
 #include FT_OTSVG_H
@@ -90,14 +86,6 @@
 #define FC_LCD_DEFAULT	1
 #define FC_LCD_LIGHT	2
 #define FC_LCD_LEGACY	3
-#endif
-
-/* FreeType version older than 2.3.5(?) didn't have these options */
-#ifndef FT_LCD_FILTER_NONE
-#define FT_LCD_FILTER_NONE	0
-#define FT_LCD_FILTER_DEFAULT	1
-#define FT_LCD_FILTER_LIGHT	2
-#define FT_LCD_FILTER_LEGACY	16
 #endif
 
 /*  FreeType version older than 2.11 does not have the FT_RENDER_MODE_SDF enum value in FT_Render_Mode */
@@ -487,29 +475,19 @@ _cairo_ft_unscaled_font_init (cairo_ft_unscaled_font_t *unscaled,
     unscaled->variations = NULL;
 
     if (from_face) {
+	FT_MM_Var *ft_mm_var;
 	unscaled->from_face = TRUE;
 	_cairo_ft_unscaled_font_init_key (unscaled, TRUE, NULL, id, face);
 
 
         unscaled->have_color = FT_HAS_COLOR (face) != 0;
         unscaled->have_color_set = TRUE;
-
-#ifdef HAVE_FT_GET_VAR_DESIGN_COORDINATES
-	{
-	    FT_MM_Var *ft_mm_var;
-	    if (0 == FT_Get_MM_Var (face, &ft_mm_var))
-	    {
-		unscaled->variations = _cairo_calloc (ft_mm_var->num_axis, sizeof (FT_Fixed));
-		if (unscaled->variations)
-		    FT_Get_Var_Design_Coordinates (face, ft_mm_var->num_axis, unscaled->variations);
-#if HAVE_FT_DONE_MM_VAR
-		FT_Done_MM_Var (face->glyph->library, ft_mm_var);
-#else
-		free (ft_mm_var);
-#endif
-	    }
+	if (FT_Get_MM_Var (face, &ft_mm_var) == 0) {
+	    unscaled->variations = _cairo_calloc (ft_mm_var->num_axis, sizeof (FT_Fixed));
+	    if (unscaled->variations)
+		FT_Get_Var_Design_Coordinates (face, ft_mm_var->num_axis, unscaled->variations);
+	    FT_Done_MM_Var (face->glyph->library, ft_mm_var);
 	}
-#endif
     } else {
 	char *filename_copy;
 
@@ -1024,12 +1002,10 @@ _compute_xrender_bitmap_size(FT_Bitmap      *target,
 	pitch = width * 4;
 	break;
 
-#ifdef FT_LOAD_COLOR
     case FT_PIXEL_MODE_BGRA:
 	/* each pixel is replicated into a 32-bit ARGB value */
 	pitch = width * 4;
 	break;
-#endif
 
     default:  /* unsupported source format */
 	return -1;
@@ -1227,12 +1203,10 @@ _fill_xrender_bitmap(FT_Bitmap      *target,
 	}
 	break;
 
-#ifdef FT_LOAD_COLOR
     case FT_PIXEL_MODE_BGRA:
 	for (h = height; h > 0; h--, srcLine += src_pitch, dstLine += pitch)
 	    memcpy (dstLine, srcLine, (size_t)width * 4);
 	break;
-#endif
 
     default:
 	assert (0);
@@ -1341,7 +1315,6 @@ _get_bitmap_surface (FT_Bitmap		     *bitmap,
 	    component_alpha = TRUE;
 	}
 	break;
-#ifdef FT_LOAD_COLOR
     case FT_PIXEL_MODE_BGRA:
 	stride = width * 4;
 	if (own_buffer) {
@@ -1364,7 +1337,6 @@ _get_bitmap_surface (FT_Bitmap		     *bitmap,
 	}
 	format = CAIRO_FORMAT_ARGB32;
 	break;
-#endif
     case FT_PIXEL_MODE_GRAY2:
     case FT_PIXEL_MODE_GRAY4:
     convert:
@@ -1582,16 +1554,10 @@ _render_glyph_outline (FT_Face                    face,
 	    break;
 	}
 
-#if HAVE_FT_LIBRARY_SETLCDFILTER
 	FT_Library_SetLcdFilter (library, lcd_filter);
-#endif
-
 	error = FT_Render_Glyph (face->glyph, render_mode);
 
-#if HAVE_FT_LIBRARY_SETLCDFILTER
 	FT_Library_SetLcdFilter (library, FT_LCD_FILTER_NONE);
-#endif
-
 	if (error)
 	    return _cairo_error (_cairo_ft_to_cairo_error (error));
 
@@ -2425,7 +2391,6 @@ skip:
         }
 
         current_coords = malloc (sizeof (FT_Fixed) * ft_mm_var->num_axis);
-#ifdef HAVE_FT_GET_VAR_DESIGN_COORDINATES
         ret = FT_Get_Var_Design_Coordinates (face, ft_mm_var->num_axis, current_coords);
         if (ret == 0) {
             for (i = 0; i < ft_mm_var->num_axis; i++) {
@@ -2435,17 +2400,12 @@ skip:
             if (i == ft_mm_var->num_axis)
               goto done;
         }
-#endif
 
         FT_Set_Var_Design_Coordinates (face, ft_mm_var->num_axis, coords);
 done:
         free (coords);
         free (current_coords);
-#if HAVE_FT_DONE_MM_VAR
         FT_Done_MM_Var (face->glyph->library, ft_mm_var);
-#else
-        free (ft_mm_var);
-#endif
     }
 }
 
@@ -2494,7 +2454,7 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
 
     cairo_ft_apply_variations (face, scaled_font);
 
-#if defined(FT_LOAD_COLOR) && defined(HAVE_FT_LOAD_NO_SVG)
+#if defined(HAVE_FT_LOAD_NO_SVG)
     if (load_flags & FT_LOAD_COLOR && glyph_priv->format == CAIRO_FT_GLYPH_TYPE_COLR_V1)
         load_flags |= FT_LOAD_NO_SVG;
 #endif
@@ -2510,15 +2470,11 @@ _cairo_ft_scaled_glyph_load_glyph (cairo_ft_scaled_font_t *scaled_font,
     /*
      * synthesize glyphs if requested
      */
-#if HAVE_FT_GLYPHSLOT_EMBOLDEN
     if (scaled_font->ft_options.synth_flags & CAIRO_FT_SYNTHESIZE_BOLD)
 	FT_GlyphSlot_Embolden (face->glyph);
-#endif
 
-#if HAVE_FT_GLYPHSLOT_OBLIQUE
     if (scaled_font->ft_options.synth_flags & CAIRO_FT_SYNTHESIZE_OBLIQUE)
 	FT_GlyphSlot_Oblique (face->glyph);
-#endif
 
     if (vertical_layout)
 	_cairo_ft_scaled_glyph_vertical_layout_bearing_fix (scaled_font, face->glyph);
@@ -2554,7 +2510,6 @@ _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
     unsigned int num_entries = 0;
     FT_Color *entries = NULL;
 
-#ifdef HAVE_FT_PALETTE_SELECT
     FT_Palette_Data palette_data;
 
     if (FT_Palette_Data_Get (face, &palette_data) == 0 && palette_data.num_palettes > 0) {
@@ -2577,7 +2532,6 @@ _cairo_ft_scaled_glyph_set_palette (cairo_ft_scaled_font_t  *scaled_font,
             }
         }
     }
-#endif
 
     if (num_entries_ret)
 	*num_entries_ret = num_entries;
@@ -2594,7 +2548,6 @@ _cairo_ft_scaled_glyph_set_foreground_color (cairo_ft_scaled_font_t *scaled_font
 					     const cairo_color_t    *foreground_color)
 {
     cairo_bool_t uses_foreground_color = FALSE;
-#ifdef HAVE_FT_PALETTE_SELECT
     FT_LayerIterator  iterator;
     FT_UInt layer_glyph_index;
     FT_UInt layer_color_index;
@@ -2620,7 +2573,7 @@ _cairo_ft_scaled_glyph_set_foreground_color (cairo_ft_scaled_font_t *scaled_font
 	color.alpha = (FT_Byte)(foreground_color->alpha * 0xFF);
 	FT_Palette_Set_Foreground_Color (face, color);
     }
-#endif
+
     return uses_foreground_color;
 }
 
@@ -2660,13 +2613,9 @@ _cairo_ft_scaled_glyph_init_surface (cairo_ft_scaled_font_t     *scaled_font,
 	/* clear load target mode */
 	load_flags &= ~(FT_LOAD_TARGET_(FT_LOAD_TARGET_MODE(load_flags)));
 	load_flags |= FT_LOAD_TARGET_NORMAL;
-#ifdef FT_LOAD_COLOR
 	load_flags |= FT_LOAD_COLOR;
-#endif
     } else { /* info == CAIRO_SCALED_GLYPH_INFO_SURFACE */
-#ifdef FT_LOAD_COLOR
         load_flags &= ~FT_LOAD_COLOR;
-#endif
     }
 
     status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
@@ -2737,7 +2686,6 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 						  cairo_bool_t            vertical_layout,
 						  int                     load_flags)
 {
-#ifdef HAVE_FT_PALETTE_SELECT
     cairo_surface_t *recording_surface;
     cairo_t *cr;
     cairo_status_t status;
@@ -2822,9 +2770,6 @@ _cairo_ft_scaled_glyph_init_record_colr_v0_glyph (cairo_ft_scaled_font_t *scaled
 					       recording_surface,
 					       NULL);
     return status;
-#else
-    return CAIRO_INT_STATUS_UNSUPPORTED;
-#endif
 }
 
 static cairo_int_status_t
@@ -3252,7 +3197,6 @@ _cairo_ft_scaled_glyph_is_colr_v0 (cairo_ft_scaled_font_t *scaled_font,
 				   cairo_scaled_glyph_t   *scaled_glyph,
 				   FT_Face                 face)
 {
-#ifdef HAVE_FT_PALETTE_SELECT
     FT_LayerIterator  iterator;
     FT_UInt layer_glyph_index;
     FT_UInt layer_color_index;
@@ -3266,7 +3210,7 @@ _cairo_ft_scaled_glyph_is_colr_v0 (cairo_ft_scaled_font_t *scaled_font,
     {
 	return TRUE;
     }
-#endif
+
     return FALSE;
 }
 
@@ -3319,10 +3263,9 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
     /* We need to load color to determine if this is a color format. */
     int color_flag = 0;
 
-#ifdef FT_LOAD_COLOR
     if (scaled_font->unscaled->have_color && scaled_font->base.options.color_mode != CAIRO_COLOR_MODE_NO_COLOR)
 	color_flag = FT_LOAD_COLOR;
-#endif
+
     /* Ensure use_em_size = FALSE as the format (bitmap or outline)
      * may change with the size. */
     status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
@@ -3441,11 +3384,6 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
     cairo_bool_t vertical_layout = FALSE;
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
     cairo_ft_glyph_private_t *glyph_priv;
-    int color_flag = 0;
-
-#ifdef FT_LOAD_COLOR
-    color_flag = FT_LOAD_COLOR;
-#endif
 
     face = _cairo_ft_unscaled_font_lock_face (unscaled);
     if (!face)
@@ -3494,7 +3432,7 @@ _cairo_ft_scaled_glyph_init (void			*abstract_font,
 	    status = _cairo_ft_scaled_glyph_load_glyph (scaled_font,
 							scaled_glyph,
 							face,
-							load_flags | color_flag,
+							load_flags | FT_LOAD_COLOR,
 							FALSE,
 							vertical_layout);
 	    if (unlikely (status))
@@ -3632,7 +3570,6 @@ _cairo_ft_load_truetype_table (void	       *abstract_font,
     if (_cairo_ft_scaled_font_is_vertical (&scaled_font->base))
         return CAIRO_INT_STATUS_UNSUPPORTED;
 
-#if HAVE_FT_LOAD_SFNT_TABLE
     face = _cairo_ft_unscaled_font_lock_face (unscaled);
     if (!face)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -3646,7 +3583,6 @@ _cairo_ft_load_truetype_table (void	       *abstract_font,
     }
 
     _cairo_ft_unscaled_font_unlock_face (unscaled);
-#endif
 
     return status;
 }
@@ -3705,6 +3641,7 @@ _cairo_ft_is_synthetic (void	        *abstract_font,
 	FT_MM_Var *mm_var = NULL;
 	FT_Fixed *coords = NULL;
 	int num_axis;
+	int i;
 
 	/* If this is an MM or variable font we can't assume the current outlines
 	 * are the same as the font tables */
@@ -3723,32 +3660,22 @@ _cairo_ft_is_synthetic (void	        *abstract_font,
 	    goto cleanup;
 	}
 
-#if FREETYPE_MAJOR > 2 || ( FREETYPE_MAJOR == 2 &&  FREETYPE_MINOR >= 8)
-	/* If FT_Get_Var_Blend_Coordinates() is available, we can check if the
-	 * current design coordinates are the default coordinates. In this case
-	 * the current outlines match the font tables.
+	/* Check if the current design coordinates are the default
+	 * coordinates. In this case the current outlines match the
+	 * font tables.
 	 */
-	{
-	    int i;
-
-	    FT_Get_Var_Blend_Coordinates (face, num_axis, coords);
-	    *is_synthetic = FALSE;
-	    for (i = 0; i < num_axis; i++) {
-		if (coords[i]) {
-		    *is_synthetic = TRUE;
-		    break;
-		}
+	FT_Get_Var_Blend_Coordinates (face, num_axis, coords);
+	*is_synthetic = FALSE;
+	for (i = 0; i < num_axis; i++) {
+	    if (coords[i]) {
+		*is_synthetic = TRUE;
+		break;
 	    }
 	}
-#endif
 
       cleanup:
 	free (coords);
-#if HAVE_FT_DONE_MM_VAR
 	FT_Done_MM_Var (face->glyph->library, mm_var);
-#else
-	free (mm_var);
-#endif
     }
 
     _cairo_ft_unscaled_font_unlock_face (unscaled);
@@ -3819,7 +3746,6 @@ _cairo_index_to_glyph_name (void	         *abstract_font,
 static cairo_bool_t
 _ft_is_type1 (FT_Face face)
 {
-#if HAVE_FT_GET_X11_FONT_FORMAT
     const char *font_format = FT_Get_X11_Font_Format (face);
     if (font_format &&
 	(strcmp (font_format, "Type 1") == 0 ||
@@ -3827,7 +3753,6 @@ _ft_is_type1 (FT_Face face)
     {
 	return TRUE;
     }
-#endif
 
     return FALSE;
 }
@@ -3854,12 +3779,10 @@ _cairo_ft_load_type1_data (void	            *abstract_font,
     if (!face)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-#if HAVE_FT_LOAD_SFNT_TABLE
     if (FT_IS_SFNT (face)) {
 	status = CAIRO_INT_STATUS_UNSUPPORTED;
 	goto unlock;
     }
-#endif
 
     if (! _ft_is_type1 (face)) {
         status = CAIRO_INT_STATUS_UNSUPPORTED;
