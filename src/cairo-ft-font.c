@@ -60,10 +60,9 @@
 #include FT_IMAGE_H
 #include FT_BITMAP_H
 #include FT_TRUETYPE_TABLES_H
-#include FT_XFREE86_H
+#include FT_FONT_FORMATS_H
 #include FT_MULTIPLE_MASTERS_H
 #include FT_SYNTHESIS_H
-
 #include FT_LCD_FILTER_H
 
 #if HAVE_FT_SVG_DOCUMENT
@@ -3746,7 +3745,7 @@ _cairo_index_to_glyph_name (void	         *abstract_font,
 static cairo_bool_t
 _ft_is_type1 (FT_Face face)
 {
-    const char *font_format = FT_Get_X11_Font_Format (face);
+    const char *font_format = FT_Get_Font_Format (face);
     if (font_format &&
 	(strcmp (font_format, "Type 1") == 0 ||
 	 strcmp (font_format, "CFF") == 0))
