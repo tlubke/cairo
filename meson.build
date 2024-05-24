@@ -330,6 +330,11 @@ if freetype_dep.found()
     foreach func : ft_check_funcs
       conf.set('HAVE_@0@'.format(func.to_upper()), 1)
     endforeach
+    if freetype_dep.version().version_compare(freetype_colrv1_required_version)
+      conf.set('HAVE_FT_SVG_DOCUMENT', 1)
+      conf.set('HAVE_FT_LOAD_NO_SVG', 1)
+      conf.set('HAVE_FT_COLR_V1', 1)
+    endif
     internal_deps += [freetype_dep]
   else
     if not cc.links(files('meson-cc-tests/ft_has_color.c'), dependencies: freetype_dep, name: 'FT has color')
