@@ -1238,7 +1238,7 @@ _cairo_scaled_font_subset_create_glyph_names (cairo_scaled_font_subset_t *subset
     if (unlikely (names == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    subset->glyph_names = calloc (subset->num_glyphs, sizeof (char *));
+    subset->glyph_names = _cairo_calloc (subset->num_glyphs, sizeof (char *));
     if (unlikely (subset->glyph_names == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto CLEANUP_HASH;

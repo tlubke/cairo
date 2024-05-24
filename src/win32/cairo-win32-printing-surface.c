@@ -1524,7 +1524,7 @@ _cairo_win32_printing_surface_stroke (void			*abstract_surface,
     dash_array = NULL;
     if (style->num_dashes) {
 	pen_style |= PS_USERSTYLE;
-	dash_array = calloc (sizeof (DWORD), style->num_dashes);
+	dash_array = _cairo_calloc (sizeof (DWORD), style->num_dashes);
 	for (i = 0; i < style->num_dashes; i++) {
 	    dash_array[i] = (DWORD) (scale * style->dash[i]);
 	}

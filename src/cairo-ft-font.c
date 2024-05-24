@@ -499,7 +499,7 @@ _cairo_ft_unscaled_font_init (cairo_ft_unscaled_font_t *unscaled,
 	    FT_MM_Var *ft_mm_var;
 	    if (0 == FT_Get_MM_Var (face, &ft_mm_var))
 	    {
-		unscaled->variations = calloc (ft_mm_var->num_axis, sizeof (FT_Fixed));
+		unscaled->variations = _cairo_calloc (ft_mm_var->num_axis, sizeof (FT_Fixed));
 		if (unscaled->variations)
 		    FT_Get_Var_Design_Coordinates (face, ft_mm_var->num_axis, unscaled->variations);
 #if HAVE_FT_DONE_MM_VAR
@@ -1601,7 +1601,7 @@ _render_glyph_outline (FT_Face                    face,
 	if (bitmap_size < 0)
 	    return _cairo_error (CAIRO_STATUS_INVALID_FORMAT);
 
-	bitmap.buffer = calloc (1, bitmap_size);
+	bitmap.buffer = _cairo_calloc (1, bitmap_size);
 	if (bitmap.buffer == NULL)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
