@@ -7,7 +7,7 @@ project('cairo', 'c', 'cpp',
 
 freetype_required_version = '>= 23.0.17' # Release version 2.10
 freetype_colrv1_required_version = '>= 25.0.19' # Release version 2.13
-fontconfig_required_version = '>= 2.2.95'
+fontconfig_required_version = '>= 2.13.0'
 xrender_required_version = '>= 0.6'
 xcb_required_version = '>= 1.6'
 xcb_render_required_version = '>= 1.6'

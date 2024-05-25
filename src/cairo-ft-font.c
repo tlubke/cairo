@@ -75,18 +75,6 @@
 #define access(p, m) 0
 #endif
 
-/* Fontconfig version older than 2.6 didn't have these options */
-#ifndef FC_LCD_FILTER
-#define FC_LCD_FILTER	"lcdfilter"
-#endif
-/* Some Ubuntu versions defined FC_LCD_FILTER without defining the following */
-#ifndef FC_LCD_NONE
-#define FC_LCD_NONE	0
-#define FC_LCD_DEFAULT	1
-#define FC_LCD_LIGHT	2
-#define FC_LCD_LEGACY	3
-#endif
-
 /*  FreeType version older than 2.11 does not have the FT_RENDER_MODE_SDF enum value in FT_Render_Mode */
 #if FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 11)
 #define HAVE_FT_RENDER_MODE_SDF 1
@@ -1781,18 +1769,12 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
     FcBool antialias, vertical_layout, hinting, autohint, bitmap, embolden;
     cairo_ft_options_t ft_options;
     int rgba;
-#ifdef FC_HINT_STYLE
     int hintstyle;
-#endif
     char *variations;
 
     _cairo_font_options_init_default (&ft_options.base);
     ft_options.load_flags = FT_LOAD_DEFAULT;
     ft_options.synth_flags = 0;
-
-#ifndef FC_EMBEDDED_BITMAP
-#define FC_EMBEDDED_BITMAP "embeddedbitmap"
-#endif
 
     /* Check whether to force use of embedded bitmaps */
     if (FcPatternGetBool (pattern,
@@ -1803,7 +1785,7 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
     if (FcPatternGetBool (pattern,
 			  FC_ANTIALIAS, 0, &antialias) != FcResultMatch)
 	antialias = FcTrue;
-    
+
     if (antialias) {
 	cairo_subpixel_order_t subpixel_order;
 	int lcd_filter;
@@ -1861,7 +1843,6 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
 	    }
 	}
 
-#ifdef FC_HINT_STYLE
 	if (FcPatternGetInteger (pattern,
 				 FC_HINT_STYLE, 0, &hintstyle) != FcResultMatch)
 	    hintstyle = FC_HINT_FULL;
@@ -1884,11 +1865,6 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
 	    ft_options.base.hint_style = CAIRO_HINT_STYLE_FULL;
 	    break;
 	}
-#else /* !FC_HINT_STYLE */
-	if (!hinting) {
-	    ft_options.base.hint_style = CAIRO_HINT_STYLE_NONE;
-	}
-#endif /* FC_HINT_STYLE */
 
 	/* Force embedded bitmaps off if no hinting requested */
 	if (ft_options.base.hint_style == CAIRO_HINT_STYLE_NONE)
@@ -1916,9 +1892,6 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
     if (vertical_layout)
 	ft_options.load_flags |= FT_LOAD_VERTICAL_LAYOUT;
 
-#ifndef FC_EMBOLDEN
-#define FC_EMBOLDEN "embolden"
-#endif
     if (FcPatternGetBool (pattern,
 			  FC_EMBOLDEN, 0, &embolden) != FcResultMatch)
 	embolden = FcFalse;
@@ -1926,9 +1899,6 @@ _get_pattern_ft_options (FcPattern *pattern, cairo_ft_options_t *ret)
     if (embolden)
 	ft_options.synth_flags |= CAIRO_FT_SYNTHESIZE_BOLD;
 
-#ifndef FC_FONT_VARIATIONS
-#define FC_FONT_VARIATIONS "fontvariations"
-#endif
     if (FcPatternGetString (pattern, FC_FONT_VARIATIONS, 0, (FcChar8 **) &variations) == FcResultMatch) {
       ft_options.base.variations = strdup (variations);
     }
@@ -4251,7 +4221,6 @@ _cairo_ft_font_options_substitute (const cairo_font_options_t *options,
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
 
-#ifdef FC_HINT_STYLE
 	if (FcPatternGet (pattern, FC_HINT_STYLE, 0, &v) == FcResultNoMatch)
 	{
 	    int hint_style;
@@ -4276,7 +4245,6 @@ _cairo_ft_font_options_substitute (const cairo_font_options_t *options,
 	    if (! FcPatternAddInteger (pattern, FC_HINT_STYLE, hint_style))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
-#endif
     }
 
     return CAIRO_STATUS_SUCCESS;
