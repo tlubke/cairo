@@ -554,7 +554,7 @@ check_pdf (cairo_test_context_t *ctx, const struct pdf_structure_test *test, con
         if (WEXITSTATUS (ret) == 0)
             result = CAIRO_TEST_SUCCESS;
         else if (WEXITSTATUS (ret) == 4)
-            result = CAIRO_TEST_UNTESTED; /* pdfinfo not found, wrong version, missing ref */
+            result = CAIRO_TEST_UNTESTED; /* pdfinfo not found or wrong version */
     }
 
     free (command);
