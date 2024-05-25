@@ -5,8 +5,8 @@ project('cairo', 'c', 'cpp',
                     'warning_level=2'],
 )
 
-freetype_required_version = '>= 9.7.3'
-freetype_colrv1_required_version = '>= 25.0.19'
+freetype_required_version = '>= 23.0.17' # Release version 2.10
+freetype_colrv1_required_version = '>= 25.0.19' # Release version 2.13
 fontconfig_required_version = '>= 2.2.95'
 xrender_required_version = '>= 0.6'
 xcb_required_version = '>= 1.6'
@@ -315,21 +315,7 @@ if freetype_dep.found()
     'compile-deps': [fontconfig_dep.partial_dependency(compile_args: true, includes: true)],
   }]
 
-  ft_check_funcs = [
-    'FT_Get_X11_Font_Format',
-    'FT_GlyphSlot_Embolden',
-    'FT_GlyphSlot_Oblique',
-    'FT_Load_Sfnt_Table',
-    'FT_Library_SetLcdFilter',
-    'FT_Get_Var_Design_Coordinates',
-    'FT_Done_MM_Var',
-    'FT_Palette_Select',
-  ]
-
   if freetype_dep.type_name() == 'internal'
-    foreach func : ft_check_funcs
-      conf.set('HAVE_@0@'.format(func.to_upper()), 1)
-    endforeach
     if freetype_dep.version().version_compare(freetype_colrv1_required_version)
       conf.set('HAVE_FT_SVG_DOCUMENT', 1)
       conf.set('HAVE_FT_LOAD_NO_SVG', 1)
@@ -337,9 +323,6 @@ if freetype_dep.found()
     endif
     internal_deps += [freetype_dep]
   else
-    if not cc.links(files('meson-cc-tests/ft_has_color.c'), dependencies: freetype_dep, name: 'FT has color')
-      conf.set('FT_HAS_COLOR', '(0)')
-    endif
     if png_dep.found() and \
         cc.has_type('FT_SVG_Document', dependencies: freetype_dep, prefix: '#include <freetype/otsvg.h>')
       conf.set('HAVE_FT_SVG_DOCUMENT', 1)
@@ -354,7 +337,6 @@ if freetype_dep.found()
        cc.has_function('FT_Get_Color_Glyph_Paint', dependencies: freetype_dep)
       conf.set('HAVE_FT_COLR_V1', 1)
     endif
-    check_funcs += ft_check_funcs
     deps += [freetype_dep]
   endif
 endif
