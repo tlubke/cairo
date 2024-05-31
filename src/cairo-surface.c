@@ -277,7 +277,7 @@ _cairo_surface_allocate_unique_id (void)
 	unique_id = 1;
     return unique_id;
 #else
-    cairo_atomic_int_t old, id;
+    int old, id;
 
     do {
 	old = _cairo_atomic_uint_get (&unique_id);
