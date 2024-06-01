@@ -658,9 +658,10 @@ exe = executable('cairo-test-suite', [cairo_test_suite_sources, test_sources, ca
     libpdiff_dep],
 )
 
+fs = import('fs')
 build_dir_files = ['completion.bash', 'index.html', 'testtable.js', 'view-test-results.py']
 foreach file : build_dir_files
-  configure_file(input: file, output : file, copy: true)
+  fs.copyfile(file)
 endforeach
 
 if build_machine.system() != 'windows'
@@ -695,6 +696,6 @@ test('cairo', exe,
 
 # The SVG renderer debug tools can only be built if the _cairo_debug_svg_render()
 # function has been exposed by defining DEBUG_SVG_RENDER
-if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.get_define('DEBUG_SVG_RENDER') != ''
+if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.has_define('DEBUG_SVG_RENDER')
   subdir('svg')
 endif
