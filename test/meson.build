@@ -696,6 +696,6 @@ test('cairo', exe,
 
 # The SVG renderer debug tools can only be built if the _cairo_debug_svg_render()
 # function has been exposed by defining DEBUG_SVG_RENDER
-if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.get_define('DEBUG_SVG_RENDER') != ''
+if conf.get('HAVE_FT_SVG_DOCUMENT', 0) == 1 and cc.has_define('DEBUG_SVG_RENDER')
   subdir('svg')
 endif
