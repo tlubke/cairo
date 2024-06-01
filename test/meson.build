@@ -658,9 +658,10 @@ exe = executable('cairo-test-suite', [cairo_test_suite_sources, test_sources, ca
     libpdiff_dep],
 )
 
+fs = import('fs')
 build_dir_files = ['completion.bash', 'index.html', 'testtable.js', 'view-test-results.py']
 foreach file : build_dir_files
-  configure_file(input: file, output : file, copy: true)
+  fs.copyfile(file)
 endforeach
 
 if build_machine.system() != 'windows'
