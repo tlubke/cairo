@@ -1115,7 +1115,7 @@ _cairo_ps_surface_create_for_stream_internal (cairo_output_stream_t *stream,
 
     surface->final_stream = stream;
 
-    surface->tmpfile = tmpfile ();
+    surface->tmpfile = _cairo_tmpfile ();
     if (surface->tmpfile == NULL) {
 	switch (errno) {
 	case ENOMEM:
