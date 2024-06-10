@@ -1417,7 +1417,7 @@ _render_glyph_outline (FT_Face                    face,
 		       cairo_font_options_t	 *font_options,
 		       cairo_image_surface_t	**surface)
 {
-    int rgba = FC_RGBA_UNKNOWN;
+    cairo_subpixel_order_t rgba = CAIRO_SUBPIXEL_ORDER_DEFAULT;
     int lcd_filter = FT_LCD_FILTER_DEFAULT;
     FT_GlyphSlot glyphslot = face->glyph;
     FT_Outline *outline = &glyphslot->outline;
@@ -1518,16 +1518,16 @@ _render_glyph_outline (FT_Face                    face,
 	switch (render_mode) {
 	case FT_RENDER_MODE_LCD:
 	    if (font_options->subpixel_order == CAIRO_SUBPIXEL_ORDER_BGR)
-		rgba = FC_RGBA_BGR;
+		rgba = CAIRO_SUBPIXEL_ORDER_BGR;
 	    else
-		rgba = FC_RGBA_RGB;
+		rgba = CAIRO_SUBPIXEL_ORDER_RGB;
 	    break;
 
 	case FT_RENDER_MODE_LCD_V:
 	    if (font_options->subpixel_order == CAIRO_SUBPIXEL_ORDER_VBGR)
-		rgba = FC_RGBA_VBGR;
+		rgba = CAIRO_SUBPIXEL_ORDER_VBGR;
 	    else
-		rgba = FC_RGBA_VRGB;
+		rgba = CAIRO_SUBPIXEL_ORDER_VRGB;
 	    break;
 
 	case FT_RENDER_MODE_MONO:
@@ -1559,7 +1559,7 @@ _render_glyph_outline (FT_Face                    face,
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	_fill_xrender_bitmap (&bitmap, face->glyph, render_mode,
-			      (rgba == FC_RGBA_BGR || rgba == FC_RGBA_VBGR));
+			      (rgba == CAIRO_SUBPIXEL_ORDER_BGR || rgba == CAIRO_SUBPIXEL_ORDER_VBGR));
 
 	/* Note:
 	 * _get_bitmap_surface will free bitmap.buffer if there is an error
