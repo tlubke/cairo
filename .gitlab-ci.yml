@@ -271,7 +271,8 @@ mingw-32 build:
   script:
     - mkdir builddir
     - cd builddir
-    - mingw32-meson --default-library=both
+    # Test building with FreeType enabled and Fontconfig disabled
+    - mingw32-meson --default-library=both -Dfontconfig=disabled
     - ninja install
   artifacts:
     expire_in: "7 days"
