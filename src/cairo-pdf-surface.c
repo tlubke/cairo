@@ -1402,7 +1402,7 @@ _cairo_pdf_surface_create_smask_group (cairo_pdf_surface_t	    *surface,
 {
     cairo_pdf_smask_group_t	*group;
 
-    group = _cairo_calloc (1, sizeof (cairo_pdf_smask_group_t));
+    group = _cairo_calloc (sizeof (cairo_pdf_smask_group_t));
     if (unlikely (group == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;

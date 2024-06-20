@@ -686,7 +686,8 @@ _cairo_xcb_connection_get (xcb_connection_t *xcb_connection)
 
     connection->root = xcb_get_setup (xcb_connection);
     connection->render = NULL;
-    connection->subpixel_orders = _cairo_calloc (connection->root->roots_len, sizeof(*connection->subpixel_orders));
+    connection->subpixel_orders = _cairo_calloc_ab (connection->root->roots_len,
+                                                 sizeof(*connection->subpixel_orders));
     if (unlikely (connection->subpixel_orders == NULL)) {
 	CAIRO_MUTEX_UNLOCK (connection->device.mutex);
 	_cairo_xcb_connection_destroy (connection);

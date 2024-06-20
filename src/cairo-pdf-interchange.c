@@ -1583,7 +1583,7 @@ _cairo_pdf_interchange_write_document_dests (cairo_pdf_surface_t *surface)
         return CAIRO_STATUS_SUCCESS;
     }
 
-    ic->sorted_dests = _cairo_calloc (ic->num_dests, sizeof (cairo_pdf_named_dest_t *));
+    ic->sorted_dests = _cairo_calloc_ab (ic->num_dests, sizeof (cairo_pdf_named_dest_t *));
     if (unlikely (ic->sorted_dests == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -1838,7 +1838,7 @@ _cairo_pdf_interchange_begin_dest_tag (cairo_pdf_surface_t    *surface,
     cairo_int_status_t status = CAIRO_STATUS_SUCCESS;
 
     if (surface->paginated_mode == CAIRO_PAGINATED_MODE_ANALYZE) {
-	dest = _cairo_calloc (1, sizeof (cairo_pdf_named_dest_t));
+	dest = _cairo_calloc (sizeof (cairo_pdf_named_dest_t));
 	if (unlikely (dest == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -2439,7 +2439,7 @@ _cairo_pdf_interchange_init (cairo_pdf_surface_t *surface)
 
     _cairo_tag_stack_init (&ic->analysis_tag_stack);
     _cairo_tag_stack_init (&ic->render_tag_stack);
-    ic->struct_root = _cairo_calloc (1, sizeof(cairo_pdf_struct_tree_node_t));
+    ic->struct_root = _cairo_calloc (sizeof(cairo_pdf_struct_tree_node_t));
     if (unlikely (ic->struct_root == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -2483,7 +2483,7 @@ _cairo_pdf_interchange_init (cairo_pdf_surface_t *surface)
     ic->mcid_order = 0;
 
     _cairo_array_init (&ic->outline, sizeof(cairo_pdf_outline_entry_t *));
-    outline_root = _cairo_calloc (1, sizeof(cairo_pdf_outline_entry_t));
+    outline_root = _cairo_calloc (sizeof(cairo_pdf_outline_entry_t));
     if (unlikely (outline_root == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 

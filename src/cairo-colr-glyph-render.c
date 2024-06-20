@@ -327,12 +327,12 @@ read_colorline (cairo_colr_glyph_render_t *render,
     double colr_alpha;
     cairo_bool_t is_foreground_color;
 
-    cl = _cairo_calloc (1, sizeof (cairo_colr_color_line_t));
+    cl = _cairo_calloc (sizeof (cairo_colr_color_line_t));
     if (unlikely (cl == NULL))
 	return NULL;
 
     cl->n_stops = colorline->color_stop_iterator.num_color_stops;
-    cl->stops = _cairo_calloc (cl->n_stops, sizeof (cairo_colr_color_stop_t));
+    cl->stops = _cairo_calloc_ab (cl->n_stops, sizeof (cairo_colr_color_stop_t));
     if (unlikely (cl->stops == NULL)) {
 	free (cl);
 	return NULL;
