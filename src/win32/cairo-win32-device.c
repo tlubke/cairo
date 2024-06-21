@@ -127,7 +127,7 @@ _cairo_win32_device_get (void)
     if (__cairo_win32_device)
 	return cairo_device_reference (__cairo_win32_device);
 
-    device = _cairo_malloc (sizeof (*device));
+    device = _cairo_calloc (sizeof (*device));
 
     _cairo_device_init (&device->base, &_cairo_win32_device_backend);
 

@@ -447,7 +447,7 @@ _cairo_pdf_surface_create_for_stream_internal (cairo_output_stream_t	*output,
     cairo_pdf_surface_t *surface;
     cairo_status_t status, status_ignored;
 
-    surface = _cairo_malloc (sizeof (cairo_pdf_surface_t));
+    surface = _cairo_calloc (sizeof (cairo_pdf_surface_t));
     if (unlikely (surface == NULL)) {
 	/* destroy stream on behalf of caller */
 	status = _cairo_output_stream_destroy (output);
@@ -1766,7 +1766,7 @@ _cairo_pdf_surface_add_source_surface (cairo_pdf_surface_t	         *surface,
 	unique_id_length = 0;
     }
 
-    surface_entry = _cairo_malloc (sizeof (cairo_pdf_source_surface_entry_t));
+    surface_entry = _cairo_calloc (sizeof (cairo_pdf_source_surface_entry_t));
     if (surface_entry == NULL) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto fail1;
@@ -9397,7 +9397,7 @@ _cairo_pdf_surface_supports_color_glyph (void                  *abstract_surface
     if (glyph_entry)
 	return glyph_entry->supported;
 
-    glyph_entry = _cairo_malloc (sizeof (cairo_pdf_color_glyph_t));
+    glyph_entry = _cairo_calloc (sizeof (cairo_pdf_color_glyph_t));
     if (glyph_entry == NULL) {
 	status = _cairo_surface_set_error (&surface->base,
 					   _cairo_error (CAIRO_STATUS_NO_MEMORY));

@@ -1065,7 +1065,7 @@ _cairo_ps_surface_get_page_media (cairo_ps_surface_t     *surface)
 	}
     }
 
-    page = _cairo_malloc (sizeof (cairo_page_media_t));
+    page = _cairo_calloc (sizeof (cairo_page_media_t));
     if (unlikely (page == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;
@@ -1101,7 +1101,7 @@ _cairo_ps_surface_create_for_stream_internal (cairo_output_stream_t *stream,
     cairo_status_t status, status_ignored;
     cairo_ps_surface_t *surface;
 
-    surface = _cairo_malloc (sizeof (cairo_ps_surface_t));
+    surface = _cairo_calloc (sizeof (cairo_ps_surface_t));
     if (unlikely (surface == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto CLEANUP;
@@ -2351,7 +2351,7 @@ _base85_strings_stream_create (cairo_output_stream_t *output)
 {
     string_array_stream_t *stream;
 
-    stream = _cairo_malloc (sizeof (string_array_stream_t));
+    stream = _cairo_calloc (sizeof (string_array_stream_t));
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -2381,7 +2381,7 @@ _base85_wrap_stream_create (cairo_output_stream_t *output)
 {
     string_array_stream_t *stream;
 
-    stream = _cairo_malloc (sizeof (string_array_stream_t));
+    stream = _cairo_calloc (sizeof (string_array_stream_t));
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;

@@ -1028,7 +1028,7 @@ create_element (tag_type_t type, char *tag)
     cairo_svg_element_t *elem;
     cairo_status_t status;
 
-    elem = _cairo_malloc (sizeof (cairo_svg_element_t));
+    elem = _cairo_calloc (sizeof (cairo_svg_element_t));
     if (unlikely (elem == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
         return NULL;
@@ -2589,7 +2589,7 @@ init_graphics_state (cairo_svg_glyph_render_t *svg_render)
 {
     cairo_svg_graphics_state_t *gs;
 
-    gs = _cairo_malloc (sizeof (cairo_svg_graphics_state_t));
+    gs = _cairo_calloc (sizeof (cairo_svg_graphics_state_t));
     get_paint (svg_render, "black", &gs->fill);
     get_paint (svg_render, "none", &gs->stroke);
     gs->color.type = FOREGROUND;
@@ -2881,7 +2881,7 @@ save_graphics_state (cairo_svg_glyph_render_t *svg_render)
 
     cairo_save (svg_render->cr);
 
-    gs = _cairo_malloc (sizeof (cairo_svg_graphics_state_t));
+    gs = _cairo_calloc (sizeof (cairo_svg_graphics_state_t));
     gs->fill           = svg_render->graphics_state->fill;
     gs->stroke         = svg_render->graphics_state->stroke;
     gs->color          = svg_render->graphics_state->color;
@@ -3102,7 +3102,7 @@ _cairo_render_svg_glyph (const char           *svg_document,
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-    cairo_svg_glyph_render_t *svg_render = _cairo_malloc (sizeof (cairo_svg_glyph_render_t));
+    cairo_svg_glyph_render_t *svg_render = _cairo_calloc (sizeof (cairo_svg_glyph_render_t));
     if (unlikely (svg_render == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 

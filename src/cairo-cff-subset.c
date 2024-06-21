@@ -616,7 +616,7 @@ cff_dict_create_operator (int            operator,
 {
     cff_dict_operator_t *op;
 
-    op = _cairo_malloc (sizeof (cff_dict_operator_t));
+    op = _cairo_calloc (sizeof (cff_dict_operator_t));
     if (unlikely (op == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 

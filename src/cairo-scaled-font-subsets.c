@@ -166,7 +166,7 @@ _cairo_sub_font_glyph_create (unsigned long	scaled_font_glyph_index,
 {
     cairo_sub_font_glyph_t *sub_font_glyph;
 
-    sub_font_glyph = _cairo_malloc (sizeof (cairo_sub_font_glyph_t));
+    sub_font_glyph = _cairo_calloc (sizeof (cairo_sub_font_glyph_t));
     if (unlikely (sub_font_glyph == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;
@@ -276,7 +276,7 @@ _cairo_sub_font_create (cairo_scaled_font_subsets_t	*parent,
     cairo_sub_font_t *sub_font;
     int i;
 
-    sub_font = _cairo_malloc (sizeof (cairo_sub_font_t));
+    sub_font = _cairo_calloc (sizeof (cairo_sub_font_t));
     if (unlikely (sub_font == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -749,7 +749,7 @@ _cairo_scaled_font_subsets_create_internal (cairo_subsets_type_t type)
 {
     cairo_scaled_font_subsets_t *subsets;
 
-    subsets = _cairo_malloc (sizeof (cairo_scaled_font_subsets_t));
+    subsets = _cairo_calloc (sizeof (cairo_scaled_font_subsets_t));
     if (unlikely (subsets == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;
@@ -1206,7 +1206,7 @@ _cairo_string_init_key (cairo_string_entry_t *key, char *s)
 static cairo_status_t
 create_string_entry (char *s, cairo_string_entry_t **entry)
 {
-    *entry = _cairo_malloc (sizeof (cairo_string_entry_t));
+    *entry = _cairo_calloc (sizeof (cairo_string_entry_t));
     if (unlikely (*entry == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 

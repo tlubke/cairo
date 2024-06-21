@@ -160,7 +160,7 @@ command_list_push_group (cairo_pdf_surface_t    *surface,
     cairo_pdf_recording_surface_commands_t recording_commands;
     cairo_int_status_t status = CAIRO_STATUS_SUCCESS;
 
-    group = _cairo_malloc (sizeof(cairo_pdf_command_list_t));
+    group = _cairo_calloc (sizeof(cairo_pdf_command_list_t));
     _cairo_array_init (&group->commands, sizeof(cairo_pdf_command_t));
     group->parent = ic->current_commands;
 
@@ -374,7 +374,7 @@ add_tree_node (cairo_pdf_surface_t           *surface,
     cairo_pdf_struct_tree_node_t *node;
     cairo_int_status_t status = CAIRO_STATUS_SUCCESS;
 
-    node = _cairo_malloc (sizeof(cairo_pdf_struct_tree_node_t));
+    node = _cairo_calloc (sizeof(cairo_pdf_struct_tree_node_t));
     if (unlikely (node == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -484,7 +484,7 @@ add_annotation (cairo_pdf_surface_t           *surface,
     cairo_pdf_interchange_t *ic = &surface->interchange;
     cairo_pdf_annotation_t *annot;
 
-    annot = _cairo_malloc (sizeof (cairo_pdf_annotation_t));
+    annot = _cairo_calloc (sizeof (cairo_pdf_annotation_t));
     if (unlikely (annot == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -1766,7 +1766,7 @@ _cairo_pdf_interchange_begin_structure_tag (cairo_pdf_surface_t    *surface,
 	    return status;
 
 	/* Add to command_id to node map. */
-	command_entry = _cairo_malloc (sizeof(cairo_pdf_command_entry_t));
+	command_entry = _cairo_calloc (sizeof(cairo_pdf_command_entry_t));
 	command_entry->recording_id = ic->recording_id;
 	command_entry->command_id = ic->command_id;
 	command_entry->node = ic->current_analyze_node;
@@ -1782,7 +1782,7 @@ _cairo_pdf_interchange_begin_structure_tag (cairo_pdf_surface_t    *surface,
 	}
 
 	if (ic->current_analyze_node->type == PDF_NODE_CONTENT) {
-	    cairo_pdf_content_tag_t *content = _cairo_malloc (sizeof(cairo_pdf_content_tag_t));
+	    cairo_pdf_content_tag_t *content = _cairo_calloc (sizeof(cairo_pdf_content_tag_t));
 	    content->node = ic->current_analyze_node;
 	    _cairo_pdf_content_tag_init_key (content);
 	    status = _cairo_hash_table_insert (ic->content_tag_map, &content->base);
@@ -2597,7 +2597,7 @@ _cairo_pdf_interchange_add_outline (cairo_pdf_surface_t        *surface,
     if (parent_id < 0 || parent_id >= (int)_cairo_array_num_elements (&ic->outline))
 	return CAIRO_STATUS_SUCCESS;
 
-    outline = _cairo_malloc (sizeof(cairo_pdf_outline_entry_t));
+    outline = _cairo_calloc (sizeof(cairo_pdf_outline_entry_t));
     if (unlikely (outline == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
