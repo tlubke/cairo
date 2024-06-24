@@ -2831,8 +2831,10 @@ _cairo_pdf_interchange_set_custom_metadata (cairo_pdf_surface_t  *surface,
     if (value && strlen(value)) {
 	new_data.name = strdup (name);
 	status = _cairo_utf8_to_pdf_string (value, &s);
-	if (unlikely (status))
+	if (unlikely (status)) {
+            free (new_data.name);
 	    return status;
+        }
 	new_data.value = s;
 	status = _cairo_array_append (&ic->custom_metadata, &new_data);
     }
