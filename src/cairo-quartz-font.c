@@ -261,7 +261,7 @@ _cairo_quartz_font_face_scaled_font_create (void *abstract_face,
     CTFontRef ctFont;
     CGRect bbox;
 
-    font = _cairo_malloc (sizeof(cairo_quartz_scaled_font_t));
+    font = _cairo_calloc (sizeof(cairo_quartz_scaled_font_t));
     if (font == NULL)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -318,7 +318,7 @@ static inline cairo_quartz_font_face_t*
 _cairo_quartz_font_face_create ()
 {
     cairo_quartz_font_face_t *font_face =
-	_cairo_malloc (sizeof (cairo_quartz_font_face_t));
+	_cairo_calloc (sizeof (cairo_quartz_font_face_t));
 
     if (!font_face) {
 	cairo_status_t ignore_status;

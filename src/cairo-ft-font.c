@@ -316,7 +316,7 @@ _cairo_ft_unscaled_font_map_create (void)
      * detect some other call path. */
     assert (cairo_ft_unscaled_font_map == NULL);
 
-    font_map = _cairo_malloc (sizeof (cairo_ft_unscaled_font_map_t));
+    font_map = _cairo_calloc (sizeof (cairo_ft_unscaled_font_map_t));
     if (unlikely (font_map == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -470,7 +470,7 @@ _cairo_ft_unscaled_font_init (cairo_ft_unscaled_font_t *unscaled,
         unscaled->have_color = FT_HAS_COLOR (face) != 0;
         unscaled->have_color_set = TRUE;
 	if (FT_Get_MM_Var (face, &ft_mm_var) == 0) {
-	    unscaled->variations = _cairo_calloc (ft_mm_var->num_axis, sizeof (FT_Fixed));
+	    unscaled->variations = _cairo_calloc_ab (ft_mm_var->num_axis, sizeof (FT_Fixed));
 	    if (unscaled->variations)
 		FT_Get_Var_Design_Coordinates (face, ft_mm_var->num_axis, unscaled->variations);
 	    FT_Done_MM_Var (face->glyph->library, ft_mm_var);
@@ -576,7 +576,7 @@ _cairo_ft_unscaled_font_create_internal (cairo_bool_t from_face,
     }
 
     /* Otherwise create it and insert into hash table. */
-    unscaled = _cairo_malloc (sizeof (cairo_ft_unscaled_font_t));
+    unscaled = _cairo_calloc (sizeof (cairo_ft_unscaled_font_t));
     if (unlikely (unscaled == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto UNWIND_FONT_MAP_LOCK;
@@ -1554,7 +1554,7 @@ _render_glyph_outline (FT_Face                    face,
 	if (bitmap_size < 0)
 	    return _cairo_error (CAIRO_STATUS_INVALID_FORMAT);
 
-	bitmap.buffer = _cairo_calloc (1, bitmap_size);
+	bitmap.buffer = _cairo_calloc (bitmap_size);
 	if (bitmap.buffer == NULL)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -2022,7 +2022,7 @@ _cairo_ft_font_face_scaled_font_create (void		    *abstract_font_face,
     if (unlikely (face == NULL)) /* backend error */
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    scaled_font = _cairo_malloc (sizeof (cairo_ft_scaled_font_t));
+    scaled_font = _cairo_calloc (sizeof (cairo_ft_scaled_font_t));
     if (unlikely (scaled_font == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto FAIL;
@@ -3221,7 +3221,7 @@ _cairo_ft_scaled_glyph_init_metrics (cairo_ft_scaled_font_t  *scaled_font,
      * cairo_ft_glyph_private_t struct and determine the glyph type.
      */
 
-    glyph_priv = _cairo_malloc (sizeof (*glyph_priv));
+    glyph_priv = _cairo_calloc (sizeof (*glyph_priv));
     if (unlikely (glyph_priv == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -4032,7 +4032,7 @@ _cairo_ft_font_face_create_for_pattern (FcPattern *pattern)
 {
     cairo_ft_font_face_t *font_face;
 
-    font_face = _cairo_malloc (sizeof (cairo_ft_font_face_t));
+    font_face = _cairo_calloc (sizeof (cairo_ft_font_face_t));
     if (unlikely (font_face == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_font_face_t *) &_cairo_font_face_nil;
@@ -4094,7 +4094,7 @@ _cairo_ft_font_face_create (cairo_ft_unscaled_font_t *unscaled,
     }
 
     /* No match found, create a new one */
-    font_face = _cairo_malloc (sizeof (cairo_ft_font_face_t));
+    font_face = _cairo_calloc (sizeof (cairo_ft_font_face_t));
     if (unlikely (!font_face)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_font_face_t *)&_cairo_font_face_nil;
