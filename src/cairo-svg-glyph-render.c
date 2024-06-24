@@ -1767,6 +1767,7 @@ _read_png_from_base64 (void *closure, unsigned char *data, unsigned int length)
         }
         if (length > 0 && decode->buf_pos < 0) {
             n = 0;
+            val = 0;
             while (*decode->data && n < 4) {
                 c = *decode->data++;
                 if (c >='A' && c <='Z') {
