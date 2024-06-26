@@ -1959,6 +1959,8 @@ _cairo_pdf_interchange_tag_end (cairo_pdf_surface_t *surface,
 
     } else if (surface->paginated_mode == CAIRO_PAGINATED_MODE_RENDER) {
 	status = _cairo_tag_stack_pop (&ic->render_tag_stack, name, &elem);
+    } else {
+	ASSERT_NOT_REACHED;
     }
     if (unlikely (status))
 	return status;
