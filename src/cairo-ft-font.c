@@ -2808,8 +2808,8 @@ _cairo_ft_scaled_glyph_init_record_colr_v1_glyph (cairo_ft_scaled_font_t *scaled
 
     /* Copied from cairo-user-font.c */
     cairo_matrix_t extent_scale;
-    double extent_x_scale;
-    double extent_y_scale;
+    double extent_x_scale = 1.0;
+    double extent_y_scale = 1.0;
     double snap_x_scale;
     double snap_y_scale;
     double fixed_scale, x_scale, y_scale;
