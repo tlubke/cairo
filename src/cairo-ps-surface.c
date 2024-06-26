@@ -3507,13 +3507,13 @@ _cairo_ps_surface_use_form (cairo_ps_surface_t           *surface,
     if (surface->ps_level == CAIRO_PS_LEVEL_3)
 	max_size = MAX_L3_FORM_DATA;
     else
-	max_size = MAX_L3_FORM_DATA;
+	max_size = MAX_L2_FORM_DATA;
 
     /* Don't add any more Forms if we exceed the form memory limit */
     if (surface->total_form_size + params->approx_size > max_size)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
-    surface->total_form_size += params->approx_size > max_size;
+    surface->total_form_size += params->approx_size;
     unique_id = _cairo_malloc (source_key.unique_id_length);
     if (unique_id == NULL)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
