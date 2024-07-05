@@ -16,7 +16,7 @@ workflow:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '40'
-  FDO_DISTRIBUTION_TAG: '2024-05-25.0'
+  FDO_DISTRIBUTION_TAG: '2024-06-06.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
@@ -96,6 +96,7 @@ fedora image:
       fonttools
       util-linux
       poppler-utils
+      clang
 
 .build fedora:
   extends:
@@ -106,8 +107,9 @@ fedora image:
     MESON_ARGS: >
       ${DEFAULT_MESON_ARGS}
       ${EXTRA_MESON_ARGS}
+      --werror
+    CFLAGS: '-Wno-error=deprecated-declarations'
   script:
-    - export CFLAGS="-Werror -Wno-error=deprecated-declarations"
     - meson setup ${MESON_ARGS} builddir
     - meson compile -C builddir
 
@@ -136,6 +138,16 @@ fedora build static:
     - '.build fedora'
   variables:
     EXTRA_MESON_ARGS: '--default-library=static'
+
+fedora build clang:
+  extends:
+    - '.build fedora'
+  variables:
+    EXTRA_MESON_ARGS: '--default-library=shared'
+  script:
+    - export CC=clang
+    - meson setup ${MESON_ARGS} builddir
+    - meson compile -C builddir
 
 .test fedora:
   dependencies:
