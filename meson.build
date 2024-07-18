@@ -1,4 +1,4 @@
-project('cairo', 'c', 'cpp',
+project('cairo', 'c',
   meson_version: '>= 1.3.0',
   version: run_command(find_program('version.py'), check: true).stdout().strip(),
   default_options: ['c_std=gnu11,c11',
@@ -483,6 +483,8 @@ if host_machine.system() == 'darwin' and not get_option('quartz').disabled()
 endif
 
 if host_machine.system() == 'windows'
+  add_languages('cpp')
+
   add_project_arguments('-DWIN32_LEAN_AND_MEAN', '-DNOMINMAX', language: ['c', 'cpp'])
 
   win32_extra_deps = [
