@@ -732,18 +732,20 @@ extra_link_args += pthread_link_args
 
 # Atomics are an optional feature in C11. Also need to check that C11 atomics are lock free.
 # Windows can't use C11 atomics as some files are compiled with C++.
-if host_machine.system() != 'windows' and cc.links(files('meson-cc-tests/atomic-ops-c11.c'), name: 'Atomic ops: c11')
-  conf.set('HAVE_C11_ATOMIC_PRIMITIVES', 1)
-elif cc.links(files('meson-cc-tests/atomic-ops-cxx11.c'), name: 'Atomic ops: cxx11')
-  conf.set('HAVE_CXX11_ATOMIC_PRIMITIVES', 1)
-elif cc.links(files('meson-cc-tests/atomic-ops-gcc-legacy.c'), name: 'Atomic ops: gcc legacy')
-  conf.set('HAVE_GCC_LEGACY_ATOMICS', 1)
-elif cc.has_header('atomic_ops.h')
-  conf.set('HAVE_LIB_ATOMIC_OPS', 1)
-elif cc.has_header('libkern/OSAtomic.h')
-  conf.set('HAVE_OS_ATOMIC_OPS', 1)
-elif host_machine.system() != 'windows'
-  warning('Atomic ops not supported.')
+if host_machine.system() != 'windows'
+  if cc.links(files('meson-cc-tests/atomic-ops-c11.c'), name: 'Atomic ops: c11')
+    conf.set('HAVE_C11_ATOMIC_PRIMITIVES', 1)
+  elif cc.links(files('meson-cc-tests/atomic-ops-cxx11.c'), name: 'Atomic ops: cxx11')
+    conf.set('HAVE_CXX11_ATOMIC_PRIMITIVES', 1)
+  elif cc.links(files('meson-cc-tests/atomic-ops-gcc-legacy.c'), name: 'Atomic ops: gcc legacy')
+    conf.set('HAVE_GCC_LEGACY_ATOMICS', 1)
+  elif cc.has_header('atomic_ops.h')
+    conf.set('HAVE_LIB_ATOMIC_OPS', 1)
+  elif cc.has_header('libkern/OSAtomic.h')
+    conf.set('HAVE_OS_ATOMIC_OPS', 1)
+  else
+    warning('Atomic ops not supported.')
+  endif
 endif
 
 test_mkdir_c_args = []
