@@ -16,7 +16,7 @@ workflow:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '40'
-  FDO_DISTRIBUTION_TAG: '2024-06-06.0'
+  FDO_DISTRIBUTION_TAG: '2024-07-24-coverage.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
@@ -97,6 +97,12 @@ fedora image:
       util-linux
       poppler-utils
       clang
+      clang-analyzer
+      clang-tools-extra
+      compiler-rt
+      libasan
+      libubsan
+      llvm
 
 .build fedora:
   extends:
