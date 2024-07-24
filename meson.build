@@ -332,7 +332,7 @@ if freetype_dep.found()
         conf.set('CAIRO_CAN_TEST_TTX_FONT', 1)
       endif
     endif
-    if cc.get_define('FT_LOAD_NO_SVG', dependencies: freetype_dep, prefix: '#include <freetype/freetype.h>') != ''
+    if cc.has_define('FT_LOAD_NO_SVG', dependencies: freetype_dep, prefix: '#include <freetype/freetype.h>')
       conf.set('HAVE_FT_LOAD_NO_SVG', 1)
     endif
     if freetype_dep.version().version_compare(freetype_colrv1_required_version) and \
