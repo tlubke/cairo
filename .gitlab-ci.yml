@@ -31,6 +31,7 @@ variables:
 
 stages:
   - prep
+  - analysis
   - build
   - test
   - analysis
@@ -503,6 +504,18 @@ coverage:
     paths:
       - "_build/meson-logs"
       - public
+
+# Run static analysis.
+static-scan:
+  stage: 'analysis'
+  extends:
+    - '.fdo.distribution-image@fedora'
+  variables:
+    MESON_ARGS: >
+      --buildtype=debug
+  script:
+    - meson setup ${MESON_ARGS} builddir .
+    - ninja -C builddir scan-build
 
 pages:
   stage: 'deploy'
