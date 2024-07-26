@@ -477,3 +477,28 @@ macOS x86 host:
     - export CAIRO_TEST_IGNORE_quartz_rgb24=$(tr '\n' ',' < .gitlab-ci/ignore-quartz-rgb24.txt)
     - export CAIRO_TEST_TARGET=quartz
     - (cd build/test && srcdir=../../test ./cairo-test-suite)
+
+coverage:
+  stage: 'analysis'
+  extends:
+    - '.fdo.distribution-image@fedora'
+  needs:
+    - job: 'fedora image'
+      artifacts: false
+  script:
+    - source ./.gitlab-ci/env.sh
+    - bash -x ./.gitlab-ci/build-with-coverage.sh
+    - bash -x ./.gitlab-ci/gen-coverage.sh
+  coverage: '/Coverage: \d+\.\d+/'
+  artifacts:
+    name: "cairo-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
+    expire_in: 2 days
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: public/coverage.xml
+    paths:
+      - "_build/meson-logs"
+      - public
+
