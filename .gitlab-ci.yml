@@ -33,6 +33,7 @@ stages:
   - prep
   - build
   - test
+  - deploy
 
 # Global CI policy: This can be used to configure global behaviour our our jobs
 default:
@@ -502,3 +503,16 @@ coverage:
       - "_build/meson-logs"
       - public
 
+pages:
+  stage: 'deploy'
+  needs: [ coverage ]
+  script:
+    # No-op, just to gitlab thinks there's something to do.
+    # The jobs that this job depends on have already populated public/
+    - echo
+  artifacts:
+    paths:
+      - public
+  rules:
+    # Restrict to the main branch so not every branch tries to deploy the web site
+    - if: ($CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH)
