@@ -16,7 +16,7 @@ workflow:
 variables:
   FDO_UPSTREAM_REPO: 'cairo/cairo'
   FDO_DISTRIBUTION_VERSION: '40'
-  FDO_DISTRIBUTION_TAG: '2024-07-24-coverage.0'
+  FDO_DISTRIBUTION_TAG: '2024-07-26-coverage.0'
 
   # TODO: should probably get its own image at some point instead of reusing the GStreamer one
   # See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/blob/main/.gitlab-image-tags.yml for latest
@@ -25,6 +25,9 @@ variables:
 
   DEFAULT_MESON_ARGS: >
     --default-library=both
+
+  RUST_STABLE: "1.80.0"
+  RUSTUP_VERSION: "1.27.1"
 
 stages:
   - prep
@@ -103,6 +106,14 @@ fedora image:
       libasan
       libubsan
       llvm
+      wget
+    FDO_DISTRIBUTION_EXEC: >-
+      bash .gitlab-ci/install-rust.sh --rustup-version ${RUSTUP_VERSION} \
+                              --stable ${RUST_STABLE} \
+                              --arch x86_64-unknown-linux-gnu &&
+      bash .gitlab-ci/install-rust-tools.sh &&
+      bash .gitlab-ci/install-grcov.sh &&
+      rm -rf /root/.cargo /root/.cache    # cleanup compilation dirs; binaries are installed now
 
 .build fedora:
   extends:
