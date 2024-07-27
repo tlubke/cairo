@@ -33,6 +33,7 @@ stages:
   - prep
   - build
   - test
+  - analysis
   - deploy
 
 # Global CI policy: This can be used to configure global behaviour our our jobs
