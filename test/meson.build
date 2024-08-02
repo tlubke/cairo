@@ -154,6 +154,7 @@ test_sources = [
   'font-matrix-translation.c',
   'font-options.c',
   'glyph-cache-pressure.c',
+  'glyph-path.c',
   'get-and-set.c',
   'get-clip.c',
   'get-group-target.c',
