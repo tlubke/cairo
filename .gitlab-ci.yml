@@ -31,7 +31,6 @@ variables:
 
 stages:
   - prep
-  - analysis
   - build
   - test
   - analysis
