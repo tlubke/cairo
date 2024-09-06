@@ -31,7 +31,6 @@ variables:
 
 stages:
   - prep
-  - analysis
   - build
   - test
   - analysis
@@ -524,14 +523,15 @@ coverage:
 
 pages:
   stage: 'deploy'
-  needs: [ coverage ]
+  needs:
+    - job: coverage
   script:
-    # No-op, just to gitlab thinks there's something to do.
-    # The jobs that this job depends on have already populated public/
-    - echo
+    - mkdir -p public
+    - cp .gitlab-ci/pages-index.html public/index.html
   artifacts:
     paths:
       - public
+    expire_in: 1 day
   rules:
     # Restrict to the main branch so not every branch tries to deploy the web site
     - if: ($CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH)
