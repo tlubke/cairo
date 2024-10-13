@@ -138,6 +138,7 @@ check_headers = [
   ['sys/ioctl.h'],
   ['intsafe.h'],
   ['alloca.h'],
+  ['termios.h'],
 ]
 
 check_types = [
