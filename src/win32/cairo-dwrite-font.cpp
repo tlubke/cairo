@@ -1047,13 +1047,13 @@ _cairo_dwrite_scaled_font_init_glyph_color_surface(cairo_dwrite_scaled_font_t *s
     matrix = _cairo_dwrite_matrix_from_matrix(&scaled_font->mat);
 
     /* The list of glyph image formats this renderer is prepared to support. */
-    DWRITE_GLYPH_IMAGE_FORMATS supported_formats =
+    DWRITE_GLYPH_IMAGE_FORMATS supported_formats = static_cast<DWRITE_GLYPH_IMAGE_FORMATS>(
         DWRITE_GLYPH_IMAGE_FORMATS_COLR |
         DWRITE_GLYPH_IMAGE_FORMATS_SVG |
         DWRITE_GLYPH_IMAGE_FORMATS_PNG |
         DWRITE_GLYPH_IMAGE_FORMATS_JPEG |
         DWRITE_GLYPH_IMAGE_FORMATS_TIFF |
-        DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8;
+        DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8);
 
     RefPtr<IDWriteFontFace2> fontFace2;
     UINT32 palette_count = 0;
